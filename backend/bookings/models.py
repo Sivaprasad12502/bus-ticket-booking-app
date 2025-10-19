@@ -1,0 +1,80 @@
+from django.db import models
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+# Create your models here.
+class Bus(models.Model):
+    bus_name=models.CharField(max_length=100)
+    total_seats=models.IntegerField()
+    bus_type=models.CharField(max_length=50,choices=[("AC","AC"),("Non-AC","Non-AC")])
+    operator_name=models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.bus_name}"
+class Route(models.Model):
+    start_location=models.CharField(max_length=100)
+    end_location=models.CharField(max_length=100)
+    distance_km=models.FloatField(blank=True,null=True)
+
+    def __str__(self):
+        return f"{self.start_location}"
+class Trip(models.Model):
+    bus=models.ForeignKey(Bus,on_delete=models.CASCADE)
+    route=models.ForeignKey(Route,on_delete=models.CASCADE)
+    departure_time=models.DateTimeField()
+    arrival_time=models.DateTimeField()
+    price=models.DecimalField(max_digits=8,decimal_places=2)
+
+    def __str__(self):
+        return f"{self.bus.bus_name}"
+    
+class Seat(models.Model):
+    trip=models.ForeignKey(Trip,on_delete=models.CASCADE,related_name='seats')
+    seat_number=models.CharField(max_length=5)
+    is_booked=models.BooleanField(default=False)
+    def __str__(self):
+        return f"{self.trip.bus.bus_name} Seat {self.seat_number}"
+
+class Booking(models.Model):
+    user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    trip=models.ForeignKey(Trip,on_delete=models.CASCADE)
+    seats=models.ManyToManyField(Seat,blank=True)
+    total_amount=models.DecimalField(max_digits=10,decimal_places=2)
+    booking_date=models.DateTimeField(auto_now_add=True)
+    status=models.CharField(
+        max_length=20,
+        choices=[("CONFIRMED","confirmed"),("CANCELLED","Cancelled")],
+        default="CONFIRMED"
+    )
+    def __str__(self):
+        return f"{self.user.username} -{self.trip} ({self.status})"
+    
+class Passenger(models.Model):
+    booking=models.ForeignKey(Booking,on_delete=models.CASCADE,)
+    name=models.CharField(max_length=100)
+    age=models.IntegerField()
+    gender=models.CharField(max_length=10,choices=[("M","Male"),("F","Female"),("O","Other")])
+    seat_number=models.CharField(max_length=5,blank=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.seat_number})"
+    
+class Payment(models.Model):
+    booking=models.OneToOneField(Booking,on_delete=models.CASCADE)
+    payment_id=models.CharField(max_length=100)
+    amount=models.DecimalField(max_digits=10,decimal_places=2)
+    payment_status=models.CharField(
+        max_length=20,
+        choices=[("PENDING","Pending"),("SUCCESS","Success"),("FAILED","Failed")],
+        default="PENDING"
+    )
+    payment_date=models.DateTimeField(auto_now_add=True)
+
+
+@receiver(post_save,sender=Trip)
+def create_seats_for_trip(sender,instance,created,**kwargs):
+    if created:
+        total_seats=instance.bus.total_seats
+        for i in range(1,total_seats+1):
+            Seat.objects.create(trip=instance,seat_number=str(i))
