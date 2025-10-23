@@ -9,6 +9,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import { toast } from "react-toastify";
 import "./payment.scss";
 
 const CheckoutForm = ({
@@ -54,11 +55,16 @@ const CheckoutForm = ({
     }
   };
 
-  if (success) {
-    // return <p style={{ color: "green" }}>Payment Successful!</p>;
-    alert('payment is successuflluy')
-    navigate('/bookings')
-  }
+  useEffect(() => {
+    if (success) {
+      toast.success("Payment is successful", {
+        onClose: () => {
+          navigate("/bookings");
+        },
+        autoClose: 2000,
+      });
+    }
+  }, [success, navigate]);
 
   return (
     <form onSubmit={handleSubmit} className="stripe-form">

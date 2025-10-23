@@ -5,10 +5,10 @@ import useForm from "../../hooks/useForm/useForm";
 import "./Login.scss";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import {toast} from 'react-toastify'
+import { toast } from "react-toastify";
 
 export const Login = () => {
-  const { apiUrl,user, setUser, navigate ,setToken} = useContext(Context);
+  const { apiUrl, user, setUser, navigate, setToken } = useContext(Context);
   const { values, handleChange } = useForm({
     username: "",
     password: "",
@@ -21,19 +21,23 @@ export const Login = () => {
     onSuccess: ({ data }) => {
       console.log("login successfully:", data);
       localStorage.setItem("token", data.access);
-      setToken(data.access)
+      setToken(data.access);
       localStorage.setItem("refresh", data.refresh);
-      const userData={username:data.username,email:data.email}
-      localStorage.setItem("user",JSON.stringify(userData))
-      setUser(userData)
-      toast.success("Logged in successfully")
-      navigate('/')
+      const userData = { username: data.username, email: data.email };
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+      toast.success("Logged in successfull", {
+        onClose: () => {
+          navigate("/");
+        },
+        autoClose: 2000,
+      });
     },
     onError: (error) => {
       console.error("login failed:", error);
       toast.error(
-        error.response?.data?.error||"Login failed. Please try again"
-      )
+        error.response?.data?.error || "Login failed. Please try again"
+      );
     },
   });
   const handleSubmit = (e) => {

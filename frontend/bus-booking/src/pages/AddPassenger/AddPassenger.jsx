@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { Context } from "../../context/Context";
+import { toast } from "react-toastify";
 import "./AddPassenger.scss";
 const AddPassenger = () => {
   const { apiUrl, token } = useContext(Context);
@@ -31,13 +32,23 @@ const AddPassenger = () => {
         headers: { Authorization: `Bearer ${token}` },
       }),
     onSuccess: ({ data }) => {
-      console.log(data)
-      console.log('booking-id in addpassenger',booking_id)
-      console.log('  totalamount in add',totalamount)
-      console.log('seatnumber in addpassenger',seatNumbers)
-      navigate(`/payment?bookingId=${booking_id}&totalamount=${totalamount}&seats=${seatNumbers}`)
+      console.log(data);
+      console.log("booking-id in addpassenger", booking_id);
+      console.log("  totalamount in add", totalamount);
+      console.log("seatnumber in addpassenger", seatNumbers);
+      toast.success("Sucessfull added", {
+        onClose: () => {
+          navigate(
+            `/payment?bookingId=${booking_id}&totalamount=${totalamount}&seats=${seatNumbers}`
+          );
+        },
+        autoClose:2000
+      });
     },
-    onError: (error) => console.log(error),
+    onError: (error) => {
+      toast.error("Error in add passenger please re-check the details");
+      console.log(error);
+    },
   });
 
   const handleChange = (index, field, value) => {
@@ -60,11 +71,12 @@ const AddPassenger = () => {
   //     ]);
   //   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     mutation.mutate({ passengers });
   };
   return (
-    <div className="add-passenger-container">
+    <form onSubmit={handleSubmit} className="add-passenger-container">
       <h2>Add Passengers</h2>
       {passengers.map((p, i) => (
         <div className="passenger-card" key={i}>
@@ -73,15 +85,18 @@ const AddPassenger = () => {
             placeholder="Name"
             value={p.name}
             onChange={(e) => handleChange(i, "name", e.target.value)}
+            required
           />
           <input
             placeholder="Age"
             value={p.age}
             onChange={(e) => handleChange(i, "age", e.target.value)}
+            required
           />
           <select
             value={p.gender}
             onChange={(e) => handleChange(i, "gender", e.target.value)}
+            required
           >
             <option value="">Select Gender</option>
             <option value="M">M</option>
@@ -92,6 +107,7 @@ const AddPassenger = () => {
             placeholder="Seat"
             value={p.seat_number}
             onChange={(e) => handleChange(i, "seat_number", e.target.value)}
+            readOnly
           />
           <input
             placeholder="Boarding"
@@ -99,6 +115,7 @@ const AddPassenger = () => {
             onChange={(e) =>
               handleChange(i, "boarding_location", e.target.value)
             }
+            required
           />
           <input
             placeholder="Dropping"
@@ -106,6 +123,7 @@ const AddPassenger = () => {
             onChange={(e) =>
               handleChange(i, "dropping_location", e.target.value)
             }
+            required
           />
         </div>
       ))}
@@ -117,11 +135,11 @@ const AddPassenger = () => {
         <div>
           <span>{totalamount}</span>
         </div>
-        <button className="continue-btn" onClick={handleSubmit}>
+        <button className="continue-btn" type="submit">
           Continue to Payment
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 

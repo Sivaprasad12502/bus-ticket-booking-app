@@ -5,9 +5,10 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import "./Register.scss";
 import { Context } from "../../context/Context";
+import {toast} from 'react-toastify'
 
 const Register = () => {
-  const { apiUrl,setUser,navigate ,setToken} = useContext(Context);
+  const { apiUrl, setUser, navigate, setToken } = useContext(Context);
   const { values, handleChange } = useForm({
     username: "",
     email: "",
@@ -15,26 +16,46 @@ const Register = () => {
     password2: "",
     phone: "",
   });
+  const validatePassword=(password,password2)=>{
+    if(password.length<8){
+      return "password must be at least 8 characters long"
+    }
+    if(password!==password2){
+      return "passwords do not match"
+    }
+    return null
+  }
   const mutation = useMutation({
     mutationFn: async (formData) =>
       await axios.post(`${apiUrl}users/register/`, formData),
 
     onSuccess: ({ data }) => {
       console.log("Registeration successfully:", data);
-      localStorage.setItem("token",data.access)
-      setToken(data.access)
+      localStorage.setItem("token", data.access);
+      setToken(data.access);
       localStorage.setItem("refresh", data.refresh);
-      const userData={username:data.username,email:data.email}
-      localStorage.setItem("user",JSON.stringify(userData))
-      setUser(userData)
-      navigate('/')
-      
+      const userData = { username: data.username, email: data.email };
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+      toast.success("user registered successfull", {
+        onClose: () => {
+          navigate("/");
+        },
+        autoClose: 2000,
+      });
     },
     onError: (error) => {
       console.error("Registration failed:", error);
+      toast.error(
+         "registration failed. Please try again"
+      );
     },
   });
   const handleSubmit = (e) => {
+    const error=validatePassword(values.password,values.password2)
+    if(error){
+      toast.error(error)
+    }
     e.preventDefault();
     mutation.mutate(values);
   };

@@ -4,6 +4,7 @@ import { Context } from "../../context/Context";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import './NavBar.scss'
+import { NavLink } from "react-router-dom";
 
 const Navbar = () => {
   const { user, setUser, apiUrl, token, setToken, navigate } =
@@ -37,6 +38,9 @@ const Navbar = () => {
   };
   return (
     <div className="user-header">
+      <div>
+        <button><NavLink to={'/bookings'}>MY Bookings</NavLink></button>
+      </div>
       <span>@{user?.username}</span>
       <button onClick={handleLogout}>Logout</button>
     </div>

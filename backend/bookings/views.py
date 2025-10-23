@@ -309,3 +309,5 @@ def confirm_payment(request, booking_Id):
 
     serializer = PaymentSerializer(payment)
     return Response(serializer.data, status=200)
+
+
