@@ -85,6 +85,7 @@ class Payment(models.Model):
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
     stripe_payment_intent_id = models.CharField(max_length=200, blank=True, null=True)
     stripe_payment_method = models.CharField(max_length=100, blank=True, null=True)
+    refund_id=models.CharField(max_length=255,blank=True,null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=10, default="inr")
     payment_status = models.CharField(

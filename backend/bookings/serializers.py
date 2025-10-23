@@ -107,6 +107,7 @@ class PaymentSerializer(serializers.ModelSerializer):
             "booking",
             "booking_id",
             "stripe_payment_intent_id",
+            "refund_id",
             "stripe_payment_method",
             "amount",
             "currency",

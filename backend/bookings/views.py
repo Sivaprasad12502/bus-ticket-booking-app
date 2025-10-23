@@ -311,3 +311,52 @@ def confirm_payment(request, booking_Id):
     return Response(serializer.data, status=200)
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def cancel_bookings(request,booking_Id):
+    '''
+    cancel a booking and issue a Stripe refund if payement was made.
+    '''
+    try:
+        booking=Booking.objects.get(pk=booking_Id,user=request.user)
+    except Booking.DoesNotExist:
+        return Response({"error":"Booking not found"},status=status.HTTP_400_BAD_REQUEST)
+    #If already cancelled, avoid duplicate refund
+    if booking.status=="CANCELLED":
+        return Response({"error":"Booking already cancelled"},status=status.HTTP_400_BAD_REQUEST)
+    #Check if there is a payment linked
+    payment=Payment.objects.filter(booking=booking).first()
+    if not payment:
+        # return Response({"erorr":"no payement record found the this booking"},status=status.HTTP_400_BAD_REQUEST)
+        booking.status="CANCELLED"
+        booking.seats.update(is_booked=False)
+        booking.delete()
+        return Response({"message": "Booking deleted (no payment found)"}, status=status.HTTP_200_OK)
+    try:
+        # only refund successfull payments
+        if payment.payment_status=="SUCCESS" and payment.stripe_payment_intent_id:
+            refund=stripe.Refund.create(
+                payment_intent=payment.stripe_payment_intent_id
+            )
+            payment.refund_id=refund.id
+            payment.payment_status="REFUNDED"
+        #mark booking cancelled
+        booking.status="CANCELLED"
+        #Free up seats
+        booking.seats.update(is_booked=False)
+        booking.delete()
+        return Response({
+           "message": "Booking cancelled successfully and refund initiated (if applicable)",
+           "booking_id":booking.id,
+           "refund_id":getattr(payment,"refund_id",None),
+           "status":booking.status
+        },
+        status=status.HTTP_200_OK)
+    except stripe.error.StripeError as e:
+        return Response(
+             {"error": f"Stripe error: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+

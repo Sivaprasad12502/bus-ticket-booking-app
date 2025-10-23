@@ -1,11 +1,12 @@
 import React, { useContext } from "react";
 import { Context } from "../../context/Context";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import "./MyBooking.scss";
 import { NavLink } from "react-router-dom";
 
 const MyBooking = () => {
+  const query = useQueryClient();
   const { apiUrl, token } = useContext(Context);
 
   const {
@@ -21,6 +22,25 @@ const MyBooking = () => {
       return response.data;
     },
     onError: (err) => console.log(err),
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (booking_Id) => {
+      const response = await axios.post(
+        `${apiUrl}bookings/bookings/${booking_Id}/cancel/`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      query.invalidateQueries({
+        queryKey: ["bookings"],
+      });
+    },
+    onError: (er) => console.log(er),
   });
   if (bookings) {
     console.log(bookings);
@@ -112,6 +132,13 @@ const MyBooking = () => {
                   </ul>
                 </div>
               )}
+              <button
+                onClick={() => {
+                  mutation.mutate(booking.id);
+                }}
+              >
+                cancel
+              </button>
             </div>
           ))}
         </div>
