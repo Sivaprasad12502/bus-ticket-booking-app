@@ -1,0 +1,84 @@
+.my-bookings {
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+
+  .title {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    color: #333;
+  }
+
+  .ticket {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+    .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+
+      h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        color: #222;
+      }
+
+      .status {
+        padding: 5px 12px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #fff;
+      }
+
+      .status.confirmed {
+        background-color: #28a745;
+      }
+
+      .status.cancelled {
+        background-color: #dc3545;
+      }
+    }
+
+    .ticket-info {
+      p {
+        margin: 5px 0;
+        font-size: 0.95rem;
+        color: #333;
+      }
+    }
+
+    .passengers {
+      margin-top: 15px;
+
+      strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      ul {
+        list-style: none;
+        padding-left: 0;
+
+        li {
+          padding: 8px 0;
+          border-bottom: 1px solid #eee;
+          font-size: 0.9rem;
+          color: #555;
+
+          span {
+            margin-right: 8px;
+          }
+        }
+      }
+    }
+  }
+}

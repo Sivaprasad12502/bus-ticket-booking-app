@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+STRIPE_SECRET_KEY="sk_test_51SL3Ra2MbjQATJw5sQJ6wcgBk9rHc6FM5ggNcLTXNe0EvvLyUywl0CgH75H5DuZ8tM38L3dufp36WwzKoapIxCOI005U9MQj8A"
+STRIPE_PUBLISHABLE_KEY="pk_test_51SL3Ra2MbjQATJw5jJdivM5nUnL4OIElPyPU82FF2YPa9b6N9BXR4cG0ZTvEVRXPeoumM94yVzqRTtiJxuZld1gT00MjmH6nGB"
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -54,14 +56,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-CORS_ALLOWED_ORIGINS=[
-    'http://localhost:3000'
-]
-# REST_FRAMEWORK={
-#     'DEFAULT_AUTHENTICATION_CLASSES':(
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#     )
-# }
+
+
 ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
@@ -141,4 +137,23 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ]
 }
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),   # make access token valid for 1 day
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # refresh token valid for 7 days
+    "ROTATE_REFRESH_TOKENS": True,                # issue new refresh token on refresh
+    "BLACKLIST_AFTER_ROTATION": True,             # blacklist old refresh token
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
 AUTH_USER_MODEL = 'users.User'
+CORS_ALLOWED_ORIGINS=[
+    'http://localhost:5173'
+]

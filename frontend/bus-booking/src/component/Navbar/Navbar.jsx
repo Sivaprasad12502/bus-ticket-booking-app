@@ -1,0 +1,46 @@
+import React from "react";
+import { useContext } from "react";
+import { Context } from "../../context/Context";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import './NavBar.scss'
+
+const Navbar = () => {
+  const { user, setUser, apiUrl, token, setToken, navigate } =
+    useContext(Context);
+  console.log("user", user);
+  console.log("token", token);
+  const mutate = useMutation({
+    mutationFn: async () => {
+        const refreshToken=localStorage.getItem("refresh")
+      await axios.post(`${apiUrl}users/logout/`, {refresh:refreshToken}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: () => {
+      console.log("loging out successfully:");
+      setToken(null);
+      setUser({});
+      localStorage.removeItem("token");
+      localStorage.removeItem("refresh");
+      localStorage.removeItem("user");
+      navigate("/login");
+    },
+    onError: (error) => {
+      console.error("logout failed:", error);
+    },
+  });
+  const handleLogout = () => {
+    mutate.mutate();
+  };
+  return (
+    <div className="user-header">
+      <span>@{user?.username}</span>
+      <button onClick={handleLogout}>Logout</button>
+    </div>
+  );
+};
+
+export default Navbar;

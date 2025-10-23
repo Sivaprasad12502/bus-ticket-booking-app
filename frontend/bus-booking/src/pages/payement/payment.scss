@@ -1,0 +1,120 @@
+/* Payment.scss */
+
+.payment-container {
+  max-width: 420px;
+  margin: 50px auto;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .checkout-header {
+    background-color: #635bff;
+    color: #fff;
+    padding: 25px 20px;
+    text-align: center;
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 5px 0 0;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+  }
+
+  .checkout-summary {
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+
+    p {
+      font-size: 16px;
+      margin: 5px 0;
+      color: #333;
+
+      span {
+        font-weight: 600;
+      }
+    }
+
+    .seats {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+  }
+
+  .stripe-form {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .StripeElement {
+      padding: 14px 16px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      font-size: 16px;
+      transition: border 0.3s ease, box-shadow 0.3s ease;
+
+      &:focus {
+        border-color: #635bff;
+        box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.15);
+      }
+    }
+
+    button {
+      padding: 14px 0;
+      background-color: #635bff;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #4f46e5;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(99, 91, 255, 0.2);
+      }
+    }
+
+    p {
+      margin: 0;
+      text-align: center;
+
+      &.error {
+        color: #ff4d4f;
+        font-weight: 500;
+      }
+
+      &.success {
+        color: #52c41a;
+        font-weight: 500;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .payment-container {
+    margin: 20px;
+  }
+}
