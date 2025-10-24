@@ -109,14 +109,15 @@ const Payment = () => {
   }, [booking_Id, apiUrl, token]);
 
   if (!clientSecret)
-    return <p>Loading payment information for booking {booking_Id}...</p>;
+    // return <p>Loading payment information for booking {booking_Id}...</p>;
+    return <div style={{textAlign:"center",display:"flex",justifyContent:"center",alignItems:"center",height:"100vh"}}>Loading payment information for booking ...</div>;
 
   console.log("booking-id", booking_Id);
   return (
     <div className="payment-container">
       <div className="checkout-header">
-        <h2>Checkout</h2>
-        <p>Booking #{booking_Id}</p>
+        <h2>Complete Your Payment</h2>
+        {/* <p>Booking #{booking_Id}</p> */}
       </div>
 
       <div className="checkout-summary">

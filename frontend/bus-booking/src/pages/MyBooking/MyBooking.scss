@@ -1,23 +1,56 @@
 .my-bookings {
-  max-width: 800px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
+  max-width: 900px;
+  margin: 60px auto;
   padding: 20px;
-
+  font-family: "Inter", sans-serif;
+  p{
+    text-align: center;
+    font-weight: bold;
+  }
   .title {
     text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 30px;
+  }
+
+  button {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
     margin-bottom: 25px;
-    font-size: 2rem;
-    color: #333;
+
+    &:hover {
+      background: linear-gradient(135deg, #1e40af, #1d4ed8);
+      transform: translateY(-1px);
+    }
+
+    a {
+      color: #fff;
+      text-decoration: none;
+    }
   }
 
   .ticket {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 6px solid #2563eb;
+    border-radius: 12px;
     margin-bottom: 25px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 25px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
 
     .ticket-header {
       display: flex;
@@ -26,58 +59,140 @@
       margin-bottom: 15px;
 
       h2 {
-        margin: 0;
-        font-size: 1.4rem;
-        color: #222;
+        font-size: 1.2rem;
+        color: #1e293b;
+        font-weight: 600;
       }
 
       .status {
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-weight: bold;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 20px;
         text-transform: uppercase;
-        color: #fff;
-      }
 
-      .status.confirmed {
-        background-color: #28a745;
-      }
+        &.booked {
+          background: #dcfce7;
+          color: #16a34a;
+        }
 
-      .status.cancelled {
-        background-color: #dc3545;
+        &.cancelled {
+          background: #fee2e2;
+          color: #dc2626;
+        }
+
+        &.completed {
+          background: #dbeafe;
+          color: #2563eb;
+        }
+
+        &.pending {
+          background: #fef9c3;
+          color: #ca8a04;
+        }
       }
     }
 
     .ticket-info {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #e2e8f0;
+
       p {
         margin: 5px 0;
+        color: #334155;
         font-size: 0.95rem;
-        color: #333;
+
+        strong {
+          color: #1e293b;
+          font-weight: 600;
+        }
       }
     }
 
     .passengers {
       margin-top: 15px;
+      background: #f9fafb;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 15px 20px;
 
       strong {
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
+        color: #1e293b;
       }
 
       ul {
         list-style: none;
-        padding-left: 0;
+        padding: 0;
 
         li {
-          padding: 8px 0;
-          border-bottom: 1px solid #eee;
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          text-align: center;
           font-size: 0.9rem;
-          color: #555;
+          padding: 8px 0;
+          border-bottom: 1px solid #e2e8f0;
+
+          &:last-child {
+            border-bottom: none;
+          }
 
           span {
-            margin-right: 8px;
+            margin-right: 10px;
+            color: #475569;
+
+            strong {
+              color: #1e293b;
+              font-weight: 600;
+            }
           }
         }
+      }
+    }
+
+    > button {
+      margin-top: 15px;
+      background: #dc2626;
+      padding: 10px 20px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #b91c1c;
+      }
+    }
+  }
+
+  p {
+    text-align: center;
+    font-size: 1rem;
+    color: #475569;
+    margin-top: 30px;
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    .ticket {
+      padding: 20px;
+
+      .ticket-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .ticket-info {
+        font-size: 0.9rem;
       }
     }
   }

@@ -32,11 +32,12 @@
         }
         .left{
             flex: 1;
-            background:linear-gradient(rgb(39,11,96,0.5),rgba(39,11,96,0.5)),url(https://images.pexels.com/photos/3228727/pexels-photo-3228727.jpeg?auto=compress&cs=tinysrgb&w=1600) center;
-            background-size: cover;
+            background:linear-gradient(rgb(39,11,96,0.5),rgba(39,11,96,0.5)),url(https://plus.unsplash.com/premium_photo-1664302152991-d013ff125f3f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YnVzfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600) center;
+            background-size: cover ;
             padding: 50px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             gap: 30px;
             color: white;
             @include mobile{

@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import "./MyBooking.scss";
 import { NavLink } from "react-router-dom";
+import {FaArrowAltCircleLeft} from 'react-icons/fa'
+import {toast} from 'react-toastify'
 
 const MyBooking = () => {
   const query = useQueryClient();
@@ -39,6 +41,8 @@ const MyBooking = () => {
       query.invalidateQueries({
         queryKey: ["bookings"],
       });
+      toast.success('Ticket Cancelled')
+      
     },
     onError: (er) => console.log(er),
   });
@@ -51,14 +55,14 @@ const MyBooking = () => {
 
   return (
     <div className="my-bookings">
-      <button>
-        <NavLink to={"/"}> back</NavLink>
-      </button>
+      
+        <NavLink to={"/"}><FaArrowAltCircleLeft size={'30px'}/> </NavLink>
+      
       {bookings.length == 0 ? (
-        <p>no bokkings</p>
+        <p>Nothing Booked Yet 🥲</p>
       ) : (
         <div>
-          <h1 className="title">My Booked Tickets</h1>
+          <h1 className="title">My Booked Tickets </h1>
           {bookings.map((booking) => (
             <div key={booking.id} className="ticket">
               <div className="ticket-header">
@@ -70,7 +74,7 @@ const MyBooking = () => {
 
               <div className="ticket-info">
                 <p>
-                  <strong>User:</strong> {booking.user}
+                  {/* <strong>User:</strong> {booking.user} */}
                 </p>
                 <p>
                   <strong>Trip:</strong> {booking.trip.bus.bus_name} (
@@ -105,27 +109,27 @@ const MyBooking = () => {
                     {booking.passengers.map((p) => (
                       <li key={p.id}>
                         <span>
-                          <strong>Name:</strong> {p.name}
+                          <strong>Name</strong> {p.name}
                         </span>{" "}
                         |
                         <span>
-                          <strong>Age:</strong> {p.age}
+                          <strong>Age</strong> {p.age}
                         </span>{" "}
                         |
                         <span>
-                          <strong>Gender:</strong> {p.gender}
+                          <strong>Gender</strong> {p.gender}
                         </span>{" "}
                         |
                         <span>
-                          <strong>Boarding:</strong> {p.boarding_location}
+                          <strong>Boarding</strong> {p.boarding_location}
                         </span>{" "}
                         |
                         <span>
-                          <strong>Dropping:</strong> {p.dropping_location}
+                          <strong>Dropping</strong> {p.dropping_location}
                         </span>{" "}
                         |
                         <span>
-                          <strong>Seat:</strong> {p.seat_number}
+                          <strong>Seat</strong> {p.seat_number}
                         </span>
                       </li>
                     ))}

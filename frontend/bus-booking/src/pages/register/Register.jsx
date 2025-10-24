@@ -63,7 +63,7 @@ const Register = () => {
     <div className="register">
       <div className="card">
         <div className="left">
-          <h1>Lama Social.</h1>
+          <h1>Make your trip with us.</h1>
           <p>
             Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quos
             provident, aperiam dolorem impedit et omnis, error minus dignissimos
@@ -84,6 +84,7 @@ const Register = () => {
               name="username"
               value={values.username}
               onChange={handleChange}
+              required
             />
             <input
               type="email"
@@ -91,6 +92,7 @@ const Register = () => {
               name="email"
               value={values.email}
               onChange={handleChange}
+              required
             />
             <input
               type="password"
@@ -98,6 +100,7 @@ const Register = () => {
               name="password"
               value={values.password}
               onChange={handleChange}
+              required
             />
             <input
               type="password"
@@ -105,6 +108,7 @@ const Register = () => {
               name="password2"
               value={values.password2}
               onChange={handleChange}
+              required
             />
             <input
               type="number"
@@ -112,6 +116,7 @@ const Register = () => {
               name="phone"
               value={values.phone}
               onChange={handleChange}
+              required
             />
             <button type="submit">Register</button>
           </form>

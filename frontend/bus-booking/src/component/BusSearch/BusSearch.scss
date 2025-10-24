@@ -1,99 +1,135 @@
 .bus-search-container {
-  max-width: 650px;
-  margin: 3rem auto;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 2rem 2.5rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  font-family: "Poppins", sans-serif;
 
   .title {
-    font-size: 1.9rem;
+    font-size: 32px;
     font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 2rem;
-    letter-spacing: 0.5px;
+    color: #2d2d2d;
+    margin-bottom: 40px;
+    text-align: center;
+    letter-spacing: 1px;
   }
 
   .form-group {
     display: flex;
-    flex-direction: column;
-    gap: 1.4rem;
-  }
+    gap: 20px;
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    align-items: flex-end;
+    transition: 0.3s ease;
 
-  .form-field {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-
-    label {
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 0.4rem;
-      color: #333;
+    &:hover {
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
     }
 
-    select,
-    input[type="date"] {
-      width: 100%;
-      padding: 0.7rem 1rem;
-      border: 1px solid #d0d0d0;
-      border-radius: 10px;
-      background-color: #fafafa;
-      font-size: 1rem;
-      color: #333;
-      transition: all 0.2s ease;
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
 
-      &:focus {
+      label {
+        font-size: 14px;
+        color: #555;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      select,
+      input {
+        padding: 12px 15px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        font-size: 16px;
+        color: #333;
         outline: none;
-        border-color: #007bff;
-        background-color: #fff;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        background-color: #fafafa;
+        transition: 0.3s ease;
+
+        &:focus {
+          border-color: #3f51b5;
+          background-color: #fff;
+          box-shadow: 0 0 5px rgba(63, 81, 181, 0.3);
+        }
+
+        option {
+          color: #333;
+        }
+      }
+    }
+
+    .search-btn {
+      padding: 14px 25px;
+      background: linear-gradient(135deg, #3f51b5, #6573ff);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      min-width: 160px;
+      transition: 0.3s ease;
+      align-self: center;
+      margin-top: 21px;
+
+      &:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 18px rgba(63, 81, 181, 0.4);
+      }
+
+      &:disabled {
+        background: #b0b0b0;
+        cursor: not-allowed;
+        box-shadow: none;
       }
     }
   }
 
-  .search-btn {
-    margin-top: 1.6rem;
-    padding: 0.8rem 1rem;
-    width: 100%;
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: #fff;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
+  // 🔹 Responsive Design
+  @media (max-width: 992px) {
+    .form-group {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
 
-    &:hover {
-      background: linear-gradient(135deg, #0056b3, #003d80);
-      box-shadow: 0 6px 15px rgba(0, 91, 187, 0.4);
-    }
+      .form-field {
+        flex: 1 1 45%;
+      }
 
-    &:disabled {
-      background: #ccc;
-      color: #666;
-      cursor: not-allowed;
-      box-shadow: none;
+      .search-btn {
+        flex: 1 1 100%;
+        width: 100%;
+      }
     }
   }
 
-  // 🔹 Mobile responsive design
   @media (max-width: 600px) {
-    padding: 1.5rem;
+    padding: 40px 10px;
+
     .title {
-      font-size: 1.6rem;
+      font-size: 26px;
     }
-    .search-btn {
-      font-size: 1rem;
+
+    .form-group {
+      flex-direction: column;
+      width: 100%;
+      padding: 25px 20px;
+
+      .form-field {
+        width: 100%;
+      }
+
+      .search-btn {
+        width: 100%;
+      }
     }
   }
 }

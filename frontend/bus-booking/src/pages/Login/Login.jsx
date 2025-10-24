@@ -64,6 +64,7 @@ export const Login = () => {
               name="username"
               value={values.username}
               onChange={handleChange}
+              required
             />
             <input
               type="password"
@@ -71,6 +72,7 @@ export const Login = () => {
               name="password"
               value={values.password}
               onChange={handleChange}
+              required
             />
             <input
               type="password"
@@ -78,6 +80,7 @@ export const Login = () => {
               name="password2"
               value={values.password2}
               onChange={handleChange}
+              required
             />
 
             <button type="submit">Login</button>

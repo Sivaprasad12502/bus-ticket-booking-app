@@ -1,67 +1,138 @@
 .bus-results {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.2rem;
-  margin: 2rem auto;
-  max-width: 800px;
-  padding: 1rem;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  }
-
-  p {
-    color: #555;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+  padding: 60px 20px;
+  font-family: "Poppins", sans-serif;
+  background: #f7f9fc;
+  min-height: 100vh;
 
   .no-results {
-    text-align: center;
-    font-size: 1.1rem;
-    color: #888;
-    margin-top: 2rem;
+    color: #777;
+    font-size: 18px;
+    margin-top: 50px;
+    font-weight: 500;
   }
 
   .bus-card {
+    width: 100%;
+    max-width: 850px;
     background: #fff;
-    border-radius: 14px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    border: 1px solid #eee;
+    border-radius: 18px;
+    padding: 25px 30px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 10px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    position: relative;
 
     &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(63, 81, 181, 0.15);
+      border-color: #e0e0e0;
     }
 
     h3 {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #222;
-      margin-bottom: 0.6rem;
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 5px;
     }
-
+    .ac-p {
+      background: green;
+      color: white !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      padding: 2px;
+    }
+    // .price{
+    //   background-color: black;
+    //   color: white;
+    //   width: fit-content;
+    //   padding: 2px;
+    // }
     p {
-      margin: 0.4rem 0;
-      font-size: 0.95rem;
+      font-size: 15px;
       color: #555;
+      margin: 3px 0;
 
-      &:nth-of-type(2) {
-        font-weight: 500;
-        color: #007bff; // blue route line
+      &:nth-child(2) {
+        font-weight: 600;
+        color: #444;
       }
 
-      &:nth-of-type(3) {
+      &:nth-child(3) {
         color: #666;
       }
 
-      &:nth-of-type(4) {
+      &:nth-child(4) {
         font-weight: 600;
-        color: #28a745; // green for price
-        margin-top: 0.4rem;
+        color: #222;
+      }
+    }
+
+    button {
+      align-self: flex-end;
+      margin-top: 10px;
+      // background: linear-gradient(135deg, #3f51b5, #6573ff);
+      background-color: red;
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 15px rgba(63, 81, 181, 0.4);
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+  }
+
+  // 🔹 Optional separator line between cards
+  .bus-card:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  // 🔹 Responsive Design
+  @media (max-width: 768px) {
+    padding: 40px 10px;
+
+    .bus-card {
+      padding: 20px;
+      max-width: 100%;
+
+      h3 {
+        font-size: 18px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
       }
     }
   }

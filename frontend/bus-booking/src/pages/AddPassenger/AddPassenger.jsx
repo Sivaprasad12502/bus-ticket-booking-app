@@ -77,7 +77,7 @@ const AddPassenger = () => {
   };
   return (
     <form onSubmit={handleSubmit} className="add-passenger-container">
-      <h2>Add Passengers</h2>
+      <h2>Add Passenger Details</h2>
       {passengers.map((p, i) => (
         <div className="passenger-card" key={i}>
           <h4>Seat {p.seat_number || i + 1}</h4>
@@ -110,7 +110,7 @@ const AddPassenger = () => {
             readOnly
           />
           <input
-            placeholder="Boarding"
+            placeholder="Boarding location"
             value={p.boarding_location}
             onChange={(e) =>
               handleChange(i, "boarding_location", e.target.value)
@@ -118,7 +118,7 @@ const AddPassenger = () => {
             required
           />
           <input
-            placeholder="Dropping"
+            placeholder="Dropping location"
             value={p.dropping_location}
             onChange={(e) =>
               handleChange(i, "dropping_location", e.target.value)
@@ -133,7 +133,7 @@ const AddPassenger = () => {
           Add Passenger
         </button> */}
         <div>
-          <span>{totalamount}</span>
+          <span>$ {totalamount}</span>
         </div>
         <button className="continue-btn" type="submit">
           Continue to Payment

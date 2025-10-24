@@ -1,120 +1,138 @@
-/* Payment.scss */
-
 .payment-container {
-  max-width: 420px;
-  margin: 50px auto;
-  font-family: "Roboto", "Segoe UI", sans-serif;
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  max-width: 600px;
+  margin: 60px auto;
+  background: #ffffff;
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
+  gap: 25px;
+  font-family: "Inter", sans-serif;
 
   .checkout-header {
-    background-color: #635bff;
-    color: #fff;
-    padding: 25px 20px;
     text-align: center;
 
     h2 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 600;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 5px;
     }
 
     p {
-      margin: 5px 0 0;
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.85);
+      color: #64748b;
+      font-size: 0.95rem;
     }
   }
 
   .checkout-summary {
-    padding: 20px;
-    border-bottom: 1px solid #f0f0f0;
+    background: #f8fafc;
+    padding: 20px 25px;
+    border-radius: 15px;
+    border: 1px solid #e2e8f0;
 
     p {
-      font-size: 16px;
-      margin: 5px 0;
-      color: #333;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
       span {
-        font-weight: 600;
+        font-weight: 700;
+        color: #2563eb;
       }
-    }
 
-    .seats {
-      margin-top: 8px;
-      font-size: 14px;
-      color: #666;
+      &.seats {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-top: 10px;
+      }
     }
   }
 
   .stripe-form {
-    padding: 20px;
+    background: #f9fafb;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
     gap: 20px;
 
     .StripeElement {
-      padding: 14px 16px;
-      border: 1px solid #ddd;
+      padding: 12px 14px;
       border-radius: 10px;
-      background-color: #f9f9f9;
-      font-size: 16px;
-      transition: border 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid #cbd5e1;
+      background: white;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+      transition: border-color 0.2s ease;
 
-      &:focus {
-        border-color: #635bff;
-        box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.15);
+      &:focus,
+      &:active {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
       }
     }
 
     button {
-      padding: 14px 0;
-      background-color: #635bff;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
       border: none;
+      padding: 12px 0;
       border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      width: 100%;
 
-      &:disabled {
-        background-color: #aaa;
-        cursor: not-allowed;
+      &:hover {
+        background: linear-gradient(135deg, #1e40af, #1d4ed8);
+        transform: translateY(-1px);
       }
 
-      &:hover:not(:disabled) {
-        background-color: #4f46e5;
-        transform: translateY(-1px);
-        box-shadow: 0 5px 15px rgba(99, 91, 255, 0.2);
+      &:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+        transform: none;
       }
     }
 
     p {
-      margin: 0;
       text-align: center;
-
-      &.error {
-        color: #ff4d4f;
-        font-weight: 500;
-      }
-
-      &.success {
-        color: #52c41a;
-        font-weight: 500;
-        font-size: 16px;
-      }
+      color: #dc2626;
+      font-size: 0.9rem;
+      font-weight: 500;
     }
   }
-}
 
-/* Responsive */
-@media (max-width: 480px) {
-  .payment-container {
-    margin: 20px;
+  // Animation when payment loads
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  animation: fadeIn 0.4s ease-in-out;
+
+  // Responsive layout
+  @media (max-width: 600px) {
+    padding: 30px 20px;
+
+    .checkout-summary {
+      padding: 15px;
+    }
+
+    .stripe-form {
+      padding: 20px;
+    }
   }
 }
