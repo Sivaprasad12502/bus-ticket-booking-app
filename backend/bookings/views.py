@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
+from datetime import datetime, time ,timedelta
 from .models import Bus, Route, Trip, Seat, Booking, Passenger, Payment
 from .serializers import (
     BusSerializer,
@@ -99,16 +100,25 @@ def route_detail(request, pk):
 @api_view(["GET", "POST"])
 def trip_list(request):
     if request.method == "GET":
-        # trips=Trip.objects.filter(departure_time__gte=timezone.now())#only future trips
-        trips = Trip.objects.all()
+        # trips=Trip.objects.filter(departure_time__gte=timezone.localtime().time())#only future trips
         # Optional:filter by start and end locations if provided in query params
+        travel_date=request.query_params.get('date')
         start = request.query_params.get("from")
         end = request.query_params.get("to")
+        trips = Trip.objects.all()
         if start and end:
             trips = trips.filter(
                 route__start_location__icontains=start,
                 route__end_location__icontains=end,
             )
+        if travel_date:
+            travel_date=datetime.strptime(travel_date,"%Y-%m-%d").date()
+            today=timezone.localdate()
+            if travel_date==today:
+                current_dt=timezone.localtime()
+                time_plus_3hr = current_dt+timedelta(hours=3)
+                print(current_dt ,'currrrent-timeee')
+                trips=trips.filter(departure_time__gte=time_plus_3hr.time())
         serializer = TripSerializer(trips, many=True)
         return Response(serializer.data)
     elif request.method == "POST":
@@ -143,13 +153,35 @@ def trip_detail(request, pk):
 # Available Seats for a trip
 @api_view(["GET"])
 def trip_available_seats(request, trip_id):
+    # try:
+    #     trip = Trip.objects.get(pk=trip_id)
+    # except Trip.DoesNotExist:
+    #     return Response(status=status.HTTP_404_NOT_FOUND)
+    # seats = trip.seats.filter(is_booked=False)
+    # serializer = SeatSerializer(seats, many=True)
+    # return Response(serializer.data)
+    date=request.query_params.get('date')
+    if not date:
+        return Response({"error":"date parameter is required"},status=400)
     try:
-        trip = Trip.objects.get(pk=trip_id)
+        trip=Trip.objects.get(pk=trip_id)
     except Trip.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    seats = trip.seats.filter(is_booked=False)
-    serializer = SeatSerializer(seats, many=True)
-    return Response(serializer.data)
+    booked_seat_numbers = Booking.objects.filter(
+        trip=trip, booked_date=date
+    ).values_list("seats__seat_number", flat=True)
+    # return seats not in that list
+    available_seats = trip.seats.exclude(seat_number__in=booked_seat_numbers)
+    serializer = SeatSerializer(available_seats, many=True)
+    # Ensure response reflects availability for the requested date.
+    # Some seat rows may carry a stale `is_booked` boolean; the API's contract
+    # is to return only seats available for the given date. Normalize the
+    # serialized output so the frontend doesn't rely on the model-level
+    # `is_booked` flag (which is not date-scoped).
+    data = serializer.data
+    for item in data:
+        item["is_booked"] = False
+    return Response(data)
 
 
 # Booking Seats
@@ -164,6 +196,7 @@ def create_bookings(request):
         user = request.user
         trip_id = request.data.get("trip_id")
         seat_numbers = request.data.get("seats")
+        booked_date=request.data.get('booked_date')
         if isinstance(seat_numbers, str):
             seat_numbers = [seat_numbers]
         try:
@@ -172,9 +205,16 @@ def create_bookings(request):
             return Response(
                 {"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND
             )
+        # seats = Seat.objects.filter(
+        #     trip=trip, seat_number__in=seat_numbers, is_booked=False
+        # )
+        booked_seat_numbers = Booking.objects.filter(
+            trip=trip, booked_date=booked_date
+        ).values_list("seats__seat_number", flat=True)
+        # filter seats that are not already booked for that date
         seats = Seat.objects.filter(
-            trip=trip, seat_number__in=seat_numbers, is_booked=False
-        )
+            trip=trip, seat_number__in=seat_numbers
+        ).exclude(seat_number__in=booked_seat_numbers)
         if seats.count() != len(seat_numbers):
             return Response(
                 {"error": "One or more seats are already booked"},
@@ -182,11 +222,11 @@ def create_bookings(request):
             )
         total_amount = sum([trip.price for _ in seats])
         booking = Booking.objects.create(
-            user=user, trip=trip, total_amount=total_amount
+            user=user, trip=trip, total_amount=total_amount,booked_date=booked_date
         )
         booking.seats.set(seats)
         # Mark seats as booked
-        seats.update(is_booked=True)
+        # seats.update(is_booked=True)
         return Response(
             {
                 "booking_id": booking.id,

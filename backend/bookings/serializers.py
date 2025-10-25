@@ -23,7 +23,8 @@ class TripSerializer(serializers.ModelSerializer):
     route_id = serializers.PrimaryKeyRelatedField(
         queryset=Route.objects.all(), source="route", write_only=True
     )
-
+    departure_time=serializers.SerializerMethodField()
+    arrival_time=serializers.SerializerMethodField()
     class Meta:
         model = Trip
         fields = [
@@ -36,6 +37,11 @@ class TripSerializer(serializers.ModelSerializer):
             "arrival_time",
             "price",
         ]
+    def get_departure_time(self, obj):
+        return obj.departure_time.strftime("%I:%M %p") if obj.departure_time else None
+
+    def get_arrival_time(self, obj):
+        return obj.arrival_time.strftime("%I:%M %p") if obj.arrival_time else None
 
 
 
@@ -87,6 +93,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "passengers",
             "total_amount",
             "booking_date",
+            "booked_date",
             "status",
         ]
 

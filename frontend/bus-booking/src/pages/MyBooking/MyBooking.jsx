@@ -65,6 +65,7 @@ const MyBooking = () => {
           <h1 className="title">My Booked Tickets </h1>
           {bookings.map((booking) => (
             <div key={booking.id} className="ticket">
+              <div>{booking.booked_date}</div>
               <div className="ticket-header">
                 <h2>Booking #{booking.id}</h2>
                 <span className={`status ${booking.status.toLowerCase()}`}>
@@ -87,11 +88,11 @@ const MyBooking = () => {
                 </p>
                 <p>
                   <strong>Departure:</strong>{" "}
-                  {new Date(booking.trip.departure_time).toLocaleString()}
+                  {booking.trip.departure_time}
                 </p>
                 <p>
                   <strong>Arrival:</strong>{" "}
-                  {new Date(booking.trip.arrival_time).toLocaleString()}
+                  {booking.trip.arrival_time}
                 </p>
                 <p>
                   <strong>Seats:</strong>{" "}

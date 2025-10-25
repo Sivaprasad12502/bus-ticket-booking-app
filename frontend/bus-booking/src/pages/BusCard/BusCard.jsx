@@ -19,7 +19,7 @@ const BusCard = () => {
     queryKey: ["buses", from, to, date],
     queryFn: async () => {
       const response = await axios.get(
-        `${apiUrl}bookings/trips/?from=${from}&to=${to}`
+        `${apiUrl}bookings/trips/?from=${from}&to=${to}&date=${date}`
       );
       const data = response.data;
       return data;
@@ -39,11 +39,11 @@ const BusCard = () => {
             {trip.route.start_location} → {trip.route.end_location}
           </p>
           <p>
-            Departure: {new Date(trip.departure_time).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})} |
-            Arrival: {new Date(trip.arrival_time).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}
+            Departure: {trip.departure_time} |
+            Arrival: {trip.arrival_time}
           </p>
           <p className="price">Price: ₹{trip.price}</p>
-          <button onClick={()=>navigate(`/busDetails/selectSeat?tripid=${trip.id}`)}>select seat</button>
+          <button onClick={()=>navigate(`/busDetails/selectSeat?tripid=${trip.id}&date=${date}`)}>select seat</button>
         </div>
       ))}
     </div>

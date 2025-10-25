@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from datetime import date
 
 
 # Create your models here.
@@ -29,8 +30,8 @@ class Route(models.Model):
 class Trip(models.Model):
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
-    departure_time = models.DateTimeField()
-    arrival_time = models.DateTimeField()
+    departure_time = models.TimeField()
+    arrival_time = models.TimeField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
@@ -52,6 +53,8 @@ class Booking(models.Model):
     seats = models.ManyToManyField(Seat, blank=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     booking_date = models.DateTimeField(auto_now_add=True)
+    # Use today's date as default when a booking date is not provided
+    booked_date = models.DateField(default=date.today)
     status = models.CharField(
         max_length=20,
         choices=[("CONFIRMED", "confirmed"), ("CANCELLED", "Cancelled")],

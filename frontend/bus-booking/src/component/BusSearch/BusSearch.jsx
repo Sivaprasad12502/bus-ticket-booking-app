@@ -27,7 +27,7 @@ export const BusSearch = () => {
       e.preventDefault();
       alert("Please fill all fields before searching.");
     }
-    navigate(`/busDetails?from=${from}&to=${to}`);
+    navigate(`/busDetails?from=${from}&to=${to}&date=${date}`);
   };
 
   return (
@@ -75,7 +75,7 @@ export const BusSearch = () => {
 
         <button
           className="search-btn"
-          disabled={!from || !to}
+          disabled={!from || !to ||!date}
           onClick={handleSearch}
         >
           Search Buses

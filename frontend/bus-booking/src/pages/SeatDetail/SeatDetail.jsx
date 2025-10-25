@@ -7,38 +7,56 @@ import "./SeatDetail.scss";
 import { toast } from "react-toastify";
 
 export const SeatDetail = () => {
-  const { apiUrl, token,navigate } = useContext(Context);
+  const { apiUrl, token, navigate } = useContext(Context);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const tripid = params.get("tripid");
-  console.log(token)
+  const date = params.get("date");
   const queryClient = useQueryClient();
   const [selectedSeats, setSelectedSeats] = useState([]);
 
-  // 🔹 Fetch seats
-  const {
-    data: seats,
-    isSuccess,
-    isLoading,
-  } = useQuery({
-    queryKey: ["seats", tripid],
+  // Guards
+  if (!tripid || !date) {
+    return <p>Please provide a trip id and date in the query string (tripid & date).</p>;
+  }
+
+  // Fetch trip details (to know total seats and price)
+  const { data: trip, isLoading: tripLoading } = useQuery({
+    queryKey: ["trip", tripid],
     queryFn: async () => {
-      const res = await axios.get(`${apiUrl}bookings/trips/${tripid}/seats/`);
+      const res = await axios.get(`${apiUrl}bookings/trips/${tripid}/`);
       return res.data;
     },
   });
-  if(seats){
-    console.log(seats)
-  }
 
-  // 🔹 Handle booking
+  // Fetch available seats for the requested date
+  const {
+    data: availableSeats,
+    isSuccess: seatsSuccess,
+    isLoading: seatsLoading,
+    error: seatsError,
+  } = useQuery({
+    queryKey: ["seats", tripid, date],
+    queryFn: async () => {
+      const res = await axios.get(`${apiUrl}bookings/trips/${tripid}/seats/?date=${date}`);
+      return res.data; // API returns seats available for the date
+    },
+  });
+
+  // Build a full seat map (1..total_seats) and mark available seats
+  const totalSeats = trip?.bus?.total_seats || 0;
+  const availableSet = new Set((availableSeats || []).map((s) => String(s.seat_number)));
+  const seatNumbers = Array.from({ length: totalSeats }, (_, i) => String(i + 1));
+
   const mutation = useMutation({
     mutationFn: async (seatIds) => {
+      if (!token) throw new Error("Authentication required");
       return await axios.post(
         `${apiUrl}bookings/bookings/`,
         {
           trip_id: tripid,
           seats: seatIds,
+          booked_date: date,
         },
         {
           headers: {
@@ -47,32 +65,34 @@ export const SeatDetail = () => {
         }
       );
     },
-    onSuccess: ({data}) => {
-      console.log(data)
-      queryClient.invalidateQueries(["seats", tripid]); // refetch seats
-      const bookingId=data.booking_id
-      const seatsQuery=selectedSeats.join(",")
-      const totalamount=data.total_amount
+    onSuccess: ({ data }) => {
+      queryClient.invalidateQueries(["seats", tripid, date]);
+      const bookingId = data.booking_id;
+      const seatsQuery = selectedSeats.join(",");
+      const totalamount = data.total_amount;
       setSelectedSeats([]);
       toast.success("Seats booked successfully!");
-      navigate(`/selectSeat/addpassenger?bookingId=${bookingId}&seats=${seatsQuery}&totalamount=${totalamount}`)
+      navigate(`/selectSeat/addpassenger?bookingId=${bookingId}&seats=${seatsQuery}&totalamount=${totalamount}`);
     },
-    onError:(error)=>{
-        console.log('error',error)
-        
-
-    }
+    onError: (error) => {
+      const msg = error?.response?.data?.error || error.message || "Booking failed";
+      toast.error(msg);
+    },
   });
 
-  const toggleSeat = (seatId) => {
+  const toggleSeat = (seatNumber, isAvailable) => {
+    if (!isAvailable) return; // cannot toggle booked seats
     setSelectedSeats((prev) =>
-      prev.includes(seatId)
-        ? prev.filter((id) => id !== seatId)
-        : [...prev, seatId]
+      prev.includes(seatNumber) ? prev.filter((s) => s !== seatNumber) : [...prev, seatNumber]
     );
   };
 
   const handleBookNow = () => {
+    if (!token) {
+      toast.error("Please login to book seats.");
+      navigate(`/login?next=/selectSeat?tripid=${tripid}&date=${date}`);
+      return;
+    }
     if (selectedSeats.length === 0) {
       toast.error("Please select at least one seat!");
       return;
@@ -80,35 +100,80 @@ export const SeatDetail = () => {
     mutation.mutate(selectedSeats);
   };
 
-  if (isLoading) return <p>Loading seats...</p>;
-  if (!isSuccess) return <p>Failed to load seats.</p>;
+  if (tripLoading || seatsLoading) return <p>Loading seats...</p>;
+  if (!seatsSuccess) return <p>Failed to load seats. {seatsError?.message}</p>;
+
+  const pricePerSeat = trip?.price ? parseFloat(trip.price) : 0;
+  const totalPrice = (selectedSeats.length * pricePerSeat).toFixed(2);
 
   return (
     <div className="seat-container">
       <h2>Choose Your Seats</h2>
 
       <div className="seat-grid">
-        {seats.map((seat) => (
-          <button
-            key={seat.id}
-            className={`seat 
-              ${seat.is_booked ? "booked" : ""}
-              ${selectedSeats.includes(seat.seat_number) ? "selected" : ""}
-            `}
-            disabled={seat.is_booked}
-            onClick={() => toggleSeat(seat.seat_number)}
-          >
-            {seat.seat_number}
-          </button>
-        ))}
+        {/* Driver / front indicator */}
+        <div className="driver">Driver</div>
+
+        {/* Render rows of seats with an aisle: 2 seats | aisle | 2 seats */}
+        {(() => {
+          const perRow = 4; // 2 left, aisle, 2 right
+          const rows = [];
+          for (let i = 0; i < seatNumbers.length; i += perRow) {
+            rows.push(seatNumbers.slice(i, i + perRow));
+          }
+          return rows.map((row, rIdx) => (
+            <div className="seat-row" key={`row-${rIdx}`}>
+              {/* left two seats (if present) */}
+              <div className="seat-block left">
+                {row.slice(0, 2).map((num) => {
+                  const isAvailable = availableSet.has(num);
+                  const isSelected = selectedSeats.includes(num);
+                  return (
+                    <button
+                      key={num}
+                      className={`seat ${!isAvailable ? "booked" : ""} ${isSelected ? "selected" : ""}`}
+                      disabled={!isAvailable}
+                      onClick={() => toggleSeat(num, isAvailable)}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* aisle spacer */}
+              <div className="aisle" />
+
+              {/* right two seats (if present) */}
+              <div className="seat-block right">
+                {row.slice(2, 4).map((num) => {
+                  const isAvailable = availableSet.has(num);
+                  const isSelected = selectedSeats.includes(num);
+                  return (
+                    <button
+                      key={num}
+                      className={`seat ${!isAvailable ? "booked" : ""} ${isSelected ? "selected" : ""}`}
+                      disabled={!isAvailable}
+                      onClick={() => toggleSeat(num, isAvailable)}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ));
+        })()}
       </div>
 
-      <button
-        className="book-btn"
-        onClick={handleBookNow}
-        disabled={mutation.isPending}
-      >
-        {mutation.isPending ? "Booking..." : "Book Now"}
+      <div className="seat-summary">
+        <p>Selected seats: {selectedSeats.join(", ") || "None"}</p>
+        <p>Seats selected: {selectedSeats.length}</p>
+        <p>Total: ₹{totalPrice}</p>
+      </div>
+
+      <button className="book-btn" onClick={handleBookNow} disabled={mutation.isLoading}>
+        {mutation.isLoading ? "Booking..." : "Book Now"}
       </button>
     </div>
   );
