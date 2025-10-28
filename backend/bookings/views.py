@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
-from datetime import datetime, time ,timedelta
+from datetime import datetime, time, timedelta
 from .models import Bus, Route, Trip, Seat, Booking, Passenger, Payment
 from .serializers import (
     BusSerializer,
@@ -15,9 +15,11 @@ from .serializers import (
     PaymentSerializer,
     BookingSerializer,
 )
+from django.db.models import Q
 
 # for stripe
 import stripe
+from stripe._error import StripeError
 from django.conf import settings
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -102,7 +104,7 @@ def trip_list(request):
     if request.method == "GET":
         # trips=Trip.objects.filter(departure_time__gte=timezone.localtime().time())#only future trips
         # Optional:filter by start and end locations if provided in query params
-        travel_date=request.query_params.get('date')
+        travel_date = request.query_params.get("date")
         start = request.query_params.get("from")
         end = request.query_params.get("to")
         trips = Trip.objects.all()
@@ -112,13 +114,15 @@ def trip_list(request):
                 route__end_location__icontains=end,
             )
         if travel_date:
-            travel_date=datetime.strptime(travel_date,"%Y-%m-%d").date()
-            today=timezone.localdate()
-            if travel_date==today:
-                current_dt=timezone.localtime()
-                time_plus_3hr = current_dt+timedelta(hours=3)
-                print(current_dt ,'currrrent-timeee')
-                trips=trips.filter(departure_time__gte=time_plus_3hr.time())
+            travel_date = datetime.strptime(travel_date, "%Y-%m-%d").date()
+            today = timezone.localdate()
+            if travel_date == today:
+                # current_dt = timezone.localtime()
+                # time_plus_3hr = current_dt + timedelta(hours=3)
+                # print(current_dt, "currrrent-timeee")
+                # trips = trips.filter(departure_time__gte=time_plus_3hr.time())
+                now=timezone.localtime().time()
+                trips=trips.filter(departure_time__gte=now)
         serializer = TripSerializer(trips, many=True)
         return Response(serializer.data)
     elif request.method == "POST":
@@ -153,6 +157,10 @@ def trip_detail(request, pk):
 # Available Seats for a trip
 @api_view(["GET"])
 def trip_available_seats(request, trip_id):
+    Booking.objects.filter(
+        status="PENDING_PAYMENT", payment_deadline__lt=timezone.now()
+    ).update(status="EXPIRED")
+
     # try:
     #     trip = Trip.objects.get(pk=trip_id)
     # except Trip.DoesNotExist:
@@ -160,16 +168,21 @@ def trip_available_seats(request, trip_id):
     # seats = trip.seats.filter(is_booked=False)
     # serializer = SeatSerializer(seats, many=True)
     # return Response(serializer.data)
-    date=request.query_params.get('date')
+    date = request.query_params.get("date")
     if not date:
-        return Response({"error":"date parameter is required"},status=400)
+        return Response({"error": "date parameter is required"}, status=400)
     try:
-        trip=Trip.objects.get(pk=trip_id)
+        trip = Trip.objects.get(pk=trip_id)
     except Trip.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    booked_seat_numbers = Booking.objects.filter(
-        trip=trip, booked_date=date
-    ).values_list("seats__seat_number", flat=True)
+    booked_seat_numbers = (
+        Booking.objects.filter(trip=trip, booked_date=date)
+        .filter(
+            Q(status="CONFIRMED")
+            | Q(status="PENDING_PAYMENT", payment_deadline__gte=timezone.now())
+        )
+        .values_list("seats__seat_number", flat=True)
+    )
     # return seats not in that list
     available_seats = trip.seats.exclude(seat_number__in=booked_seat_numbers)
     serializer = SeatSerializer(available_seats, many=True)
@@ -189,6 +202,10 @@ def trip_available_seats(request, trip_id):
 @permission_classes([IsAuthenticated])
 def create_bookings(request):
     if request.method == "GET":
+        Booking.objects.filter(
+            status="PENDING_PAYMENT", payment_deadline__lt=timezone.now()
+        ).update(status="EXPIRED")
+
         bookings = Booking.objects.filter(user=request.user)
         serializer = BookingSerializer(bookings, many=True)
         return Response(serializer.data)
@@ -196,7 +213,13 @@ def create_bookings(request):
         user = request.user
         trip_id = request.data.get("trip_id")
         seat_numbers = request.data.get("seats")
-        booked_date=request.data.get('booked_date')
+        booked_date = request.data.get("booked_date")
+        passengers_data = request.data.get("passengers", [])
+        if not trip_id or not seat_numbers or not booked_date:
+            return Response(
+                {"error": "trip_id, seats, and booked_date are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if isinstance(seat_numbers, str):
             seat_numbers = [seat_numbers]
         try:
@@ -209,29 +232,53 @@ def create_bookings(request):
         #     trip=trip, seat_number__in=seat_numbers, is_booked=False
         # )
         booked_seat_numbers = Booking.objects.filter(
-            trip=trip, booked_date=booked_date
+            trip=trip, booked_date=booked_date, status="CONFIRMED"
         ).values_list("seats__seat_number", flat=True)
         # filter seats that are not already booked for that date
-        seats = Seat.objects.filter(
-            trip=trip, seat_number__in=seat_numbers
-        ).exclude(seat_number__in=booked_seat_numbers)
+        seats = Seat.objects.filter(trip=trip, seat_number__in=seat_numbers).exclude(
+            seat_number__in=booked_seat_numbers
+        )
         if seats.count() != len(seat_numbers):
             return Response(
                 {"error": "One or more seats are already booked"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        total_amount = sum([trip.price for _ in seats])
+        # require at least one passenger per (same count as seats)
+        if not passengers_data or len(passengers_data) != len(seat_numbers):
+            return Response(
+                {"error": "passengers passengers details for all seats"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # total_amount = sum([trip.price for _ in seats])
+        total_amount = trip.price * len(seat_numbers)
+        # Create Booking
         booking = Booking.objects.create(
-            user=user, trip=trip, total_amount=total_amount,booked_date=booked_date
+            user=user,
+            trip=trip,
+            total_amount=total_amount,
+            booked_date=booked_date,
+            payment_deadline=timezone.now() + timedelta(minutes=10),  # hold for 10 mins
         )
         booking.seats.set(seats)
         # Mark seats as booked
         # seats.update(is_booked=True)
+        # Create passengers
+        for p in passengers_data:
+            Passenger.objects.create(
+                booking=booking,
+                name=p.get("name"),
+                age=p.get("age"),
+                gender=p.get("gender"),
+                boarding_location=p.get("boarding_location"),
+                dropping_location=p.get("dropping_location"),
+                seat_number=p.get("seat_number"),
+            )
         return Response(
             {
                 "booking_id": booking.id,
                 "total_amount": total_amount,
                 "booked_seats": seat_numbers,
+                "passengers": passengers_data,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -293,6 +340,14 @@ def create_payment_intent(request, booking_Id):
         booking = Booking.objects.get(pk=booking_Id, user=request.user)
     except Booking.DoesNotExist:
         return Response({"error": "Booking not found"}, status=404)
+    if booking.status != "PENDING_PAYMENT":
+        return Response(
+            {"error": "This booking is cannot be paind anymore."}, status=400
+        )
+    if booking.payment_deadline and timezone.now() > booking.payment_deadline:
+        booking.status = "EXPIRED"
+        booking.save()
+        return Response({"error": "Payment time expired. Please rebook."}, status=400)
     amount = int(booking.total_amount * 100)  # convert to paise
     currency = "inr"
     try:
@@ -345,6 +400,7 @@ def confirm_payment(request, booking_Id):
     payment.payment_status = "SUCCESS"
     payment.save()
     booking.status = "CONFIRMED"
+    booking.payment_deadline = None  # clear deadline
     booking.save()
 
     serializer = PaymentSerializer(payment)
@@ -353,50 +409,66 @@ def confirm_payment(request, booking_Id):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def cancel_bookings(request,booking_Id):
-    '''
+def cancel_bookings(request, booking_Id):
+    """
     cancel a booking and issue a Stripe refund if payement was made.
-    '''
+    """
     try:
-        booking=Booking.objects.get(pk=booking_Id,user=request.user)
+        booking = Booking.objects.get(pk=booking_Id, user=request.user)
     except Booking.DoesNotExist:
-        return Response({"error":"Booking not found"},status=status.HTTP_400_BAD_REQUEST)
-    #If already cancelled, avoid duplicate refund
-    if booking.status=="CANCELLED":
-        return Response({"error":"Booking already cancelled"},status=status.HTTP_400_BAD_REQUEST)
-    #Check if there is a payment linked
-    payment=Payment.objects.filter(booking=booking).first()
+        return Response(
+            {"error": "Booking not found"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    # If already cancelled, avoid duplicate refund
+    if booking.status == "CANCELLED":
+        return Response(
+            {"error": "Booking already cancelled"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    # Check if there is a payment linked
+    payment = Payment.objects.filter(booking=booking).first()
     if not payment:
         # return Response({"erorr":"no payement record found the this booking"},status=status.HTTP_400_BAD_REQUEST)
-        booking.status="CANCELLED"
-        booking.seats.update(is_booked=False)
-        booking.delete()
-        return Response({"message": "Booking deleted (no payment found)"}, status=status.HTTP_200_OK)
+        booking.status = "CANCELLED"
+        # booking.seats.update(is_booked=False)
+        # booking.delete()
+        booking.save()
+        return Response(
+            {"message": "Booking deleted (no payment found)"}, status=status.HTTP_200_OK
+        )
     try:
         # only refund successfull payments
-        if payment.payment_status=="SUCCESS" and payment.stripe_payment_intent_id:
-            refund=stripe.Refund.create(
-                payment_intent=payment.stripe_payment_intent_id
-            )
-            payment.refund_id=refund.id
-            payment.payment_status="REFUNDED"
-        #mark booking cancelled
-        booking.status="CANCELLED"
-        #Free up seats
-        booking.seats.update(is_booked=False)
-        booking.delete()
-        return Response({
-           "message": "Booking cancelled successfully and refund initiated (if applicable)",
-           "booking_id":booking.id,
-           "refund_id":getattr(payment,"refund_id",None),
-           "status":booking.status
-        },
-        status=status.HTTP_200_OK)
-    except stripe.error.StripeError as e:
+        if payment.payment_status == "SUCCESS" and payment.stripe_payment_intent_id:
+            intent=stripe.PaymentIntent.retrieve(payment.stripe_payment_intent_id)
+            if intent.status=="succeeded" and intent.latest_charge:
+                refund = stripe.Refund.create(
+                    payment_intent=payment.stripe_payment_intent_id
+                )
+                payment.refund_id = refund.id
+                payment.payment_status = "REFUNDED"
+                payment.save()
+                refund_message="Refund initialted succesfully"
+            else:
+                refund_message=f"no refund - PaymentIntent status is {intent.status}"
+        else:
+            refund_message="no refund - payment not successful or not intent ID"
+        # mark booking cancelled
+        booking.status = "CANCELLED"
+        # Free up seats
+        # booking.seats.update(is_booked=False)
+        booking_id = booking.id
+        booking.save()
         return Response(
-             {"error": f"Stripe error: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST
+            {
+                "message": "Booking cancelled successfully and refund initiated (if applicable)",
+                "booking_id": booking_id,
+                "refund_id": getattr(payment, "refund_id", None),
+                "status": booking.status,
+            },
+            status=status.HTTP_200_OK,
+        )
+    except StripeError as e:
+        return Response(
+            {"error": f"Stripe error: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST
         )
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-

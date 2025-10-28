@@ -9,7 +9,7 @@ import {toast} from 'react-toastify'
 
 const MyBooking = () => {
   const query = useQueryClient();
-  const { apiUrl, token } = useContext(Context);
+  const { apiUrl, token,navigate } = useContext(Context);
 
   const {
     data: bookings,
@@ -46,6 +46,10 @@ const MyBooking = () => {
     },
     onError: (er) => console.log(er),
   });
+  const handlePayNow=(bookingId,total_amount)=>{
+    console.log("handle pay now clicked",bookingId,total_amount)
+    navigate(`/payment?bookingId=${bookingId}&totalamount=${total_amount}`)
+  }
   if (bookings) {
     console.log(bookings);
   }
@@ -137,13 +141,32 @@ const MyBooking = () => {
                   </ul>
                 </div>
               )}
-              <button
-                onClick={() => {
-                  mutation.mutate(booking.id);
-                }}
-              >
-                cancel
-              </button>
+                           {/* Action Buttons */}
+              <div className="actions">
+                {booking.status === "PENDING_PAYMENT" && (
+                  <button
+                    className="pay-now"
+                    onClick={() =>
+                      handlePayNow(booking.id, booking.total_amount)
+                    }
+                  >
+                    Pay Now 💳
+                  </button>
+                )}
+                {booking.status === "CONFIRMED" && (
+                  <button className="confirmed-btn" disabled>
+                    Confirmed ✅
+                  </button>
+                )}
+                {booking.status !== "CANCELLED" && (
+                  <button
+                    className="cancel-btn"
+                    onClick={() => mutation.mutate(booking.id)}
+                  >
+                    Cancel ❌
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

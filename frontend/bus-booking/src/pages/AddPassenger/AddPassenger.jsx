@@ -10,9 +10,9 @@ const AddPassenger = () => {
   const { apiUrl, token } = useContext(Context);
   const navigate = useNavigate();
   const params = new URLSearchParams(useLocation().search);
-  const booking_id = params.get("bookingId");
-  console.log(booking_id);
-  const totalamount = params.get("totalamount") || 0;
+  // const booking_id = params.get("bookingId");
+  // console.log(booking_id);
+  // const totalamount = params.get("totalamount") || 0;
   const seatNumbers = params.get("seats")?.split(",");
   console.log(seatNumbers);
   const [passengers, setPassengers] = useState(
@@ -28,21 +28,23 @@ const AddPassenger = () => {
 
   const mutation = useMutation({
     mutationFn: async (data) =>
-      axios.post(`${apiUrl}bookings/bookings/${booking_id}/passengers/`, data, {
+      axios.post(`${apiUrl}bookings/bookings/`, data, {
         headers: { Authorization: `Bearer ${token}` },
       }),
     onSuccess: ({ data }) => {
-      console.log(data);
-      console.log("booking-id in addpassenger", booking_id);
-      console.log("  totalamount in add", totalamount);
-      console.log("seatnumber in addpassenger", seatNumbers);
+      // console.log(data);
+      // console.log("booking-id in addpassenger", booking_id);
+      // console.log("  totalamount in add", totalamount);
+      // console.log("seatnumber in addpassenger", seatNumbers);
       toast.success("Sucessfull added", {
         onClose: () => {
+          const booking_id = data.booking_id;
+          const totalamount = data.total_amount;
           navigate(
             `/payment?bookingId=${booking_id}&totalamount=${totalamount}&seats=${seatNumbers}`
           );
         },
-        autoClose:2000
+        autoClose: 2000,
       });
     },
     onError: (error) => {
@@ -73,7 +75,25 @@ const AddPassenger = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutation.mutate({ passengers });
+    if (
+      passengers.some(
+        (p) =>
+          !p.name ||
+          !p.age ||
+          !p.gender ||
+          !p.boarding_location ||
+          !p.dropping_location
+      )
+    ) {
+      toast.error("Please fill all passenger details");
+      return;
+    }
+    mutation.mutate({
+      trip_id: params.get("tripid"),
+      booked_date: params.get("date"),
+      seats: seatNumbers,
+      passengers,
+    });
   };
   return (
     <form onSubmit={handleSubmit} className="add-passenger-container">
@@ -132,9 +152,7 @@ const AddPassenger = () => {
         {/* <button className="add-passenger-btn" onClick={addPassengerField}>
           Add Passenger
         </button> */}
-        <div>
-          <span>$ {totalamount}</span>
-        </div>
+        <div>{/* <span>$ {totalamount}</span> */}</div>
         <button className="continue-btn" type="submit">
           Continue to Payment
         </button>

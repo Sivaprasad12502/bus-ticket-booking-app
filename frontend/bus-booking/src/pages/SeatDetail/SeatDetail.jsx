@@ -48,37 +48,37 @@ export const SeatDetail = () => {
   const availableSet = new Set((availableSeats || []).map((s) => String(s.seat_number)));
   const seatNumbers = Array.from({ length: totalSeats }, (_, i) => String(i + 1));
 
-  const mutation = useMutation({
-    mutationFn: async (seatIds) => {
-      if (!token) throw new Error("Authentication required");
-      return await axios.post(
-        `${apiUrl}bookings/bookings/`,
-        {
-          trip_id: tripid,
-          seats: seatIds,
-          booked_date: date,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    },
-    onSuccess: ({ data }) => {
-      queryClient.invalidateQueries(["seats", tripid, date]);
-      const bookingId = data.booking_id;
-      const seatsQuery = selectedSeats.join(",");
-      const totalamount = data.total_amount;
-      setSelectedSeats([]);
-      toast.success("Seats booked successfully!");
-      navigate(`/selectSeat/addpassenger?bookingId=${bookingId}&seats=${seatsQuery}&totalamount=${totalamount}`);
-    },
-    onError: (error) => {
-      const msg = error?.response?.data?.error || error.message || "Booking failed";
-      toast.error(msg);
-    },
-  });
+  // const mutation = useMutation({
+  //   mutationFn: async (seatIds) => {
+  //     if (!token) throw new Error("Authentication required");
+  //     return await axios.post(
+  //       `${apiUrl}bookings/bookings/`,
+  //       {
+  //         trip_id: tripid,
+  //         seats: seatIds,
+  //         booked_date: date,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //   },
+  //   onSuccess: ({ data }) => {
+  //     queryClient.invalidateQueries(["seats", tripid, date]);
+  //     const bookingId = data.booking_id;
+  //     const seatsQuery = selectedSeats.join(",");
+  //     const totalamount = data.total_amount;
+  //     setSelectedSeats([]);
+  //     toast.success("Seats booked successfully!");
+  //     navigate(`/selectSeat/addpassenger?bookingId=${bookingId}&seats=${seatsQuery}&totalamount=${totalamount}`);
+  //   },
+  //   onError: (error) => {
+  //     const msg = error?.response?.data?.error || error.message || "Booking failed";
+  //     toast.error(msg);
+  //   },
+  // });
 
   const toggleSeat = (seatNumber, isAvailable) => {
     if (!isAvailable) return; // cannot toggle booked seats
@@ -97,7 +97,9 @@ export const SeatDetail = () => {
       toast.error("Please select at least one seat!");
       return;
     }
-    mutation.mutate(selectedSeats);
+    // mutation.mutate(selectedSeats);
+    const seatsQuery=selectedSeats.join(",");
+    navigate(`/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}`)
   };
 
   if (tripLoading || seatsLoading) return <p>Loading seats...</p>;
@@ -172,8 +174,9 @@ export const SeatDetail = () => {
         <p>Total: ₹{totalPrice}</p>
       </div>
 
-      <button className="book-btn" onClick={handleBookNow} disabled={mutation.isLoading}>
-        {mutation.isLoading ? "Booking..." : "Book Now"}
+      <button className="book-btn" onClick={handleBookNow} disabled={selectedSeats.length===0}>
+        {/* {mutation.isLoading ? "Booking..." : "Book Now"} */}
+        book now
       </button>
     </div>
   );

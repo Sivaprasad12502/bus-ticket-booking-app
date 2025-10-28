@@ -48,7 +48,7 @@ class TripSerializer(serializers.ModelSerializer):
 class SeatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seat
-        fields = ["id", "trip", "seat_number", "is_booked"]
+        fields = ["id", "trip", "seat_number"]
 
 class PassengerSerializer(serializers.ModelSerializer):
     booking = serializers.StringRelatedField(read_only=True)

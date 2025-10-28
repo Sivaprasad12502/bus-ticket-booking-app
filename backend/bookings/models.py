@@ -41,7 +41,7 @@ class Trip(models.Model):
 class Seat(models.Model):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="seats")
     seat_number = models.CharField(max_length=5)
-    is_booked = models.BooleanField(default=False)
+    # is_booked = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.trip.bus.bus_name} Seat {self.seat_number}"
@@ -55,10 +55,11 @@ class Booking(models.Model):
     booking_date = models.DateTimeField(auto_now_add=True)
     # Use today's date as default when a booking date is not provided
     booked_date = models.DateField(default=date.today)
+    payment_deadline=models.DateTimeField(null=True,blank=True)
     status = models.CharField(
         max_length=20,
-        choices=[("CONFIRMED", "confirmed"), ("CANCELLED", "Cancelled")],
-        default="CONFIRMED",
+        choices=[("PENDING_PAYMENT","Pending Payment"),("CONFIRMED", "confirmed"), ("CANCELLED", "Cancelled"),("EXPIRED","Expired")],
+        default="PENDING_PAYMENT",
     )
 
     def __str__(self):
