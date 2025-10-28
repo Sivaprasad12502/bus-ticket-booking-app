@@ -99,6 +99,18 @@
       border-color: #3f51b5;
       transform: scale(1.08);
     }
+    &.women-only {
+      background-color: #fbcfe8; // light pink
+      border-color: #f472b6;
+    }
+
+    .seat-icon {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      font-size: 10px;
+      color: #be185d;
+    }
   }
 
   // 🚍 Book button

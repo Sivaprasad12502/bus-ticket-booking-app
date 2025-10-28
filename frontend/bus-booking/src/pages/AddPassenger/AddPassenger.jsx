@@ -56,6 +56,9 @@ const AddPassenger = () => {
       });
     },
     onError: (error) => {
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      }
       toast.error("Error in add passenger please re-check the details");
       console.log(error);
     },

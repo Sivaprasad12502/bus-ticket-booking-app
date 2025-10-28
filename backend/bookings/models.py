@@ -85,6 +85,9 @@ class TripStop(models.Model):
 class Seat(models.Model):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="seats")
     seat_number = models.CharField(max_length=5)
+    gender_preference=models.CharField(
+        max_length=10,choices=[("ANY","Any"),("WOMEN_ONLY","Women only")],default="ANY"
+    )
     # is_booked = models.BooleanField(default=False)
 
     def __str__(self):

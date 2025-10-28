@@ -54,10 +54,15 @@ export const SeatDetail = () => {
   const availableSet = new Set(
     (availableSeats || []).map((s) => String(s.seat_number))
   );
+  const seatInfoMap=new Map();
+  (availableSeats||[]).forEach((s)=>{
+    seatInfoMap.set(String(s.seat_number),s);
+  })
   const seatNumbers = Array.from({ length: totalSeats }, (_, i) =>
     String(i + 1)
   );
-
+  console.log(availableSet,"avillalala")
+  console.log(seatInfoMap,"seatInfomaaaap")
   // const mutation = useMutation({
   //   mutationFn: async (seatIds) => {
   //     if (!token) throw new Error("Authentication required");
@@ -197,15 +202,20 @@ export const SeatDetail = () => {
   };
   //Helper render seat
   const renderSeat=(num)=>{
+    const seatData=seatInfoMap.get(num)
+    const genderPref=seatData?.gender_preference||"ANY"
+    const isWomenOnly=genderPref==="WOMEN_ONLY"
     const isAvailable=availableSet.has(num);
     const isSelected=selectedSeats.includes(num);
     return(
       <button 
       key={num}
-      className={`seat ${!isAvailable?"booked":""} ${isSelected?"selected":""}`}
+      className={`seat ${!isAvailable?"booked":""} ${isSelected?"selected":""} ${isWomenOnly?"women-only":""}`}
       disabled={!isAvailable}
-      onClick={()=>toggleSeat(num,isAvailable)}>
+      onClick={()=>toggleSeat(num,isAvailable)}
+      title={isWomenOnly?"Reserved for Women":""}>
         {num}
+        {isWomenOnly&&<span className="seat-icon">♀</span>}
       </button>
     )
   }

@@ -245,6 +245,7 @@ def create_bookings(request):
         # seats = Seat.objects.filter(
         #     trip=trip, seat_number__in=seat_numbers, is_booked=False
         # )
+       
         booked_seat_numbers = Booking.objects.filter(
             trip=trip, booked_date=booked_date, status="CONFIRMED"
         ).values_list("seats__seat_number", flat=True)
@@ -257,6 +258,15 @@ def create_bookings(request):
                 {"error": "One or more seats are already booked"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        #gender restriction for seats
+        for p,seat in zip(passengers_data,seats):
+            gender=p.get("gender")
+            #if the seat is women-only but passenger is male
+            if seat.gender_preference=="WOMEN_ONLY" and gender!="F":
+                return Response(
+                    {"error":f"Seat{seat.seat_number} is reserved for women only"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         # require at least one passenger per (same count as seats)
         if not passengers_data or len(passengers_data) != len(seat_numbers):
             return Response(
