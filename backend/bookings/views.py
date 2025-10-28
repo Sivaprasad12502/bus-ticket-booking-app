@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
 from datetime import datetime, time, timedelta
-from .models import Bus, Route, Trip, Seat, Booking, Passenger, Payment
+from .models import Bus, Route, Trip, Seat, Booking, Passenger, Payment, RouteStop
 from .serializers import (
     BusSerializer,
     RouteSerializer,
@@ -14,6 +14,7 @@ from .serializers import (
     PassengerSerializer,
     PaymentSerializer,
     BookingSerializer,
+    RouteStopSerializer
 )
 from django.db.models import Q
 
@@ -61,7 +62,20 @@ def bus_detail(request, pk):
         bus.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+#route-Stop_list
+# @api_view(["GET","POST"])
+# # @permission_classes([IsAuthenticated])
+# def route_stop_list(request):
+#     if request.method=="GET":
+#         route_stops=RouteStop.objects.all()
+#         serializer=RouteStopSerializer(route_stops,many=True)
+#         return Response(serializer.data)
+#     elif request.method=="POST":
+#         serializer=RouteStopSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data,status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 # Routes
 @api_view(["GET", "POST"])
 def route_list(request):
@@ -121,8 +135,8 @@ def trip_list(request):
                 # time_plus_3hr = current_dt + timedelta(hours=3)
                 # print(current_dt, "currrrent-timeee")
                 # trips = trips.filter(departure_time__gte=time_plus_3hr.time())
-                now=timezone.localtime().time()
-                trips=trips.filter(departure_time__gte=now)
+                now = timezone.localtime().time()
+                trips = trips.filter(departure_time__gte=now)
         serializer = TripSerializer(trips, many=True)
         return Response(serializer.data)
     elif request.method == "POST":
@@ -250,7 +264,28 @@ def create_bookings(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         # total_amount = sum([trip.price for _ in seats])
-        total_amount = trip.price * len(seat_numbers)
+        # total_amount = trip.price * len(seat_numbers)
+        # calculate toal fare based on boarding/dropping
+        total_amount = 0
+        for p in passengers_data:
+            boarding = p.get("boarding_location")
+            dropping = p.get("dropping_location")
+            passenger_fare = trip.price
+            if boarding and dropping:
+                from_stop = RouteStop.objects.filter(
+                    route=trip.route, stop_name__iexact=boarding
+                ).first()
+                to_stop = RouteStop.objects.filter(
+                    route=trip.route, stop_name__iexact=dropping
+                ).first()
+
+                if from_stop and to_stop:
+                    try:
+                        distance_fare = float(to_stop.fare_from_start or 0) - float(from_stop.fare_from_start or 0)
+                        passenger_fare = max(distance_fare, 0)
+                    except (TypeError, ValueError):
+                        passenger_fare = trip.price
+            total_amount += passenger_fare
         # Create Booking
         booking = Booking.objects.create(
             user=user,
@@ -264,13 +299,32 @@ def create_bookings(request):
         # seats.update(is_booked=True)
         # Create passengers
         for p in passengers_data:
+            boarding = p.get("boarding_location")
+            dropping = p.get("dropping_location")
+
+            from_stop = RouteStop.objects.filter(
+                route=trip.route, stop_name__iexact=boarding
+            ).first()
+            to_stop = RouteStop.objects.filter(
+                route=trip.route, stop_name__iexact=dropping
+            ).first()
+
+            fare = trip.price
+            if from_stop and to_stop:
+                fare = max(
+                    float(to_stop.fare_from_start) - float(from_stop.fare_from_start), 0
+                )
+
             Passenger.objects.create(
                 booking=booking,
                 name=p.get("name"),
                 age=p.get("age"),
                 gender=p.get("gender"),
-                boarding_location=p.get("boarding_location"),
-                dropping_location=p.get("dropping_location"),
+                # boarding_location=p.get("boarding_location"),
+                # dropping_location=p.get("dropping_location"),
+                boarding_location=boarding,
+                dropping_location=dropping,
+                fare=fare,
                 seat_number=p.get("seat_number"),
             )
         return Response(
@@ -438,19 +492,19 @@ def cancel_bookings(request, booking_Id):
     try:
         # only refund successfull payments
         if payment.payment_status == "SUCCESS" and payment.stripe_payment_intent_id:
-            intent=stripe.PaymentIntent.retrieve(payment.stripe_payment_intent_id)
-            if intent.status=="succeeded" and intent.latest_charge:
+            intent = stripe.PaymentIntent.retrieve(payment.stripe_payment_intent_id)
+            if intent.status == "succeeded" and intent.latest_charge:
                 refund = stripe.Refund.create(
                     payment_intent=payment.stripe_payment_intent_id
                 )
                 payment.refund_id = refund.id
                 payment.payment_status = "REFUNDED"
                 payment.save()
-                refund_message="Refund initialted succesfully"
+                refund_message = "Refund initialted succesfully"
             else:
-                refund_message=f"no refund - PaymentIntent status is {intent.status}"
+                refund_message = f"no refund - PaymentIntent status is {intent.status}"
         else:
-            refund_message="no refund - payment not successful or not intent ID"
+            refund_message = "no refund - payment not successful or not intent ID"
         # mark booking cancelled
         booking.status = "CANCELLED"
         # Free up seats

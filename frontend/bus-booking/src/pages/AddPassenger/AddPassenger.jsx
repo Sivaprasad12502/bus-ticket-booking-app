@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Context } from "../../context/Context";
 import { toast } from "react-toastify";
@@ -25,7 +25,15 @@ const AddPassenger = () => {
       dropping_location: "",
     }))
   );
-
+  const triipid = params.get("tripid");
+  const { data: trip, isLoading } = useQuery({
+    queryKey: ["trip-details", triipid],
+    queryFn: async () => {
+      const response = await axios.get(`${apiUrl}bookings/trips/${triipid}/`);
+      return response.data;
+    },
+  });
+  const tripStopes = trip?.trip_stops || [];
   const mutation = useMutation({
     mutationFn: async (data) =>
       axios.post(`${apiUrl}bookings/bookings/`, data, {
@@ -129,22 +137,34 @@ const AddPassenger = () => {
             onChange={(e) => handleChange(i, "seat_number", e.target.value)}
             readOnly
           />
-          <input
-            placeholder="Boarding location"
+          <select
             value={p.boarding_location}
             onChange={(e) =>
               handleChange(i, "boarding_location", e.target.value)
             }
             required
-          />
-          <input
-            placeholder="Dropping location"
+          >
+            <option value="">Select Boarding Stop</option>
+            {tripStopes.map((stop, index) => (
+              <option key={index} value={stop.stop_name}>
+                {stop.stop_name}
+              </option>
+            ))}
+          </select>
+          <select
             value={p.dropping_location}
             onChange={(e) =>
               handleChange(i, "dropping_location", e.target.value)
             }
             required
-          />
+          >
+            <option value="">Select Dropping Stop</option>
+            {tripStopes.map((stop, index) => (
+              <option key={index} value={stop.stop_name}>
+                {stop.stop_name}
+              </option>
+            ))}
+          </select>
         </div>
       ))}
 

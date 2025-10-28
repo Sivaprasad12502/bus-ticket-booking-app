@@ -4,12 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import "./MyBooking.scss";
 import { NavLink } from "react-router-dom";
-import {FaArrowAltCircleLeft} from 'react-icons/fa'
-import {toast} from 'react-toastify'
+import { FaArrowAltCircleLeft } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const MyBooking = () => {
   const query = useQueryClient();
-  const { apiUrl, token,navigate } = useContext(Context);
+  const { apiUrl, token, navigate } = useContext(Context);
 
   const {
     data: bookings,
@@ -41,15 +41,14 @@ const MyBooking = () => {
       query.invalidateQueries({
         queryKey: ["bookings"],
       });
-      toast.success('Ticket Cancelled')
-      
+      toast.success("Ticket Cancelled");
     },
     onError: (er) => console.log(er),
   });
-  const handlePayNow=(bookingId,total_amount)=>{
-    console.log("handle pay now clicked",bookingId,total_amount)
-    navigate(`/payment?bookingId=${bookingId}&totalamount=${total_amount}`)
-  }
+  const handlePayNow = (bookingId, total_amount) => {
+    console.log("handle pay now clicked", bookingId, total_amount);
+    navigate(`/payment?bookingId=${bookingId}&totalamount=${total_amount}`);
+  };
   if (bookings) {
     console.log(bookings);
   }
@@ -59,9 +58,10 @@ const MyBooking = () => {
 
   return (
     <div className="my-bookings">
-      
-        <NavLink to={"/"}><FaArrowAltCircleLeft size={'30px'}/> </NavLink>
-      
+      <NavLink to={"/"}>
+        <FaArrowAltCircleLeft size={"30px"} />{" "}
+      </NavLink>
+
       {bookings.length == 0 ? (
         <p>Nothing Booked Yet 🥲</p>
       ) : (
@@ -78,9 +78,7 @@ const MyBooking = () => {
               </div>
 
               <div className="ticket-info">
-                <p>
-                  {/* <strong>User:</strong> {booking.user} */}
-                </p>
+                <p>{/* <strong>User:</strong> {booking.user} */}</p>
                 <p>
                   <strong>Trip:</strong> {booking.trip.bus.bus_name} (
                   {booking.trip.bus.bus_type})
@@ -91,12 +89,10 @@ const MyBooking = () => {
                   {booking.trip.route.distance_km} km)
                 </p>
                 <p>
-                  <strong>Departure:</strong>{" "}
-                  {booking.trip.departure_time}
+                  <strong>Departure:</strong> {booking.trip.departure_time}
                 </p>
                 <p>
-                  <strong>Arrival:</strong>{" "}
-                  {booking.trip.arrival_time}
+                  <strong>Arrival:</strong> {booking.trip.arrival_time}
                 </p>
                 <p>
                   <strong>Seats:</strong>{" "}
@@ -109,7 +105,9 @@ const MyBooking = () => {
                 {booking.payments && (
                   <p>
                     <strong>Payment Status</strong>
-                    <span className={`payment-status ${booking.payments.payment_status.toLowerCase()}`}>
+                    <span
+                      className={`payment-status ${booking.payments.payment_status.toLowerCase()}`}
+                    >
                       {booking.payments.payment_status}
                     </span>
                   </p>
@@ -145,12 +143,13 @@ const MyBooking = () => {
                         <span>
                           <strong>Seat</strong> {p.seat_number}
                         </span>
+                        <span>Fare  ={p.fare}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-                           {/* Action Buttons */}
+              {/* Action Buttons */}
               <div className="actions">
                 {booking.status === "PENDING_PAYMENT" && (
                   <button

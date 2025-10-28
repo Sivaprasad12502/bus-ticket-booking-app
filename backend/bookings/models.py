@@ -22,7 +22,7 @@ class Bus(models.Model):
             ("Sleeper", "Sleeper Layout"),
         ],
     )
-    operator_mobile_no=models.CharField(max_length=15, blank=True,null=True)
+    operator_mobile_no = models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
         return f"{self.bus_name}"
@@ -37,6 +37,28 @@ class Route(models.Model):
         return f"{self.start_location}"
 
 
+class RouteStop(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="stops")
+    stop_name = models.CharField(max_length=100)
+    order = models.PositiveIntegerField(
+        help_text="The order of this stop in the  route"
+    )
+    # arrival_time = models.TimeField(null=True, blank=True)
+    # departure_time = models.TimeField(null=True, blank=True)
+    distance_from_start = models.FloatField(
+        help_text="Distance in km from start", null=True, blank=True
+    )
+    fare_from_start = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True
+    )
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.route.start_location} -> {self.stop_name}"
+
+
 class Trip(models.Model):
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
@@ -45,7 +67,19 @@ class Trip(models.Model):
     price = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
-        return f"{self.bus.bus_name}"
+        return f"{self.bus.bus_name} -> {self.route.start_location} to {self.route.end_location} {self.departure_time} -> {self.arrival_time}"
+
+
+class TripStop(models.Model):
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="trip_stops")
+    route_stop = models.ForeignKey(RouteStop, on_delete=models.CASCADE)
+    arrival_time = models.TimeField()
+
+    class Meta:
+        ordering = ["route_stop__order"]
+
+    def __str__(self):
+        return f"{self.trip.bus.bus_name}->{self.route_stop.stop_name}"
 
 
 class Seat(models.Model):
@@ -93,13 +127,16 @@ class Passenger(models.Model):
     boarding_location = models.CharField(max_length=100)
     dropping_location = models.CharField(max_length=100)
     seat_number = models.CharField(max_length=5, blank=True)
+    fare = models.DecimalField(max_digits=8, decimal_places=2, default=0.0)
 
     def __str__(self):
         return f"{self.name} ({self.seat_number})"
 
 
 class Payment(models.Model):
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE,related_name="payments")
+    booking = models.OneToOneField(
+        Booking, on_delete=models.CASCADE, related_name="payments"
+    )
     stripe_payment_intent_id = models.CharField(max_length=200, blank=True, null=True)
     stripe_payment_method = models.CharField(max_length=100, blank=True, null=True)
     refund_id = models.CharField(max_length=255, blank=True, null=True)

@@ -11,6 +11,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { toast } from "react-toastify";
 import "./payment.scss";
+import { useQuery } from "@tanstack/react-query";
 
 const CheckoutForm = ({
   booking_Id,
@@ -88,7 +89,23 @@ const Payment = () => {
   const stripePromise = loadStripe(
     "pk_test_51SL3Ra2MbjQATJw5jJdivM5nUnL4OIElPyPU82FF2YPa9b6N9BXR4cG0ZTvEVRXPeoumM94yVzqRTtiJxuZld1gT00MjmH6nGB"
   );
-
+  const {
+    data: bookings,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["bookings"],
+    queryFn: async () => {
+      const response = await axios.get(`${apiUrl}bookings/bookings/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    },
+    onError: (err) => console.log(err),
+  });
+  console.log(bookings, "boooookings in payment page");
+  const bookedTickets = bookings?.find((b) => b.id == Number(booking_Id));
+  console.log(bookedTickets, "bookedTickets in payment page");
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
@@ -110,7 +127,19 @@ const Payment = () => {
 
   if (!clientSecret)
     // return <p>Loading payment information for booking {booking_Id}...</p>;
-    return <div style={{textAlign:"center",display:"flex",justifyContent:"center",alignItems:"center",height:"100vh"}}>Loading payment information for booking ...</div>;
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        Loading payment information for booking ...
+      </div>
+    );
 
   console.log("booking-id", booking_Id);
   return (
@@ -124,7 +153,20 @@ const Payment = () => {
         <p>
           Total Amount: <span>₹{totalAmount}</span>
         </p>
-        <p className="seats">Seats: {seats.join(", ")}</p>
+        <div>
+          {bookedTickets?.passengers?.map((item) => (
+            <div key={item.id}>
+              <p>Passenger: {item.name}</p>
+              <p>Seat Number: {item.seat_number}</p>
+              <p>Fare: ₹{item.fare}</p>
+              <p>
+                Boarding: {item.boarding_location} → Dropping:{" "}
+                {item.dropping_location}
+              </p>
+            </div>
+          ))}
+        </div>
+        {/* <p className="seats">Seats: {seats.join(", ")}</p> */}
       </div>
 
       <Elements stripe={stripePromise} options={{ clientSecret }}>
