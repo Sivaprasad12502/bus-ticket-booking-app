@@ -3,7 +3,7 @@
   margin: 60px auto;
   padding: 20px;
   font-family: "Inter", sans-serif;
-  p{
+  p {
     text-align: center;
     font-weight: bold;
   }
@@ -109,6 +109,20 @@
           color: #1e293b;
           font-weight: 600;
         }
+      }
+      .payment-status.success {
+        color: green;
+        font-weight: bold;
+      }
+
+      .payment-status.pending {
+        color: orange;
+        font-weight: bold;
+      }
+
+      .payment-status.refunded {
+        color: green;
+        font-weight: bold;
       }
     }
 

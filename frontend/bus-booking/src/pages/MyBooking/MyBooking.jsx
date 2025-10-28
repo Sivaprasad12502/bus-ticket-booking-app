@@ -105,6 +105,15 @@ const MyBooking = () => {
                 <p>
                   <strong>Total Amount:</strong> ₹{booking.total_amount}
                 </p>
+                {/* Payment Status Here  */}
+                {booking.payments && (
+                  <p>
+                    <strong>Payment Status</strong>
+                    <span className={`payment-status ${booking.payments.payment_status.toLowerCase()}`}>
+                      {booking.payments.payment_status}
+                    </span>
+                  </p>
+                )}
               </div>
 
               {booking.passengers && booking.passengers.length > 0 && (

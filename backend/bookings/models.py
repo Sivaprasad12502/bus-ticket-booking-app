@@ -10,9 +10,19 @@ class Bus(models.Model):
     bus_name = models.CharField(max_length=100)
     total_seats = models.IntegerField()
     bus_type = models.CharField(
-        max_length=50, choices=[("AC", "AC"), ("Non-AC", "Non-AC")]
+        max_length=50,
+        choices=[("AC", "AC"), ("Non-AC", "Non-AC"), ("Sleeper", "sleeper")],
     )
     operator_name = models.CharField(max_length=100)
+    layout_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("2*2", "2*2 Seating"),
+            ("1*2", "1*2 seating"),
+            ("Sleeper", "Sleeper Layout"),
+        ],
+    )
+    operator_mobile_no=models.CharField(max_length=15, blank=True,null=True)
 
     def __str__(self):
         return f"{self.bus_name}"
@@ -55,10 +65,15 @@ class Booking(models.Model):
     booking_date = models.DateTimeField(auto_now_add=True)
     # Use today's date as default when a booking date is not provided
     booked_date = models.DateField(default=date.today)
-    payment_deadline=models.DateTimeField(null=True,blank=True)
+    payment_deadline = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
-        choices=[("PENDING_PAYMENT","Pending Payment"),("CONFIRMED", "confirmed"), ("CANCELLED", "Cancelled"),("EXPIRED","Expired")],
+        choices=[
+            ("PENDING_PAYMENT", "Pending Payment"),
+            ("CONFIRMED", "confirmed"),
+            ("CANCELLED", "Cancelled"),
+            ("EXPIRED", "Expired"),
+        ],
         default="PENDING_PAYMENT",
     )
 
@@ -68,9 +83,7 @@ class Booking(models.Model):
 
 class Passenger(models.Model):
     booking = models.ForeignKey(
-        Booking,
-        on_delete=models.CASCADE,
-        related_name="passengers"
+        Booking, on_delete=models.CASCADE, related_name="passengers"
     )
     name = models.CharField(max_length=100)
     age = models.IntegerField()
@@ -86,10 +99,10 @@ class Passenger(models.Model):
 
 
 class Payment(models.Model):
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE,related_name="payments")
     stripe_payment_intent_id = models.CharField(max_length=200, blank=True, null=True)
     stripe_payment_method = models.CharField(max_length=100, blank=True, null=True)
-    refund_id=models.CharField(max_length=255,blank=True,null=True)
+    refund_id = models.CharField(max_length=255, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=10, default="inr")
     payment_status = models.CharField(

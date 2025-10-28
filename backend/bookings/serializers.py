@@ -70,39 +70,8 @@ class PassengerSerializer(serializers.ModelSerializer):
             "seat_number",
         ]
 
-class BookingSerializer(serializers.ModelSerializer):
-    seats = SeatSerializer(many=True, read_only=True)
-    seat_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Seat.objects.all(), many=True, write_only=True, source="seats"
-    )
-    user = serializers.StringRelatedField(read_only=True)
-    trip = TripSerializer(read_only=True)
-    trip_id = serializers.PrimaryKeyRelatedField(
-        queryset=Trip.objects.all(), write_only=True, source="trip"
-    )
-    passengers = PassengerSerializer(many=True, read_only=True,)
-    class Meta:
-        model = Booking
-        fields = [
-            "id",
-            "user",
-            "trip",
-            "trip_id",
-            "seats",
-            "seat_ids",
-            "passengers",
-            "total_amount",
-            "booking_date",
-            "booked_date",
-            "status",
-        ]
-
-
-
-
-
 class PaymentSerializer(serializers.ModelSerializer):
-    booking = BookingSerializer(read_only=True)
+    booking = serializers.StringRelatedField(read_only=True)
     booking_id = serializers.PrimaryKeyRelatedField(
         queryset=Booking.objects.all(), write_only=True, source="booking"
     )
@@ -122,3 +91,38 @@ class PaymentSerializer(serializers.ModelSerializer):
             "receipt_url",
             "payment_date",
         ]
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    seats = SeatSerializer(many=True, read_only=True)
+    seat_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Seat.objects.all(), many=True, write_only=True, source="seats"
+    )
+    user = serializers.StringRelatedField(read_only=True)
+    trip = TripSerializer(read_only=True)
+    trip_id = serializers.PrimaryKeyRelatedField(
+        queryset=Trip.objects.all(), write_only=True, source="trip"
+    )
+    passengers = PassengerSerializer(many=True, read_only=True,)
+    payments=PaymentSerializer(read_only=True)
+    class Meta:
+        model = Booking
+        fields = [
+            "id",
+            "user",
+            "trip",
+            "trip_id",
+            "seats",
+            "seat_ids",
+            "passengers",
+            "payments",
+            "total_amount",
+            "booking_date",
+            "booked_date",
+            "status",
+        ]
+
+
+
+
+

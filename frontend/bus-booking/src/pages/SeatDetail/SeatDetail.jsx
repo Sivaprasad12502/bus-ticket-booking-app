@@ -17,7 +17,11 @@ export const SeatDetail = () => {
 
   // Guards
   if (!tripid || !date) {
-    return <p>Please provide a trip id and date in the query string (tripid & date).</p>;
+    return (
+      <p>
+        Please provide a trip id and date in the query string (tripid & date).
+      </p>
+    );
   }
 
   // Fetch trip details (to know total seats and price)
@@ -38,15 +42,21 @@ export const SeatDetail = () => {
   } = useQuery({
     queryKey: ["seats", tripid, date],
     queryFn: async () => {
-      const res = await axios.get(`${apiUrl}bookings/trips/${tripid}/seats/?date=${date}`);
+      const res = await axios.get(
+        `${apiUrl}bookings/trips/${tripid}/seats/?date=${date}`
+      );
       return res.data; // API returns seats available for the date
     },
   });
 
   // Build a full seat map (1..total_seats) and mark available seats
   const totalSeats = trip?.bus?.total_seats || 0;
-  const availableSet = new Set((availableSeats || []).map((s) => String(s.seat_number)));
-  const seatNumbers = Array.from({ length: totalSeats }, (_, i) => String(i + 1));
+  const availableSet = new Set(
+    (availableSeats || []).map((s) => String(s.seat_number))
+  );
+  const seatNumbers = Array.from({ length: totalSeats }, (_, i) =>
+    String(i + 1)
+  );
 
   // const mutation = useMutation({
   //   mutationFn: async (seatIds) => {
@@ -83,7 +93,9 @@ export const SeatDetail = () => {
   const toggleSeat = (seatNumber, isAvailable) => {
     if (!isAvailable) return; // cannot toggle booked seats
     setSelectedSeats((prev) =>
-      prev.includes(seatNumber) ? prev.filter((s) => s !== seatNumber) : [...prev, seatNumber]
+      prev.includes(seatNumber)
+        ? prev.filter((s) => s !== seatNumber)
+        : [...prev, seatNumber]
     );
   };
 
@@ -98,8 +110,10 @@ export const SeatDetail = () => {
       return;
     }
     // mutation.mutate(selectedSeats);
-    const seatsQuery=selectedSeats.join(",");
-    navigate(`/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}`)
+    const seatsQuery = selectedSeats.join(",");
+    navigate(
+      `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}`
+    );
   };
 
   if (tripLoading || seatsLoading) return <p>Loading seats...</p>;
@@ -108,6 +122,93 @@ export const SeatDetail = () => {
   const pricePerSeat = trip?.price ? parseFloat(trip.price) : 0;
   const totalPrice = (selectedSeats.length * pricePerSeat).toFixed(2);
 
+  // sleeper
+  const busType = trip?.bus?.bus_type || "AC";
+  const renderSeats = () => {
+    if (busType === "Sleeper") {
+      return (
+        <div className="sleeper-layout">
+          <div className="deck upper-deck">
+            <h4>Uppder Deck</h4>
+            <div className="deck-rows">
+              {seatNumbers
+                .filter((_, i) => i % 2 == 0) //exmaple split upper/lower
+                .map((num) => {
+                  const isAvailable = availableSet.has(num);
+                  const isSelected = selectedSeats.includes(num);
+                  return (
+                    <button
+                      key={num}
+                      className={`seat sleeper ${!isAvailable ? "booked" : ""}${
+                        isSelected ? "selected" : ""
+                      }`}
+                      disabled={!isAvailable}
+                      onClick={() => toggleSeat(num, isAvailable)}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+          <div className="deck lower-deck">
+            <h4>lower Deck</h4>
+            <div className="deck-rows">
+              {seatNumbers
+                .filter((_, i) => i % 2 !== 0) //exmaple split upper/lower
+                .map((num) => {
+                  const isAvailable = availableSet.has(num);
+                  const isSelected = selectedSeats.includes(num);
+                  return (
+                    <button
+                      key={num}
+                      className={`seat sleeper ${!isAvailable ? "booked" : ""}${
+                        isSelected ? "selected" : ""
+                      }`}
+                      disabled={!isAvailable}
+                      onClick={() => toggleSeat(num, isAvailable)}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    //default 2*2 seat layout
+    const perRow=4;
+    const rows=[];
+    for(let i=0;i<seatNumbers.length;i+=perRow){
+      rows.push(seatNumbers.slice(i,i+perRow))
+    }
+    return rows.map((row,rIdx)=>(
+      <div className="seat-row" key={`row-${rIdx}`}>
+        <div className="seat-block left">
+          {row.slice(0,2).map((num)=>renderSeat(num))}
+        </div>
+        <div className="aisle"/>
+        <div className="seat-block right">
+          {row.slice(2,4).map((num)=>renderSeat(num))}
+        </div>
+      </div>
+    ))
+  };
+  //Helper render seat
+  const renderSeat=(num)=>{
+    const isAvailable=availableSet.has(num);
+    const isSelected=selectedSeats.includes(num);
+    return(
+      <button 
+      key={num}
+      className={`seat ${!isAvailable?"booked":""} ${isSelected?"selected":""}`}
+      disabled={!isAvailable}
+      onClick={()=>toggleSeat(num,isAvailable)}>
+        {num}
+      </button>
+    )
+  }
   return (
     <div className="seat-container">
       <h2>Choose Your Seats</h2>
@@ -115,57 +216,8 @@ export const SeatDetail = () => {
       <div className="seat-grid">
         {/* Driver / front indicator */}
         <div className="driver">Driver</div>
-
-        {/* Render rows of seats with an aisle: 2 seats | aisle | 2 seats */}
-        {(() => {
-          const perRow = 4; // 2 left, aisle, 2 right
-          const rows = [];
-          for (let i = 0; i < seatNumbers.length; i += perRow) {
-            rows.push(seatNumbers.slice(i, i + perRow));
-          }
-          return rows.map((row, rIdx) => (
-            <div className="seat-row" key={`row-${rIdx}`}>
-              {/* left two seats (if present) */}
-              <div className="seat-block left">
-                {row.slice(0, 2).map((num) => {
-                  const isAvailable = availableSet.has(num);
-                  const isSelected = selectedSeats.includes(num);
-                  return (
-                    <button
-                      key={num}
-                      className={`seat ${!isAvailable ? "booked" : ""} ${isSelected ? "selected" : ""}`}
-                      disabled={!isAvailable}
-                      onClick={() => toggleSeat(num, isAvailable)}
-                    >
-                      {num}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* aisle spacer */}
-              <div className="aisle" />
-
-              {/* right two seats (if present) */}
-              <div className="seat-block right">
-                {row.slice(2, 4).map((num) => {
-                  const isAvailable = availableSet.has(num);
-                  const isSelected = selectedSeats.includes(num);
-                  return (
-                    <button
-                      key={num}
-                      className={`seat ${!isAvailable ? "booked" : ""} ${isSelected ? "selected" : ""}`}
-                      disabled={!isAvailable}
-                      onClick={() => toggleSeat(num, isAvailable)}
-                    >
-                      {num}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ));
-        })()}
+         {renderSeats()}
+        
       </div>
 
       <div className="seat-summary">
@@ -174,7 +226,11 @@ export const SeatDetail = () => {
         <p>Total: ₹{totalPrice}</p>
       </div>
 
-      <button className="book-btn" onClick={handleBookNow} disabled={selectedSeats.length===0}>
+      <button
+        className="book-btn"
+        onClick={handleBookNow}
+        disabled={selectedSeats.length === 0}
+      >
         {/* {mutation.isLoading ? "Booking..." : "Book Now"} */}
         book now
       </button>
