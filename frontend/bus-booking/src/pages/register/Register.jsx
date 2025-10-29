@@ -5,7 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import "./Register.scss";
 import { Context } from "../../context/Context";
-import {toast} from 'react-toastify'
+import { toast } from "react-toastify";
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaBus } from "react-icons/fa";
 
 const Register = () => {
   const { apiUrl, setUser, navigate, setToken } = useContext(Context);
@@ -16,28 +17,30 @@ const Register = () => {
     password2: "",
     phone: "",
   });
-  const validatePassword=(password,password2)=>{
-    if(password.length<8){
-      return "password must be at least 8 characters long"
+
+  const validatePassword = (password, password2) => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
     }
-    if(password!==password2){
-      return "passwords do not match"
+    if (password !== password2) {
+      return "Passwords do not match";
     }
-    return null
-  }
+    return null;
+  };
+
   const mutation = useMutation({
     mutationFn: async (formData) =>
       await axios.post(`${apiUrl}users/register/`, formData),
 
     onSuccess: ({ data }) => {
-      console.log("Registeration successfully:", data);
+      console.log("Registration successfully:", data);
       localStorage.setItem("token", data.access);
       setToken(data.access);
       localStorage.setItem("refresh", data.refresh);
       const userData = { username: data.username, email: data.email };
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
-      toast.success("user registered successfull", {
+      toast.success("User registered successfully", {
         onClose: () => {
           navigate("/");
         },
@@ -46,79 +49,134 @@ const Register = () => {
     },
     onError: (error) => {
       console.error("Registration failed:", error);
-      toast.error(
-         "registration failed. Please try again"
-      );
+      if(error.response&&error.response.status===400){
+        const data=error.response.data;
+        const errorMessages=Object.entries(data).flat().join("\n")
+        toast.error(errorMessages)
+      }
+      // toast.error("Registration failed. Please try again");
     },
   });
+
   const handleSubmit = (e) => {
-    const error=validatePassword(values.password,values.password2)
-    if(error){
-      toast.error(error)
-    }
     e.preventDefault();
+    const error = validatePassword(values.password, values.password2);
+    if (error) {
+      toast.error(error);
+      return;
+    }
     mutation.mutate(values);
   };
+
   return (
     <div className="register">
       <div className="card">
         <div className="left">
-          <h1>Make your trip with us.</h1>
-          <p>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quos
-            provident, aperiam dolorem impedit et omnis, error minus dignissimos
-            inventore quidem ratione atque molestias numquam eligendi cupiditate
-            non, sint vero aspernatur?
-          </p>
-          <span>Do you have an account?</span>
-          <Link to="/login">
-            <button>Login</button>
-          </Link>
+          <div className="left__content">
+            <FaBus className="icon-bus" />
+            <h2>Already have an account?</h2>
+            <p>
+              Welcome back! Login to access exclusive deals, track bookings, and enjoy seamless bus ticket booking.
+            </p>
+            <Link to="/login">
+              <button className="btn-login">Login Now</button>
+            </Link>
+          </div>
         </div>
         <div className="right">
-          <h1>Register</h1>
+          <div className="right__header">
+            <h1>Create Account</h1>
+            <p>Join us to start your journey</p>
+          </div>
           <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Username"
-              name="username"
-              value={values.username}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              name="email"
-              value={values.email}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              name="password"
-              value={values.password}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              name="password2"
-              value={values.password2}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="number"
-              placeholder="Mobile No"
-              name="phone"
-              value={values.phone}
-              onChange={handleChange}
-              required
-            />
-            <button type="submit">Register</button>
+            <div className="form-group">
+              <label htmlFor="username">Username</label>
+              <div className="input-wrapper">
+                <FaUser className="input-icon" />
+                <input
+                  type="text"
+                  id="username"
+                  placeholder="Choose a username"
+                  name="username"
+                  value={values.username}
+                  onChange={handleChange}
+                  required
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <div className="input-wrapper">
+                <FaEnvelope className="input-icon" />
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="Enter your email"
+                  name="email"
+                  value={values.email}
+                  onChange={handleChange}
+                  required
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <div className="input-wrapper">
+                <FaLock className="input-icon" />
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Create a password (min. 8 characters)"
+                  name="password"
+                  value={values.password}
+                  onChange={handleChange}
+                  required
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password2">Confirm Password</label>
+              <div className="input-wrapper">
+                <FaLock className="input-icon" />
+                <input
+                  type="password"
+                  id="password2"
+                  placeholder="Confirm your password"
+                  name="password2"
+                  value={values.password2}
+                  onChange={handleChange}
+                  required
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phone">Mobile Number</label>
+              <div className="input-wrapper">
+                <FaPhone className="input-icon" />
+                <input
+                  type="tel"
+                  id="phone"
+                  placeholder="Enter your mobile number"
+                  name="phone"
+                  value={values.phone}
+                  onChange={handleChange}
+                  required
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-register" disabled={mutation.isPending}>
+              {mutation.isPending ? "Registering..." : "Register"}
+            </button>
           </form>
         </div>
       </div>

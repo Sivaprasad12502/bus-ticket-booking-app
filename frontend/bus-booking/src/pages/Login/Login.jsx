@@ -6,13 +6,13 @@ import "./Login.scss";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { FaUser, FaLock, FaBus } from "react-icons/fa";
 
 export const Login = () => {
   const { apiUrl, user, setUser, navigate, setToken } = useContext(Context);
   const { values, handleChange } = useForm({
     username: "",
     password: "",
-    password2: "",
   });
   const mutation = useMutation({
     mutationFn: async (formData) =>
@@ -26,7 +26,7 @@ export const Login = () => {
       const userData = { username: data.username, email: data.email };
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
-      toast.success("Logged in successfull", {
+      toast.success("Logged in successfully", {
         onClose: () => {
           navigate("/");
         },
@@ -49,44 +49,62 @@ export const Login = () => {
     <div className="login">
       <div className="card">
         <div className="left">
-          <span>Dont' you have an account?</span>
-          <Link to="/register">
-            {" "}
-            <button>Register</button>
-          </Link>
+          <div className="left__content">
+            <FaBus className="icon-bus" />
+            <h2>First time here?</h2>
+            <p>Register with us to unlock exciting offers and discounts on bus bookings.</p>
+            <Link to="/register">
+              <button className="btn-register">Create Account</button>
+            </Link>
+          </div>
         </div>
         <div className="right">
-          <h1>Login</h1>
+          <div className="right__header">
+            <h1>Welcome Back</h1>
+            <p>Login to continue your journey</p>
+          </div>
           <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Username"
-              name="username"
-              value={values.username}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              name="password"
-              value={values.password}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="password"
-              placeholder="confirm Password"
-              name="password2"
-              value={values.password2}
-              onChange={handleChange}
-              required
-            />
+            <div className="form-group">
+              <label htmlFor="username">Username</label>
+              <div className="input-wrapper">
+                <FaUser className="input-icon" />
+                <input
+                  type="text"
+                  id="username"
+                  placeholder="Enter your username"
+                  name="username"
+                  value={values.username}
+                  onChange={handleChange}
+                  required
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
 
-            <button type="submit">Login</button>
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <div className="input-wrapper">
+                <FaLock className="input-icon" />
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Enter your password"
+                  name="password"
+                  value={values.password}
+                  onChange={handleChange}
+                  required
+                  disabled={mutation.isPending}
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-login" disabled={mutation.isPending}>
+              {mutation.isPending ? "Logging in..." : "Login"}
+            </button>
           </form>
         </div>
       </div>
     </div>
   );
 };
+

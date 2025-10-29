@@ -5,6 +5,21 @@ import { useLocation } from "react-router-dom";
 import { Context } from "../../context/Context";
 import "./SeatDetail.scss";
 import { toast } from "react-toastify";
+import { 
+  FaBus, 
+  FaMapMarkerAlt, 
+  FaCalendarAlt, 
+  FaClock, 
+  FaRupeeSign,
+  FaChair,
+  FaCheckCircle,
+  FaSpinner,
+  FaExclamationCircle,
+  FaArrowRight
+} from "react-icons/fa";
+import { MdEventSeat, MdAirlineSeatReclineNormal } from "react-icons/md";
+import { GiSteeringWheel } from "react-icons/gi";
+import Navbar from "../../component/Navbar/Navbar";
 
 export const SeatDetail = () => {
   const { apiUrl, token, navigate } = useContext(Context);
@@ -121,8 +136,33 @@ export const SeatDetail = () => {
     );
   };
 
-  if (tripLoading || seatsLoading) return <p>Loading seats...</p>;
-  if (!seatsSuccess) return <p>Failed to load seats. {seatsError?.message}</p>;
+  if (tripLoading || seatsLoading) {
+    return (
+      <>
+        <Navbar />
+        <div className="seat-container">
+          <div className="seat-container__loading">
+            <FaSpinner />
+            <p>Loading seat layout...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+  
+  if (!seatsSuccess) {
+    return (
+      <>
+        <Navbar />
+        <div className="seat-container">
+          <div className="seat-container__error">
+            <FaExclamationCircle />
+            <p>Failed to load seats. {seatsError?.message}</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   const pricePerSeat = trip?.price ? parseFloat(trip.price) : 0;
   const totalPrice = (selectedSeats.length * pricePerSeat).toFixed(2);
@@ -134,46 +174,62 @@ export const SeatDetail = () => {
       return (
         <div className="sleeper-layout">
           <div className="deck upper-deck">
-            <h4>Uppder Deck</h4>
+            <h4>
+              <MdAirlineSeatReclineNormal />
+              Upper Deck
+            </h4>
             <div className="deck-rows">
               {seatNumbers
-                .filter((_, i) => i % 2 == 0) //exmaple split upper/lower
+                .filter((_, i) => i % 2 == 0) //example split upper/lower
                 .map((num) => {
+                  const seatData = seatInfoMap.get(num);
+                  const genderPref = seatData?.gender_preference || "ANY";
+                  const isWomenOnly = genderPref === "WOMEN_ONLY";
                   const isAvailable = availableSet.has(num);
                   const isSelected = selectedSeats.includes(num);
                   return (
                     <button
                       key={num}
-                      className={`seat sleeper ${!isAvailable ? "booked" : ""}${
+                      className={`seat sleeper ${!isAvailable ? "booked" : ""} ${
                         isSelected ? "selected" : ""
-                      }`}
+                      } ${isWomenOnly ? "women-only" : ""}`}
                       disabled={!isAvailable}
                       onClick={() => toggleSeat(num, isAvailable)}
+                      title={isWomenOnly ? "Reserved for Women" : ""}
                     >
                       {num}
+                      {isWomenOnly && <span className="seat-icon">♀</span>}
                     </button>
                   );
                 })}
             </div>
           </div>
           <div className="deck lower-deck">
-            <h4>lower Deck</h4>
+            <h4>
+              <MdAirlineSeatReclineNormal />
+              Lower Deck
+            </h4>
             <div className="deck-rows">
               {seatNumbers
-                .filter((_, i) => i % 2 !== 0) //exmaple split upper/lower
+                .filter((_, i) => i % 2 !== 0) //example split upper/lower
                 .map((num) => {
+                  const seatData = seatInfoMap.get(num);
+                  const genderPref = seatData?.gender_preference || "ANY";
+                  const isWomenOnly = genderPref === "WOMEN_ONLY";
                   const isAvailable = availableSet.has(num);
                   const isSelected = selectedSeats.includes(num);
                   return (
                     <button
                       key={num}
-                      className={`seat sleeper ${!isAvailable ? "booked" : ""}${
+                      className={`seat sleeper ${!isAvailable ? "booked" : ""} ${
                         isSelected ? "selected" : ""
-                      }`}
+                      } ${isWomenOnly ? "women-only" : ""}`}
                       disabled={!isAvailable}
                       onClick={() => toggleSeat(num, isAvailable)}
+                      title={isWomenOnly ? "Reserved for Women" : ""}
                     >
                       {num}
+                      {isWomenOnly && <span className="seat-icon">♀</span>}
                     </button>
                   );
                 })}
@@ -220,30 +276,146 @@ export const SeatDetail = () => {
     )
   }
   return (
-    <div className="seat-container">
-      <h2>Choose Your Seats</h2>
+    <>
+      {/* <Navbar /> */}
+      <div className="seat-container">
+        <div className="seat-container__content">
+          {/* Left Section - Seat Selection */}
+          <div className="seat-container__main">
+            {/* Trip Info Header */}
+            <div className="seat-container__header">
+              <h1>
+                <FaBus />
+                Select Your Seats
+              </h1>
+              <div className="seat-container__header-details">
+                <div className="seat-container__header-details-item">
+                  <FaMapMarkerAlt />
+                  <span>
+                    <strong>{trip?.source}</strong> → <strong>{trip?.destination}</strong>
+                  </span>
+                </div>
+                <div className="seat-container__header-details-item">
+                  <FaCalendarAlt />
+                  <span>{new Date(date).toLocaleDateString('en-IN', { 
+                    weekday: 'short', 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                  })}</span>
+                </div>
+                <div className="seat-container__header-details-item">
+                  <FaClock />
+                  <span>{trip?.departure_time}</span>
+                </div>
+                <div className="seat-container__header-details-item">
+                  <FaBus />
+                  <span><strong>{trip?.bus?.bus_name}</strong> ({trip?.bus?.bus_type})</span>
+                </div>
+                <div className="seat-container__header-details-item">
+                  <FaRupeeSign />
+                  <span><strong>₹{pricePerSeat}</strong> per seat</span>
+                </div>
+              </div>
+            </div>
 
-      <div className="seat-grid">
-        {/* Driver / front indicator */}
-        <div className="driver">Driver</div>
-         {renderSeats()}
-        
+            {/* Bus Visualization */}
+            <div className="bus-wrapper">
+              <div className="driver">
+                <GiSteeringWheel />
+                Driver
+              </div>
+              
+              <div className="seat-grid">
+                {renderSeats()}
+              </div>
+            </div>
+
+            {/* Seat Legend */}
+            <div className="legend">
+              <h4>Seat Legend</h4>
+              <div className="legend__grid">
+                <div className="legend__item">
+                  <div className="box box--available"></div>
+                  <span>Available</span>
+                </div>
+                <div className="legend__item">
+                  <div className="box box--selected"></div>
+                  <span>Selected</span>
+                </div>
+                <div className="legend__item">
+                  <div className="box box--booked"></div>
+                  <span>Booked</span>
+                </div>
+                <div className="legend__item">
+                  <div className="box box--women"></div>
+                  <span>Women Only</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar - Booking Summary */}
+          <div className="seat-container__sidebar">
+            {/* <div className="seat-container__summary">
+              <h3>
+                <MdEventSeat />
+                Booking Summary
+              </h3>
+              
+              {selectedSeats.length > 0 ? (
+                <>
+                  <div className="seat-container__summary-item">
+                    <label>Selected Seats:</label>
+                    <div className="selected-seats">
+                      {selectedSeats.map(seat => (
+                        <span key={seat} className="seat-badge">{seat}</span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="seat-container__summary-item">
+                    <label>Number of Seats:</label>
+                    <span>{selectedSeats.length}</span>
+                  </div>
+                  
+                  <div className="seat-container__summary-item">
+                    <label>Price per Seat:</label>
+                    <span>₹{pricePerSeat}</span>
+                  </div>
+                  
+                  <div className="seat-container__summary-item">
+                    <label>Total Amount:</label>
+                    <span className="total">₹{totalPrice}</span>
+                  </div>
+                </>
+              ) : (
+                <p style={{ 
+                  textAlign: 'center', 
+                  color: '#999', 
+                  padding: '20px',
+                  fontSize: '14px' 
+                }}>
+                  No seats selected yet. Click on available seats to select.
+                </p>
+              )}
+            </div> */}
+
+            <button
+              className="seat-container__book-btn"
+              onClick={handleBookNow}
+              disabled={selectedSeats.length === 0}
+            >
+              <FaCheckCircle />
+              {selectedSeats.length > 0 
+                ? `Proceed to Book (${selectedSeats.length} ${selectedSeats.length === 1 ? 'Seat' : 'Seats'})`
+                : 'Select Seats to Continue'
+              }
+              <FaArrowRight />
+            </button>
+          </div>
+        </div>
       </div>
-
-      <div className="seat-summary">
-        <p>Selected seats: {selectedSeats.join(", ") || "None"}</p>
-        <p>Seats selected: {selectedSeats.length}</p>
-        <p>Total: ₹{totalPrice}</p>
-      </div>
-
-      <button
-        className="book-btn"
-        onClick={handleBookNow}
-        disabled={selectedSeats.length === 0}
-      >
-        {/* {mutation.isLoading ? "Booking..." : "Book Now"} */}
-        book now
-      </button>
-    </div>
+    </>
   );
 };

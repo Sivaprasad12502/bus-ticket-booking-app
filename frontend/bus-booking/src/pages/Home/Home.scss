@@ -1,0 +1,591 @@
+// ============================================
+// HOMEPAGE STYLES - REDBUS/MAKEMYTRIP INSPIRED
+// ============================================
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+// ============================================
+// COLOR VARIABLES
+// ============================================
+$primary-color: #d84e55;
+$primary-dark: #c13b42;
+$secondary-color: #f9f9f9;
+$text-color: #333;
+$text-light: #666;
+$text-muted: #999;
+$accent-color: #ffcc00;
+$white: #ffffff;
+$border-color: #e0e0e0;
+$shadow-light: rgba(0, 0, 0, 0.08);
+$shadow-medium: rgba(0, 0, 0, 0.12);
+$shadow-strong: rgba(0, 0, 0, 0.2);
+
+// ============================================
+// BREAKPOINTS
+// ============================================
+$mobile: 600px;
+$tablet: 1024px;
+
+// ============================================
+// MIXINS
+// ============================================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin card {
+  background: $white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px $shadow-light;
+  transition: all 0.3s ease;
+}
+
+@mixin hover-lift {
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px $shadow-medium;
+  }
+}
+
+@mixin button-primary {
+  background: $primary-color;
+  color: $white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: $primary-dark;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+@mixin section-spacing {
+  padding: 80px 0;
+
+  @media (max-width: $tablet) {
+    padding: 60px 0;
+  }
+
+  @media (max-width: $mobile) {
+    padding: 40px 0;
+  }
+}
+
+// ============================================
+// GLOBAL RESETS
+// ============================================
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: $text-color;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+// ============================================
+// HOMEPAGE CONTAINER
+// ============================================
+.homepage {
+  min-height: 100vh;
+  background: $secondary-color;
+
+  // Container for centering content
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    @media (max-width: $mobile) {
+      padding: 0 16px;
+    }
+  }
+}
+
+// ============================================
+// HERO SECTION
+// ============================================
+.hero {
+  position: relative;
+  min-height: 550px;
+  background: linear-gradient(135deg, rgba(216, 78, 85, 0.9) 0%, rgba(193, 59, 66, 0.9) 100%),
+              url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1600') center/cover;
+  display: flex;
+  align-items: center;
+  padding: 100px 24px 60px;
+
+  @media (max-width: $mobile) {
+    min-height: 450px;
+    padding: 80px 16px 40px;
+  }
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 1;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    text-align: center;
+  }
+
+  &__title {
+    font-size: 48px;
+    font-weight: 700;
+    color: $white;
+    margin-bottom: 16px;
+    text-shadow: 2px 4px 12px rgba(0, 0, 0, 0.3);
+
+    @media (max-width: $tablet) {
+      font-size: 36px;
+    }
+
+    @media (max-width: $mobile) {
+      font-size: 28px;
+    }
+  }
+
+  &__subtitle {
+    font-size: 20px;
+    color: rgba($white, 0.95);
+    margin-bottom: 40px;
+    font-weight: 300;
+
+    @media (max-width: $mobile) {
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+  }
+}
+
+// ============================================
+// POPULAR ROUTES SECTION
+// ============================================
+.popular-routes {
+  @include section-spacing;
+  background: $white;
+
+  &__title {
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 48px;
+    color: $text-color;
+
+    @media (max-width: $mobile) {
+      font-size: 24px;
+      margin-bottom: 32px;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    @media (max-width: $mobile) {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 0 16px;
+    }
+  }
+}
+
+.route-card {
+  @include card;
+  padding: 24px;
+  cursor: pointer;
+  @include hover-lift;
+
+  &__header {
+    @include flex-between;
+    margin-bottom: 16px;
+  }
+
+  &__cities {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: $text-color;
+  }
+
+  &__arrow {
+    color: $primary-color;
+    font-size: 20px;
+  }
+
+  &__details {
+    @include flex-between;
+    padding-top: 16px;
+    border-top: 1px solid $border-color;
+    margin-top: 16px;
+  }
+
+  &__duration {
+    color: $text-light;
+    font-size: 14px;
+  }
+
+  &__price {
+    font-size: 22px;
+    font-weight: 700;
+    color: $primary-color;
+  }
+
+  &__button {
+    margin-top: 16px;
+    width: 100%;
+    @include button-primary;
+    background: transparent;
+    color: $primary-color;
+    border: 2px solid $primary-color;
+
+    &:hover {
+      background: $primary-color;
+      color: $white;
+    }
+  }
+}
+
+// ============================================
+// BUS OPERATORS SECTION
+// ============================================
+.bus-operators {
+  @include section-spacing;
+  background: $secondary-color;
+
+  &__title {
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 48px;
+    color: $text-color;
+
+    @media (max-width: $mobile) {
+      font-size: 24px;
+      margin-bottom: 32px;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    @media (max-width: $mobile) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      padding: 0 16px;
+    }
+  }
+}
+
+.operator-card {
+  @include card;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  filter: grayscale(50%);
+
+  &:hover {
+    filter: grayscale(0%);
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px $shadow-medium;
+  }
+
+  &__logo {
+    font-size: 40px;
+    color: $primary-color;
+    margin-bottom: 12px;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: $text-color;
+    font-size: 16px;
+  }
+}
+
+// ============================================
+// WHY CHOOSE US SECTION
+// ============================================
+.why-choose {
+  @include section-spacing;
+  background: $white;
+
+  &__title {
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 48px;
+    color: $text-color;
+
+    @media (max-width: $mobile) {
+      font-size: 24px;
+      margin-bottom: 32px;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    @media (max-width: $mobile) {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 0 16px;
+    }
+  }
+}
+
+.feature-card {
+  @include card;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px $shadow-medium;
+  }
+
+  &__icon {
+    font-size: 48px;
+    color: $primary-color;
+    margin-bottom: 20px;
+  }
+
+  &__title {
+    font-size: 20px;
+    font-weight: 600;
+    color: $text-color;
+    margin-bottom: 12px;
+  }
+
+  &__description {
+    color: $text-light;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+}
+
+// ============================================
+// PROMOTIONS SECTION
+// ============================================
+.promotions {
+  @include section-spacing;
+  background: $secondary-color;
+
+  &__container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    @media (max-width: $mobile) {
+      padding: 0 16px;
+    }
+  }
+}
+
+.promo-banner {
+  @include card;
+  background: linear-gradient(135deg, $primary-color 0%, #e66767 100%);
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+  color: $white;
+
+  @media (max-width: $mobile) {
+    padding: 32px 24px;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: rgba($white, 0.08);
+    border-radius: 50%;
+
+    @media (max-width: $mobile) {
+      width: 250px;
+      height: 250px;
+    }
+  }
+
+  &__content {
+    position: relative;
+    z-index: 2;
+  }
+
+  &__title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 12px;
+
+    @media (max-width: $mobile) {
+      font-size: 24px;
+    }
+  }
+
+  &__description {
+    font-size: 18px;
+    margin-bottom: 24px;
+    opacity: 0.95;
+
+    @media (max-width: $mobile) {
+      font-size: 16px;
+    }
+  }
+
+  &__button {
+    background: $white;
+    color: $primary-color;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    background: $accent-color;
+    color: $primary-color;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    @include flex-center;
+    font-weight: 700;
+    font-size: 18px;
+    transform: rotate(15deg);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+
+    @media (max-width: $mobile) {
+      width: 70px;
+      height: 70px;
+      font-size: 14px;
+      top: 16px;
+      right: 16px;
+    }
+  }
+}
+
+// ============================================
+// SECTION TITLE (REUSABLE)
+// ============================================
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 48px;
+  color: $text-color;
+  position: relative;
+
+  @media (max-width: $mobile) {
+    font-size: 24px;
+    margin-bottom: 32px;
+  }
+
+  &::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: $primary-color;
+    margin: 16px auto 0;
+    border-radius: 2px;
+  }
+}
+
+// ============================================
+// UTILITY CLASSES
+// ============================================
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  @media (max-width: $mobile) {
+    padding: 0 16px;
+  }
+}
+
+.text-center {
+  text-align: center;
+}
+
+.loader {
+  @include flex-center;
+  min-height: 200px;
+  font-size: 18px;
+  color: $text-light;
+}
+
+.error {
+  @include flex-center;
+  min-height: 200px;
+  font-size: 18px;
+  color: $primary-color;
+  background: rgba($primary-color, 0.1);
+  border-radius: 8px;
+  padding: 24px;
+  margin: 24px;
+}

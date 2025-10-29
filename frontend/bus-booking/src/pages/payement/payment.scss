@@ -1,138 +1,360 @@
-.payment-container {
-  max-width: 600px;
-  margin: 60px auto;
-  background: #ffffff;
-  padding: 40px 50px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+@import "../../style.scss";
+
+.payment-page {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f5f5f5, #ffffff);
+}
+
+.loader-container,
+.error-container {
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  font-family: "Inter", sans-serif;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
 
-  .checkout-header {
-    text-align: center;
-
-    h2 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 5px;
-    }
-
-    p {
-      color: #64748b;
-      font-size: 0.95rem;
-    }
+  p {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    color: $text-secondary;
   }
 
-  .checkout-summary {
-    background: #f8fafc;
-    padding: 20px 25px;
-    border-radius: 15px;
-    border: 1px solid #e2e8f0;
+  .btn-home {
+    margin-top: 1.5rem;
+    padding: 0.75rem 2rem;
+    background: $primary-red;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
 
-    p {
-      font-size: 1rem;
-      margin-bottom: 8px;
-      color: #334155;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      span {
-        font-weight: 700;
-        color: #2563eb;
-      }
-
-      &.seats {
-        font-size: 0.9rem;
-        color: #475569;
-        margin-top: 10px;
-      }
-    }
-  }
-
-  .stripe-form {
-    background: #f9fafb;
-    padding: 25px;
-    border-radius: 15px;
-    border: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-
-    .StripeElement {
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      background: white;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
-      transition: border-color 0.2s ease;
-
-      &:focus,
-      &:active {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-      }
-    }
-
-    button {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #ffffff;
-      border: none;
-      padding: 12px 0;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-
-      &:hover {
-        background: linear-gradient(135deg, #1e40af, #1d4ed8);
-        transform: translateY(-1px);
-      }
-
-      &:disabled {
-        background: #94a3b8;
-        cursor: not-allowed;
-        transform: none;
-      }
-    }
-
-    p {
-      text-align: center;
-      color: #dc2626;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-  }
-
-  // Animation when payment loads
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  animation: fadeIn 0.4s ease-in-out;
-
-  // Responsive layout
-  @media (max-width: 600px) {
-    padding: 30px 20px;
-
-    .checkout-summary {
-      padding: 15px;
-    }
-
-    .stripe-form {
-      padding: 20px;
+    &:hover {
+      background: darken($primary-red, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba($primary-red, 0.3);
     }
   }
 }
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid $secondary-color;
+  border-top: 4px solid $primary-red;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.payment-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  .payment-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $text-primary;
+      margin-bottom: 0.5rem;
+    }
+
+    .booking-id {
+      font-size: 1rem;
+      color: $text-secondary;
+    }
+  }
+
+  .payment-content {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2rem;
+    align-items: start;
+
+    .booking-summary {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 80px;
+
+      h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: $text-primary;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .summary-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+
+        span:first-child {
+          font-size: 1rem;
+          color: $text-secondary;
+          font-weight: 500;
+        }
+
+        .amount {
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: $primary-red;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+
+          svg {
+            font-size: 1.5rem;
+          }
+        }
+      }
+
+      .passengers-list {
+        h4 {
+          font-size: 1.05rem;
+          font-weight: 600;
+          color: $text-primary;
+          margin-bottom: 1rem;
+        }
+
+        .passenger-item {
+          background: #fafafa;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-bottom: 1rem;
+          border: 1px solid #e0e0e0;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .passenger-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+
+            .passenger-name {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              font-weight: 600;
+              color: $text-primary;
+
+              svg {
+                color: $text-secondary;
+              }
+            }
+
+            .seat-badge {
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+              padding: 0.3rem 0.8rem;
+              background: $primary-red;
+              color: white;
+              border-radius: 12px;
+              font-size: 0.85rem;
+              font-weight: 600;
+            }
+          }
+
+          .passenger-details {
+            .journey {
+              font-size: 0.9rem;
+              color: $text-secondary;
+              margin-bottom: 0.5rem;
+            }
+
+            .fare {
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+              font-size: 0.95rem;
+              font-weight: 600;
+              color: $text-primary;
+
+              svg {
+                font-size: 0.85rem;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .payment-form-section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+      h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: $text-primary;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .checkout-form-wrapper {
+        .stripe-form {
+          .card-element-wrapper {
+            position: relative;
+            background: #fafafa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+
+            &:focus-within {
+              border-color: $primary-red;
+              background: white;
+              box-shadow: 0 0 0 3px rgba($primary-red, 0.1);
+            }
+
+            .card-icon {
+              position: absolute;
+              top: 1.5rem;
+              left: 1.5rem;
+              font-size: 1.5rem;
+              color: $text-secondary;
+            }
+
+            .StripeElement {
+              padding-left: 2.5rem;
+            }
+          }
+
+          .error-message {
+            padding: 1rem;
+            background: #ffebee;
+            color: #c62828;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #c62828;
+            font-size: 0.95rem;
+          }
+
+          .success-message {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #2e7d32;
+            font-size: 0.95rem;
+            font-weight: 600;
+
+            svg {
+              font-size: 1.2rem;
+            }
+          }
+
+          .btn-pay {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: $primary-red;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+
+            .spinner {
+              width: 16px;
+              height: 16px;
+              border: 3px solid rgba(255, 255, 255, 0.3);
+              border-top: 3px solid white;
+              border-radius: 50%;
+              animation: spin 0.8s linear infinite;
+            }
+
+            &:hover:not(:disabled) {
+              background: darken($primary-red, 10%);
+              transform: translateY(-2px);
+              box-shadow: 0 10px 25px rgba($primary-red, 0.4);
+            }
+
+            &:disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+              transform: none;
+            }
+          }
+        }
+      }
+
+      .security-note {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f0f9ff;
+        border-radius: 8px;
+        text-align: center;
+
+        p {
+          color: $text-secondary;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 968px) {
+  .payment-container .payment-content {
+    grid-template-columns: 1fr;
+
+    .booking-summary {
+      position: static;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-container {
+    padding: 1rem 0.5rem;
+
+    .payment-header h2 {
+      font-size: 1.6rem;
+    }
+
+    .payment-content {
+      .booking-summary,
+      .payment-form-section {
+        padding: 1.5rem 1rem;
+      }
+    }
+  }
+}
+

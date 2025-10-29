@@ -1,12 +1,20 @@
+// Color Variables
+// $primary-red: #d84e55;
+$primary-red: rgb(43, 55, 96);
+$secondary-color: #f9f9f9;
+$accent-color: #ffcc00;
+$text-primary: #333333;
+$text-secondary: #666666;
+
+// Responsive Mixins
 @mixin mobile {
     @media (max-width:480px) {
         @content;
-        
     }
 }
+
 @mixin tablet {
     @media (max-width:960px) {
         @content;
-        
     }
 }

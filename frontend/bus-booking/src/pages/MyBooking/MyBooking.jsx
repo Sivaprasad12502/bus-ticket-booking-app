@@ -4,8 +4,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import "./MyBooking.scss";
 import { NavLink } from "react-router-dom";
-import { FaArrowAltCircleLeft } from "react-icons/fa";
+import { FaArrowAltCircleLeft, FaBus, FaCalendar, FaMapMarkerAlt, FaRupeeSign } from "react-icons/fa";
+import { MdEventSeat } from "react-icons/md";
 import { toast } from "react-toastify";
+import Navbar from "../../component/Navbar/Navbar";
 
 const MyBooking = () => {
   const query = useQueryClient();
@@ -45,142 +47,183 @@ const MyBooking = () => {
     },
     onError: (er) => console.log(er),
   });
+
   const handlePayNow = (bookingId, total_amount) => {
     console.log("handle pay now clicked", bookingId, total_amount);
     navigate(`/payment?bookingId=${bookingId}&totalamount=${total_amount}`);
   };
-  if (bookings) {
-    console.log(bookings);
+
+  if (isLoading) {
+    return (
+      <div className="my-bookings-page">
+        {/* <Navbar /> */}
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p>Loading your bookings...</p>
+        </div>
+      </div>
+    );
   }
-  if (isLoading) return <p>Loading your bookings...</p>;
-  if (isError) return <p>Error fetching bookings!</p>;
-  // if (!bookings || bookings.length === 0) return <p>No bookings found.</p>;
+
+  if (isError) {
+    return (
+      <div className="my-bookings-page">
+        <Navbar />
+        <div className="error-container">
+          <p>⚠️ Error fetching bookings. Please try again.</p>
+          <button onClick={() => navigate("/")} className="btn-home">Go Home</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="my-bookings">
-      <NavLink to={"/"}>
-        <FaArrowAltCircleLeft size={"30px"} />{" "}
-      </NavLink>
-
-      {bookings.length == 0 ? (
-        <p>Nothing Booked Yet 🥲</p>
-      ) : (
-        <div>
-          <h1 className="title">My Booked Tickets </h1>
-          {bookings.map((booking) => (
-            <div key={booking.id} className="ticket">
-              <div>{booking.booked_date}</div>
-              <div className="ticket-header">
-                <h2>Booking #{booking.id}</h2>
-                <span className={`status ${booking.status.toLowerCase()}`}>
-                  {booking.status}
-                </span>
-              </div>
-
-              <div className="ticket-info">
-                <p>{/* <strong>User:</strong> {booking.user} */}</p>
-                <p>
-                  <strong>Trip:</strong> {booking.trip.bus.bus_name} (
-                  {booking.trip.bus.bus_type})
-                </p>
-                <p>
-                  <strong>Route:</strong> {booking.trip.route.start_location} →{" "}
-                  {booking.trip.route.end_location} (
-                  {booking.trip.route.distance_km} km)
-                </p>
-                <p>
-                  <strong>Departure:</strong> {booking.trip.departure_time}
-                </p>
-                <p>
-                  <strong>Arrival:</strong> {booking.trip.arrival_time}
-                </p>
-                <p>
-                  <strong>Seats:</strong>{" "}
-                  {booking.seats.map((s) => s.seat_number).join(", ")}
-                </p>
-                <p>
-                  <strong>Total Amount:</strong> ₹{booking.total_amount}
-                </p>
-                {/* Payment Status Here  */}
-                {booking.payments && (
-                  <p>
-                    <strong>Payment Status</strong>
-                    <span
-                      className={`payment-status ${booking.payments.payment_status.toLowerCase()}`}
-                    >
-                      {booking.payments.payment_status}
-                    </span>
-                  </p>
-                )}
-              </div>
-
-              {booking.passengers && booking.passengers.length > 0 && (
-                <div className="passengers">
-                  <strong>Passengers:</strong>
-                  <ul>
-                    {booking.passengers.map((p) => (
-                      <li key={p.id}>
-                        <span>
-                          <strong>Name</strong> {p.name}
-                        </span>{" "}
-                        |
-                        <span>
-                          <strong>Age</strong> {p.age}
-                        </span>{" "}
-                        |
-                        <span>
-                          <strong>Gender</strong> {p.gender}
-                        </span>{" "}
-                        |
-                        <span>
-                          <strong>Boarding</strong> {p.boarding_location}
-                        </span>{" "}
-                        |
-                        <span>
-                          <strong>Dropping</strong> {p.dropping_location}
-                        </span>{" "}
-                        |
-                        <span>
-                          <strong>Seat</strong> {p.seat_number}
-                        </span>
-                        <span>Fare  ={p.fare}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {/* Action Buttons */}
-              <div className="actions">
-                {booking.status === "PENDING_PAYMENT" && (
-                  <button
-                    className="pay-now"
-                    onClick={() =>
-                      handlePayNow(booking.id, booking.total_amount)
-                    }
-                  >
-                    Pay Now 💳
-                  </button>
-                )}
-                {booking.status === "CONFIRMED" && (
-                  <button className="confirmed-btn" disabled>
-                    Confirmed ✅
-                  </button>
-                )}
-                {booking.status !== "CANCELLED" && (
-                  <button
-                    className="cancel-btn"
-                    onClick={() => mutation.mutate(booking.id)}
-                  >
-                    Cancel ❌
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+    <div className="my-bookings-page">
+      <Navbar />
+      <div className="my-bookings">
+        <div className="bookings-header">
+          {/* <button className="btn-back" onClick={() => navigate("/")}>
+            <FaArrowAltCircleLeft /> Back to Home
+          </button> */}
+          <h1>My Booked Tickets</h1>
+          <p className="subtitle">{bookings?.length || 0} booking(s) found</p>
         </div>
-      )}
+
+        {bookings && bookings.length === 0 ? (
+          <div className="no-bookings">
+            <FaBus className="no-bookings-icon" />
+            <h3>No bookings yet</h3>
+            <p>Book your first bus ticket to see it here</p>
+            <button onClick={() => navigate("/")} className="btn-search">Search Buses</button>
+          </div>
+        ) : (
+          <div className="bookings-list">
+            {bookings?.map((booking) => (
+              <div key={booking.id} className="ticket-card">
+                <div className="ticket-card__header">
+                  <div className="booking-info">
+                    <h3>Booking #{booking.id}</h3>
+                    <p className="booked-date">
+                      <FaCalendar /> Booked for: {new Date(booking.booked_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <div className="status-badges">
+                    <span className={`badge badge--status ${booking.status.toLowerCase()}`}>
+                      {booking.status.replace('_', ' ')}
+                    </span>
+                    {booking.payments && (
+                      <span className={`badge badge--payment ${booking.payments.payment_status.toLowerCase()}`}>
+                        {booking.payments.payment_status}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="ticket-card__body">
+                  <div className="trip-section">
+                    <div className="bus-details">
+                      <FaBus className="icon" />
+                      <div>
+                        <h4>{booking.trip.bus.bus_name}</h4>
+                        <span className={`bus-type ${booking.trip.bus.bus_type === 'AC' ? 'ac' : 'non-ac'}`}>
+                          {booking.trip.bus.bus_type}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="route-section">
+                      <div className="route-point">
+                        <FaMapMarkerAlt className="icon-start" />
+                        <div>
+                          <p className="location">{booking.trip.route.start_location}</p>
+                          <p className="time">{booking.trip.departure_time}</p>
+                        </div>
+                      </div>
+                      <div className="route-line">
+                        <div className="line"></div>
+                        <span className="distance">{booking.trip.route.distance_km} km</span>
+                      </div>
+                      <div className="route-point">
+                        <FaMapMarkerAlt className="icon-end" />
+                        <div>
+                          <p className="location">{booking.trip.route.end_location}</p>
+                          <p className="time">{booking.trip.arrival_time}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="booking-meta">
+                      <div className="meta-item">
+                        <MdEventSeat className="icon" />
+                        <span>Seats: {booking.seats.map((s) => s.seat_number).join(", ")}</span>
+                      </div>
+                      <div className="meta-item price">
+                        <FaRupeeSign className="icon" />
+                        <span>Total: ₹{booking.total_amount}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {booking.passengers && booking.passengers.length > 0 && (
+                    <div className="passengers-section">
+                      <h5>Passenger Details:</h5>
+                      <div className="passengers-grid">
+                        {booking.passengers.map((p) => (
+                          <div key={p.id} className="passenger-card">
+                            <div className="passenger-header">
+                              <span className="name">{p.name}</span>
+                              <span className="seat-badge">Seat {p.seat_number}</span>
+                            </div>
+                            <div className="passenger-details">
+                              <span>{p.age} yrs, {p.gender}</span>
+                            </div>
+                            <div className="passenger-journey">
+                              <span className="boarding">📍 {p.boarding_location}</span>
+                              <span className="arrow">→</span>
+                              <span className="dropping">📍 {p.dropping_location}</span>
+                            </div>
+                            <div className="passenger-fare">
+                              Fare: ₹{p.fare}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="ticket-card__footer">
+                  {booking.status === "PENDING_PAYMENT" && (
+                    <button
+                      className="btn btn-pay"
+                      onClick={() => handlePayNow(booking.id, booking.total_amount)}
+                    >
+                      💳 Pay Now
+                    </button>
+                  )}
+                  {booking.status === "CONFIRMED" && (
+                    <button className="btn btn-confirmed" disabled>
+                      ✅ Confirmed
+                    </button>
+                  )}
+                  {booking.status !== "CANCELLED" && (
+                    <button
+                      className="btn btn-cancel"
+                      onClick={() => mutation.mutate(booking.id)}
+                      disabled={mutation.isPending}
+                    >
+                      ❌ {mutation.isPending ? "Cancelling..." : "Cancel"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
 export default MyBooking;
+

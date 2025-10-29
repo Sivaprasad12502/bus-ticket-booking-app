@@ -1,106 +1,242 @@
 @import "../../style.scss";
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.register{
-    height: 100vh;
-    background-color: rgb(193, 190, 255);
+
+.register {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e3e8f0 100%);
+  padding: 2rem 1rem;
+
+  @include mobile {
+    padding: 1rem 0.5rem;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 1000px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    @include mobile{
-        height: 100%;
+    flex-direction: row-reverse;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    background: white;
+    min-height: 550px;
+
+    @include mobile {
+      flex-direction: column;
+      max-width: 450px;
     }
 
-    .card{
-        width: 50%;
-        display: flex;
-        flex-direction: row-reverse;
-        background-color: white;
-        border-radius: 10px;
-        min-height: 600px;
-        overflow: hidden;
-        @include mobile{
-            width: 100%;
-            flex-direction: column;
-            border-radius: 0px;
-        }
-        @include tablet{
-            width: 100%;
-        }
-        .left{
-            flex: 1;
-            background:linear-gradient(rgb(39,11,96,0.5),rgba(39,11,96,0.5)),url("https://images.unsplash.com/photo-1575744008040-df41c6ff1fa9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8ODZ8fGJ1c3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600") center;
-            background-size: cover;
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 30px;
-            color: white;
-            @include mobile{
-                padding: 10px;
-            }
-            h1{
-                font-size: 50px;
-                line-height: 50px;
-                @include mobile{
-                    font-size: 25px;
-                    line-height: 10px;
-                }
-            }
-            p{}
-            span{
-                font-size: 14px;
-            }
-            button{
-                width: 50%;
-                padding:10px;
-                border: none;
-                background-color: white;
-                color: rebeccapurple;
-                font-weight: bold;
-                cursor: pointer;
-            }
-        }
-        .right{
-            flex: 1;
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            gap: 50px;
-            justify-content: center;
-            @include mobile{
-                padding: 10px;
-                gap: 10px;
-            }
-            h1{
-                color: #555;
-            }
-            form{
-                display: flex;
-                flex-direction: column;
-                gap: 30px;
-                @include mobile{
-                    gap: 10px;
-                }
-                input{
-                    border: none;
-                    border-bottom: 1px solid lightgray;
-                    padding: 20px 10px;
-                }
-                button{
-                    width: 50%;
-                    padding: 10px;
-                    border: none;
-                    background-color: #938eef;
-                    color: white;
-                    font-weight: bold;
-                    cursor: pointer;
-                }
-            }
-        }
+    @include tablet {
+      max-width: 700px;
     }
+
+    .left {
+      flex: 1;
+      background: linear-gradient(135deg, $primary-red 0%, darken($primary-red, 15%) 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+
+      @include mobile {
+        padding: 2rem 1.5rem;
+      }
+
+      &__content {
+        text-align: center;
+        max-width: 350px;
+
+        .icon-bus {
+          font-size: 4rem;
+          margin-bottom: 1.5rem;
+          opacity: 0.9;
+          animation: float 3s ease-in-out infinite;
+
+          @include mobile {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+          }
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+
+        h2 {
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin-bottom: 1rem;
+
+          @include mobile {
+            font-size: 1.5rem;
+          }
+        }
+
+        p {
+          font-size: 1rem;
+          line-height: 1.6;
+          margin-bottom: 2rem;
+          opacity: 0.95;
+
+          @include mobile {
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+          }
+        }
+
+        .btn-login {
+          padding: 0.9rem 2.5rem;
+          border: 2px solid white;
+          background: transparent;
+          color: white;
+          font-size: 1rem;
+          font-weight: 600;
+          border-radius: 50px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: white;
+            color: $primary-red;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+          }
+        }
+      }
+    }
+
+    .right {
+      flex: 1;
+      padding: 3rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+
+      @include mobile {
+        padding: 2rem 1.5rem;
+      }
+
+      &__header {
+        margin-bottom: 2rem;
+
+        @include mobile {
+          margin-bottom: 1.5rem;
+        }
+
+        h1 {
+          font-size: 2rem;
+          font-weight: 700;
+          color: $text-primary;
+          margin-bottom: 0.5rem;
+
+          @include mobile {
+            font-size: 1.6rem;
+          }
+        }
+
+        p {
+          color: $text-secondary;
+          font-size: 1rem;
+        }
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+
+        @include mobile {
+          gap: 1rem;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+
+          label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: $text-primary;
+          }
+
+          .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+
+            .input-icon {
+              position: absolute;
+              left: 1rem;
+              color: $text-secondary;
+              font-size: 1rem;
+              pointer-events: none;
+            }
+
+            input {
+              width: 100%;
+              padding: 0.85rem 1rem 0.85rem 2.75rem;
+              border: 2px solid #e0e0e0;
+              border-radius: 8px;
+              font-size: 0.95rem;
+              transition: all 0.3s ease;
+              background: #fafafa;
+
+              &:focus {
+                outline: none;
+                border-color: $primary-red;
+                background: white;
+                box-shadow: 0 0 0 3px rgba($primary-red, 0.1);
+              }
+
+              &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+              }
+
+              &::placeholder {
+                color: #bbb;
+              }
+            }
+          }
+        }
+
+        .btn-register {
+          padding: 1rem;
+          background: $primary-red;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 1.05rem;
+          font-weight: 600;
+          cursor: pointer;
+          margin-top: 0.5rem;
+          transition: all 0.3s ease;
+
+          &:hover:not(:disabled) {
+            background: darken($primary-red, 10%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba($primary-red, 0.4);
+          }
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+          }
+        }
+      }
+    }
+  }
 }

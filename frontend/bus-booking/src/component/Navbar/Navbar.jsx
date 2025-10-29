@@ -4,12 +4,14 @@ import { Context } from "../../context/Context";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import "./NavBar.scss";
-import { NavLink } from "react-router-dom";
-import { FaUser } from "react-icons/fa";
+import { NavLink, useLocation } from "react-router-dom";
+import { FaUser,FaArrowAltCircleLeft } from "react-icons/fa";
 
 const Navbar = () => {
   const { user, setUser, apiUrl, token, setToken, navigate } =
     useContext(Context);
+    const location=useLocation()
+    console.log(location,'location')
   console.log("user", user);
   console.log("token", token);
   const mutate = useMutation({
@@ -45,7 +47,9 @@ const Navbar = () => {
     <div className="user-header">
       <div>
         <button>
-          <NavLink to={"/bookings"}>MY Bookings</NavLink>
+         {
+          location.pathname=='/bookings'?<NavLink to={'/'}> <FaArrowAltCircleLeft /> Home</NavLink>: <NavLink to={"/bookings"}>MY Bookings</NavLink>
+         }
         </button>
         <button className="lgout-btn" onClick={handleLogout}>
           Logout

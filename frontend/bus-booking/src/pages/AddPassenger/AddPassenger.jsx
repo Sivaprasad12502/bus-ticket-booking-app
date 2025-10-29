@@ -1,20 +1,22 @@
 import React, { useContext, useState } from "react";
-
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Context } from "../../context/Context";
 import { toast } from "react-toastify";
+import { FaUser, FaCalendar, FaMapMarkerAlt, FaBus } from "react-icons/fa";
+import { MdEventSeat } from "react-icons/md";
+import Navbar from "../../component/Navbar/Navbar";
 import "./AddPassenger.scss";
+
 const AddPassenger = () => {
   const { apiUrl, token } = useContext(Context);
   const navigate = useNavigate();
   const params = new URLSearchParams(useLocation().search);
-  // const booking_id = params.get("bookingId");
-  // console.log(booking_id);
-  // const totalamount = params.get("totalamount") || 0;
   const seatNumbers = params.get("seats")?.split(",");
-  console.log(seatNumbers);
+  const triipid = params.get("tripid");
+  const travelDate = params.get("date");
+
   const [passengers, setPassengers] = useState(
     seatNumbers.map((seat) => ({
       seat_number: seat,
@@ -25,7 +27,7 @@ const AddPassenger = () => {
       dropping_location: "",
     }))
   );
-  const triipid = params.get("tripid");
+
   const { data: trip, isLoading } = useQuery({
     queryKey: ["trip-details", triipid],
     queryFn: async () => {
@@ -33,18 +35,16 @@ const AddPassenger = () => {
       return response.data;
     },
   });
+
   const tripStopes = trip?.trip_stops || [];
+
   const mutation = useMutation({
     mutationFn: async (data) =>
       axios.post(`${apiUrl}bookings/bookings/`, data, {
         headers: { Authorization: `Bearer ${token}` },
       }),
     onSuccess: ({ data }) => {
-      // console.log(data);
-      // console.log("booking-id in addpassenger", booking_id);
-      // console.log("  totalamount in add", totalamount);
-      // console.log("seatnumber in addpassenger", seatNumbers);
-      toast.success("Sucessfull added", {
+      toast.success("Passenger details added successfully", {
         onClose: () => {
           const booking_id = data.booking_id;
           const totalamount = data.total_amount;
@@ -58,8 +58,11 @@ const AddPassenger = () => {
     onError: (error) => {
       if (error.response && error.response.data && error.response.data.error) {
         toast.error(error.response.data.error);
+      } else {
+        toast.error(
+          "Error adding passenger details. Please check and try again."
+        );
       }
-      toast.error("Error in add passenger please re-check the details");
       console.log(error);
     },
   });
@@ -70,22 +73,12 @@ const AddPassenger = () => {
     setPassengers(newData);
   };
 
-  //   const addPassengerField = () => {
-  //     setPassengers([
-  //       ...passengers,
-  //       {
-  //         name: "",
-  //         age: "",
-  //         gender: "",
-  //         seat_number: "",
-  //         boarding_location: "",
-  //         dropping_location: "",
-  //       },
-  //     ]);
-  //   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (passengers.some((p) => !/^[A-Za-z\s]+$/.test(p.name.trim()))) {
+      toast.error("Name should contain only letters");
+      return;
+    }
     if (
       passengers.some(
         (p) =>
@@ -106,81 +99,243 @@ const AddPassenger = () => {
       passengers,
     });
   };
-  return (
-    <form onSubmit={handleSubmit} className="add-passenger-container">
-      <h2>Add Passenger Details</h2>
-      {passengers.map((p, i) => (
-        <div className="passenger-card" key={i}>
-          <h4>Seat {p.seat_number || i + 1}</h4>
-          <input
-            placeholder="Name"
-            value={p.name}
-            onChange={(e) => handleChange(i, "name", e.target.value)}
-            required
-          />
-          <input
-            placeholder="Age"
-            value={p.age}
-            onChange={(e) => handleChange(i, "age", e.target.value)}
-            required
-          />
-          <select
-            value={p.gender}
-            onChange={(e) => handleChange(i, "gender", e.target.value)}
-            required
-          >
-            <option value="">Select Gender</option>
-            <option value="M">M</option>
-            <option value="F">F</option>
-            <option value="OTHER">OTHER</option>
-          </select>
-          <input
-            placeholder="Seat"
-            value={p.seat_number}
-            onChange={(e) => handleChange(i, "seat_number", e.target.value)}
-            readOnly
-          />
-          <select
-            value={p.boarding_location}
-            onChange={(e) =>
-              handleChange(i, "boarding_location", e.target.value)
-            }
-            required
-          >
-            <option value="">Select Boarding Stop</option>
-            {tripStopes.map((stop, index) => (
-              <option key={index} value={stop.stop_name}>
-                {stop.stop_name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={p.dropping_location}
-            onChange={(e) =>
-              handleChange(i, "dropping_location", e.target.value)
-            }
-            required
-          >
-            <option value="">Select Dropping Stop</option>
-            {tripStopes.map((stop, index) => (
-              <option key={index} value={stop.stop_name}>
-                {stop.stop_name}
-              </option>
-            ))}
-          </select>
-        </div>
-      ))}
 
-      <div className="btn-group">
-        {/* <button className="add-passenger-btn" onClick={addPassengerField}>
-          Add Passenger
-        </button> */}
-        <div>{/* <span>$ {totalamount}</span> */}</div>
-        <button className="continue-btn" type="submit">
-          Continue to Payment
-        </button>
+  if (isLoading) {
+    return (
+      <div className="add-passenger-page">
+        {/* <Navbar /> */}
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p>Loading trip details...</p>
+        </div>
       </div>
-    </form>
+    );
+  }
+
+  return (
+    <div className="add-passenger-page">
+      {/* <Navbar /> */}
+      <div className="add-passenger-container">
+        <div className="page-header">
+          <h2>Passenger Details</h2>
+          <p className="subtitle">Fill in the details for all passengers</p>
+        </div>
+
+        {trip && (
+          <div className="trip-summary">
+            <div className="trip-summary__header">
+              <FaBus className="icon" />
+              <div>
+                <h4>{trip.bus.bus_name}</h4>
+                <span className="bus-type">{trip.bus.bus_type}</span>
+              </div>
+            </div>
+            <div className="trip-summary__body">
+              <div className="info-item">
+                <FaMapMarkerAlt className="icon" />
+                <span>
+                  {trip.route.start_location} → {trip.route.end_location}
+                </span>
+              </div>
+              <div className="info-item">
+                <FaCalendar className="icon" />
+                <span>
+                  {new Date(travelDate).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+              <div className="info-item">
+                <MdEventSeat className="icon" />
+                <span>
+                  {seatNumbers.length} Seat(s): {seatNumbers.join(", ")}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="passenger-form">
+          <div className="passengers-grid">
+            {passengers.map((p, i) => (
+              <div className="passenger-card" key={i}>
+                <div className="passenger-card__header">
+                  <h4>
+                    <MdEventSeat /> Seat {p.seat_number}
+                  </h4>
+                  <span className="passenger-number">Passenger {i + 1}</span>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor={`name-${i}`}>Full Name *</label>
+                  <div className="input-wrapper">
+                    <FaUser className="input-icon" />
+                    <input
+                      id={`name-${i}`}
+                      type="text"
+                      placeholder="Enter full name"
+                      value={p.name}
+                      onChange={(e) => handleChange(i, "name", e.target.value)}
+                      required
+                      disabled={mutation.isPending}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-roww">
+                  <div className="form-group">
+                    <label htmlFor={`age-${i}`}>Age *</label>
+                    <input
+                      id={`age-${i}`}
+                      type="number"
+                      placeholder="Age"
+                      value={p.age}
+                      min="1"
+                      max="120"
+                      onChange={(e) => handleChange(i, "age", e.target.value)}
+                      required
+                      disabled={mutation.isPending}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    {/* <label htmlFor={`gender-${i}`}>Gender *</label>
+                    <select
+                      id={`gender-${i}`}
+                      value={p.gender}
+                      onChange={(e) => handleChange(i, "gender", e.target.value)}
+                      required
+                      disabled={mutation.isPending}
+                    >
+                      <option value="">Select</option>
+                      <option value="M">Male</option>
+                      <option value="F">Female</option>
+                      <option value="OTHER">Other</option>
+                    </select> */}
+                    <div className="gender-options">
+                      <label>Gender:</label>
+
+                      <label>
+                        <input
+                          type="radio"
+                          name={`gender-${i}`}
+                          value="M"
+                          checked={p.gender === "M"}
+                          onChange={(e) =>
+                            handleChange(i, "gender", e.target.value)
+                          }
+                          required
+                          disabled={mutation.isPending}
+                        />
+                        Male
+                      </label>
+
+                      <label>
+                        <input
+                          type="radio"
+                          name={`gender-${i}`}
+                          value="F"
+                          checked={p.gender === "F"}
+                          onChange={(e) =>
+                            handleChange(i, "gender", e.target.value)
+                          }
+                          required
+                          disabled={mutation.isPending}
+                        />
+                        Female
+                      </label>
+
+                      <label>
+                        <input
+                          type="radio"
+                          name={`gender-${i}`}
+                          value="OTHER"
+                          checked={p.gender === "OTHER"}
+                          onChange={(e) =>
+                            handleChange(i, "gender", e.target.value)
+                          }
+                          required
+                          disabled={mutation.isPending}
+                        />
+                        Other
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor={`boarding-${i}`}>Boarding Point *</label>
+                  <div className="input-wrapper">
+                    <FaMapMarkerAlt className="input-icon" />
+                    <select
+                      id={`boarding-${i}`}
+                      value={p.boarding_location}
+                      onChange={(e) =>
+                        handleChange(i, "boarding_location", e.target.value)
+                      }
+                      required
+                      disabled={mutation.isPending}
+                    >
+                      <option value="">Select boarding point</option>
+                      {tripStopes.map((stop, index) => (
+                        <option key={index} value={stop.stop_name}>
+                          {/* {stop.stop_name} - {stop.arrival_time} */}
+                          {stop.stop_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor={`dropping-${i}`}>Dropping Point *</label>
+                  <div className="input-wrapper">
+                    <FaMapMarkerAlt className="input-icon" />
+                    <select
+                      id={`dropping-${i}`}
+                      value={p.dropping_location}
+                      onChange={(e) =>
+                        handleChange(i, "dropping_location", e.target.value)
+                      }
+                      required
+                      disabled={mutation.isPending}
+                    >
+                      <option value="">Select dropping point</option>
+                      {tripStopes.map((stop, index) => (
+                        <option key={index} value={stop.stop_name}>
+                          {/* {stop.stop_name} - {stop.arrival_time} */}
+                          {stop.stop_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="form-actions">
+            <button
+              type="button"
+              className="btn-back"
+              onClick={() => navigate(-1)}
+              disabled={mutation.isPending}
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              className="btn-continue"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? "Processing..." : "Continue to Payment"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

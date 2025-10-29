@@ -1,104 +1,168 @@
+// ============================================
+// NAVBAR COMPONENT - REDBUS STYLE
+// ============================================
+
+// Color Variables
+// $primary-red: #d84e55;
+$primary-red:rgb(43, 55, 96);
+// $primary-dark: #c13b42;
+$primary-dark: #040818;
+$white: #ffffff;
+$text-color: #333;
+$shadow-light: rgba(0, 0, 0, 0.08);
+$shadow-medium: rgba(0, 0, 0, 0.12);
+
 .user-header {
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #3f51b5, #6573ff);
-  padding: 15px 40px;
-  color: #fff;
+  background: $white;
+  padding: 16px 48px;
+  color: $text-color;
   font-family: "Poppins", sans-serif;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 12px $shadow-light;
   position: sticky;
   top: 0;
   z-index: 1000;
+  transition: box-shadow 0.3s ease;
 
-  // Left section (buttons / logo)
+  &--scrolled {
+    box-shadow: 0 4px 20px $shadow-medium;
+  }
+
+  // Buttons section
   div {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
 
     button {
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      border-radius: 25px;
-      padding: 8px 18px;
+      background: transparent;
+      border: 2px solid $primary-red;
+      border-radius: 8px;
+      padding: 10px 24px;
       cursor: pointer;
-      transition: 0.3s ease;
+      transition: all 0.3s ease;
       font-size: 15px;
+      font-weight: 600;
 
       a {
         text-decoration: none;
-        color: #fff;
+        color: $primary-red;
         font-weight: 600;
+        transition: color 0.3s ease;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(1.05);
+        background: $primary-red;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba($primary-red, 0.25);
+
+        a {
+          color: $white;
+        }
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
-     // Logout button
-     .lgout-btn{
-      background: #ff5252;
-      border: none;
-      color: #fff;
-      padding: 8px 18px;
-      border-radius: 25px;
+
+    // Logout button - distinct styling
+    .lgout-btn {
+      background: $primary-red;
+      border: 2px solid $primary-red;
+      color: $white;
+      padding: 10px 24px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       font-size: 15px;
-      transition: 0.3s ease;
+      transition: all 0.3s ease;
 
       &:hover {
-        background: #ff1744;
-        box-shadow: 0 4px 10px rgba(255, 82, 82, 0.4);
-        transform: scale(1.05);
+        background: $primary-dark;
+        border-color: $primary-dark;
+        box-shadow: 0 4px 16px rgba($primary-red, 0.3);
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
   }
 
+  // Username section
   div {
-    // Username
-    display: flex;
-    // flex-direction: row-reverse;
     span {
       display: flex;
+      align-items: center;
       font-size: 16px;
       font-weight: 600;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 8px 15px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      gap: 5px;
-    }
+      color: $text-color;
+      background: rgba($primary-red, 0.08);
+      padding: 10px 20px;
+      border-radius: 8px;
+      letter-spacing: 0.3px;
+      gap: 8px;
+      transition: all 0.3s ease;
 
-   
-  }
+      svg {
+        color: $primary-red;
+        font-size: 18px;
+      }
 
-  // 🔹 Responsive Design
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px 20px;
-
-    div {
-      flex-direction: column;
-      gap: 10px;
-
-      button {
-        width: 100%;
-        text-align: center;
+      &:hover {
+        background: rgba($primary-red, 0.12);
       }
     }
+  }
 
-    span {
-      font-size: 14px;
-    }
+  // Responsive Design
+  @media (max-width: 1024px) {
+    padding: 16px 32px;
+  }
 
-    > button {
+  @media (max-width: 768px) {
+    // flex-direction: column;
+    gap: 16px;
+    padding: 16px 20px;
+
+    div {
       width: 100%;
+      justify-content: center;
+
+      button {
+        flex: 1;
+        // min-width: 120px;
+      }
+
+      span {
+        justify-content: center;
+        width: 100%;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    padding: 12px 16px;
+
+    div {
+      // flex-direction: column;
+      gap: 12px;
+
+      button {
+        // width: 100%;
+        width: 100px !important;
+        text-align: center;
+      }
+
+      span {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
     }
   }
 }

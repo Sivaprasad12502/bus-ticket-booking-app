@@ -28,9 +28,13 @@ class RouteSerializer(serializers.ModelSerializer):
 
 class TripStopSerializer(serializers.ModelSerializer):
     stop_name=serializers.CharField(source="route_stop.stop_name",read_only=True)
+    arrival_time=serializers.SerializerMethodField()
     class Meta:
         model=TripStop
         fields = ["id", "stop_name", "arrival_time"]
+
+    def get_arrival_time(self, obj):
+        return obj.arrival_time.strftime("%I:%M %p") if obj.arrival_time else None
 
 class TripSerializer(serializers.ModelSerializer):
     bus = BusSerializer(read_only=True)
