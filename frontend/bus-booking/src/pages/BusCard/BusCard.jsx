@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useContext, useState } from "react";
+import React, { useState, useContext } from "react";
 import { Context } from "../../context/Context";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
@@ -9,6 +9,26 @@ import Navbar from "../../component/Navbar/Navbar";
 import "./Buscard.scss";
 import { motion } from "framer-motion";
 
+const SeatsAvailability = ({ tripId, date }) => {
+  const { apiUrl } = useContext(Context);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["availableSeats", tripId, date],
+    queryFn: async () => {
+      const res = await axios.get(
+        `${apiUrl}bookings/trips/${tripId}/seats/?date=${date}`
+      );
+      return res.data; // assuming list of available seats
+    },
+  });
+  if (isLoading) return <p className="seat-status loading">Checking...</p>;
+  if (isError) return <p className="seat-status error">Error</p>;
+  return (
+    <p className="seat-status success">
+      <MdEventSeat /> {data.length} seats available
+    </p>
+  );
+};
+
 const BusCard = () => {
   const { apiUrl, navigate } = useContext(Context);
   const location = useLocation();
@@ -17,7 +37,6 @@ const BusCard = () => {
   const to = params.get("to");
   const date = params.get("date");
   const [selectedType, setSelectedType] = useState("");
-
   const { data, isLoading, isError } = useQuery({
     queryKey: ["buses", from, to, date],
     queryFn: async () => {
@@ -27,15 +46,15 @@ const BusCard = () => {
       return response.data;
     },
   });
-  console.log(data, "buscard dataaa");
   const busType = [...new Set(data?.map((trip) => trip.bus.bus_type))];
   const filteredData = selectedType
     ? data?.filter((trip) => trip.bus.bus_type === selectedType)
     : data;
+
   if (isLoading) {
     return (
       <div className="bus-results-page">
-        <Navbar />
+        {/* <Navbar /> */}
         <div className="loader-container">
           <div className="loader"></div>
           <p>Finding available buses...</p>
@@ -146,6 +165,7 @@ const BusCard = () => {
                         <p className="time">{trip.departure_time}</p>
                       </div>
                     </div>
+
                     <div className="route-line">
                       <span className="distance">
                         {trip.route.distance_km} km
@@ -199,6 +219,9 @@ const BusCard = () => {
                 </div>
 
                 <div className="bus-card__footer">
+                  <div className="seat-info">
+                    <SeatsAvailability tripId={trip.id} date={date} />
+                  </div>
                   <button
                     className="btn-select-seat"
                     onClick={() =>

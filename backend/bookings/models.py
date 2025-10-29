@@ -65,7 +65,7 @@ class Trip(models.Model):
     departure_time = models.TimeField()
     arrival_time = models.TimeField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
-
+    
     def __str__(self):
         return f"{self.bus.bus_name} -> {self.route.start_location} to {self.route.end_location} {self.departure_time} -> {self.arrival_time}"
 

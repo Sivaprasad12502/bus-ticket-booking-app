@@ -8,6 +8,7 @@ import {
   FaArrowAltCircleLeft,
   FaBus,
   FaCalendar,
+  FaClock,
   FaMapMarkerAlt,
   FaRupeeSign,
 } from "react-icons/fa";
@@ -136,8 +137,8 @@ const MyBooking = () => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.6,
-                  delay: index * 0.1,
+                  duration: 0.4,
+                  // delay: index * 0.1,
                   ease: "easeOut",
                 }}
                 viewport={{ once: false, amount: 0.2 }}
@@ -236,33 +237,69 @@ const MyBooking = () => {
                       <div className="passengers-section">
                         <h5>Passenger Details:</h5>
                         <div className="passengers-grid">
-                          {booking.passengers.map((p) => (
-                            <div key={p.id} className="passenger-card">
-                              <div className="passenger-header">
-                                <span className="name">{p.name}</span>
-                                <span className="seat-badge">
-                                  Seat {p.seat_number}
-                                </span>
+                          {booking.passengers.map((p) => {
+                            // Find boarding and dropping stop times from trip_stops
+                            const boardingStop = booking.trip.trip_stops?.find(
+                              stop => stop.stop_name === p.boarding_location
+                            );
+                            const droppingStop = booking.trip.trip_stops?.find(
+                              stop => stop.stop_name === p.dropping_location
+                            );
+
+                            return (
+                              <div key={p.id} className="passenger-card">
+                                <div className="passenger-header">
+                                  <span className="name">{p.name}</span>
+                                  <span className="seat-badge">
+                                    Seat {p.seat_number}
+                                  </span>
+                                </div>
+                                <div className="passenger-details">
+                                  <span>
+                                    {p.age} yrs, {p.gender === 'M' ? 'Male' : p.gender === 'F' ? 'Female' : 'Other'}
+                                  </span>
+                                </div>
+                                <div className="passenger-journey">
+                                  <div className="journey-stop boarding-stop">
+                                    <span className="location">
+                                      📍 {p.boarding_location}
+                                    </span>
+                                    {boardingStop?.arrival_time ? (
+                                      <span className="time">
+                                        <FaClock style={{ fontSize: '12px', marginRight: '4px' }} />
+                                        {boardingStop.arrival_time}
+                                      </span>
+                                    ) : (
+                                      <span className="time" style={{ background: '#f0f0f0', color: '#999' }}>
+                                        <FaClock style={{ fontSize: '12px', marginRight: '4px' }} />
+                                        Time N/A
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="arrow">→</span>
+                                  <div className="journey-stop dropping-stop">
+                                    <span className="location">
+                                      📍 {p.dropping_location}
+                                    </span>
+                                    {droppingStop?.arrival_time ? (
+                                      <span className="time">
+                                        <FaClock style={{ fontSize: '12px', marginRight: '4px' }} />
+                                        {droppingStop.arrival_time}
+                                      </span>
+                                    ) : (
+                                      <span className="time" style={{ background: '#f0f0f0', color: '#999' }}>
+                                        <FaClock style={{ fontSize: '12px', marginRight: '4px' }} />
+                                        Time N/A
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="passenger-fare">
+                                  Fare: ₹{p.fare}
+                                </div>
                               </div>
-                              <div className="passenger-details">
-                                <span>
-                                  {p.age} yrs, {p.gender}
-                                </span>
-                              </div>
-                              <div className="passenger-journey">
-                                <span className="boarding">
-                                  📍 {p.boarding_location}
-                                </span>
-                                <span className="arrow">→</span>
-                                <span className="dropping">
-                                  📍 {p.dropping_location}
-                                </span>
-                              </div>
-                              <div className="passenger-fare">
-                                Fare: ₹{p.fare}
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
