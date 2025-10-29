@@ -31,7 +31,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btn-back,
@@ -90,6 +92,16 @@
   .results-count {
     font-size: 0.95rem;
     color: $text-secondary;
+  }
+  .filter-box{
+    margin-top: 0.5rem;
+    select{
+      padding: 0.5rem 1rem;
+      border:1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
   }
 }
 
@@ -218,7 +230,9 @@
 
     .route-details {
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      // grid-template-columns: 1fr auto 1fr;
+      //for animaatioiion
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 1.5rem;
       align-items: center;
       margin-bottom: 1rem;
@@ -275,6 +289,13 @@
           font-size: 0.85rem;
           color: $text-secondary;
           white-space: nowrap;
+        }
+        .animated-line {
+          flex-grow: 1;
+          height: 3px;
+          background: linear-gradient(90deg, #007bff, #00c6ff);
+          border-radius: 4px;
+          transform-origin: left;
         }
 
         .line {
@@ -461,4 +482,3 @@
     }
   }
 }
-

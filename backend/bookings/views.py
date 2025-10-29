@@ -419,6 +419,7 @@ def create_payment_intent(request, booking_Id):
         intent = stripe.PaymentIntent.create(
             amount=amount,
             currency=currency,
+            # payment_method_types=["card","upi","netbanking","wallet"],
             metadata={"booking_Id": booking.id, "user": request.user.username},
         )
         # Save Payment info in DB

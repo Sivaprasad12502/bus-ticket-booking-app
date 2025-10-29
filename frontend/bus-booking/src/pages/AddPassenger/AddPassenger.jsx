@@ -16,7 +16,8 @@ const AddPassenger = () => {
   const seatNumbers = params.get("seats")?.split(",");
   const triipid = params.get("tripid");
   const travelDate = params.get("date");
-
+  const [fareStart,setFareStart]=useState(0)
+  const [fareEnd,setFareEnd]=useState(0)
   const [passengers, setPassengers] = useState(
     seatNumbers.map((seat) => ({
       seat_number: seat,
@@ -36,7 +37,9 @@ const AddPassenger = () => {
     },
   });
 
-  const tripStopes = trip?.trip_stops || [];
+  // const tripStopes = trip?.trip_stops || [];
+  const tripStopes = trip?.route?.stops || [];
+  console.log(tripStopes,'tripstopeesss from add passenger')
 
   const mutation = useMutation({
     mutationFn: async (data) =>
@@ -66,10 +69,24 @@ const AddPassenger = () => {
       console.log(error);
     },
   });
-
+  const calculateFare=(boarding,dropping)=>{
+    const start=tripStopes.find((s)=>s.stop_name===boarding)
+    const end=tripStopes.find((s)=>s.stop_name===dropping)
+    if(!start ||!end)return 0
+    const fare=parseFloat(end.fare_from_start)-parseFloat(start.fare_from_start)
+    return fare>0?fare:0
+  }
   const handleChange = (index, field, value) => {
     const newData = [...passengers];
     newData[index][field] = value;
+    //reacalculate fare if boarding or droppping changes
+    if(field==="boarding_location"||field==="dropping_location"){
+      const boarding=newData[index].boarding_location;
+      const dropping=newData[index].dropping_location
+      if (boarding&&dropping){
+        newData[index].fare=calculateFare(boarding,dropping)
+      }
+    }
     setPassengers(newData);
   };
 
@@ -312,6 +329,7 @@ const AddPassenger = () => {
                     </select>
                   </div>
                 </div>
+                <div className="fare-display"> Fare: ₹{p.fare ? p.fare.toFixed(2) : "--"}</div>
               </div>
             ))}
           </div>

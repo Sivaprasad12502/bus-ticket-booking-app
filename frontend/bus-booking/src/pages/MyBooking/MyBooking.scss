@@ -94,6 +94,16 @@
       font-size: 1rem;
       color: $text-secondary;
     }
+    .filter-box{
+    margin-top: 0.5rem;
+    select{
+      padding: 0.5rem 1rem;
+      border:1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  }
   }
 
   .no-bookings {
