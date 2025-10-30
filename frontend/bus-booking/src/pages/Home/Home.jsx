@@ -180,12 +180,12 @@ const Home = () => {
                 className="carousel-slide"
                 style={{ backgroundImage: `url(${banner.image})` }}
               >
-                <div
+                {/* <div
                   className="carousel-overlay"
                   style={{
                     background: `linear-gradient(135deg, ${banner.color}dd, ${banner.color}99)`,
                   }}
-                ></div>
+                ></div> */}
                 <div className="carousel-content">
                   <h2>{banner.title}</h2>
                   <p>{banner.subtitle}</p>
@@ -321,19 +321,19 @@ const Home = () => {
             <h4 className="footer-heading">Quick Links</h4>
             <ul className="footer-links">
               <li>
-                <a href="#about">About Us</a>
+                <a>About Us</a>
               </li>
               <li>
-                <a href="#contact">Contact</a>
+                <a>Contact</a>
               </li>
               <li>
-                <a href="#terms">Terms & Conditions</a>
+                <a>Terms & Conditions</a>
               </li>
               <li>
-                <a href="#privacy">Privacy Policy</a>
+                <a>Privacy Policy</a>
               </li>
               <li>
-                <a href="#refund">Refund Policy</a>
+                <a>Refund Policy</a>
               </li>
             </ul>
           </div>

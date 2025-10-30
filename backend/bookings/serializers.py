@@ -1,11 +1,28 @@
 from rest_framework import serializers
-from .models import Bus, Route, RouteStop, Trip, Seat, Booking, Passenger, Payment,TripStop
+from .models import (
+    Bus,
+    Route,
+    RouteStop,
+    Trip,
+    Seat,
+    Booking,
+    Passenger,
+    Payment,
+    TripStop,
+)
 
 
 class BusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bus
-        fields = ["id", "bus_name", "total_seats", "bus_type", "operator_name"]
+        fields = [
+            "id",
+            "bus_name",
+            "total_seats",
+            "bus_type",
+            "operator_name",
+            "operator_mobile",
+        ]
 
 
 class RouteStopSerializer(serializers.ModelSerializer):
@@ -16,30 +33,34 @@ class RouteStopSerializer(serializers.ModelSerializer):
             "stop_name",
             "order",
             "distance_from_start",
-            "fare_from_start",
+            # "fare_from_start",
         ]
 
 
 class RouteSerializer(serializers.ModelSerializer):
-    stops=RouteStopSerializer(many=True,read_only=True)
+    stops = RouteStopSerializer(many=True, read_only=True)
+
     class Meta:
         model = Route
-        fields = ["id", "start_location", "end_location", "distance_km","stops"]
+        fields = ["id", "start_location", "end_location", "distance_km", "stops"]
+
 
 class TripStopSerializer(serializers.ModelSerializer):
-    stop_name=serializers.CharField(source="route_stop.stop_name",read_only=True)
-    arrival_time=serializers.SerializerMethodField()
+    stop_name = serializers.CharField(source="route_stop.stop_name", read_only=True)
+    arrival_time = serializers.SerializerMethodField()
+
     class Meta:
-        model=TripStop
-        fields = ["id", "stop_name", "arrival_time"]
+        model = TripStop
+        fields = ["id", "stop_name", "arrival_time",'fare_from_start']
 
     def get_arrival_time(self, obj):
         return obj.arrival_time.strftime("%I:%M %p") if obj.arrival_time else None
 
+
 class TripSerializer(serializers.ModelSerializer):
     bus = BusSerializer(read_only=True)
     route = RouteSerializer(read_only=True)
-    trip_stops=TripStopSerializer(many=True,read_only=True)
+    trip_stops = TripStopSerializer(many=True, read_only=True)
     bus_id = serializers.PrimaryKeyRelatedField(
         queryset=Bus.objects.all(), source="bus", write_only=True
     )
@@ -60,7 +81,7 @@ class TripSerializer(serializers.ModelSerializer):
             "departure_time",
             "arrival_time",
             "price",
-            "trip_stops"
+            "trip_stops",
         ]
 
     def get_departure_time(self, obj):
@@ -73,7 +94,7 @@ class TripSerializer(serializers.ModelSerializer):
 class SeatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seat
-        fields = ["id", "trip", "seat_number","gender_preference"]
+        fields = ["id", "trip", "seat_number", "gender_preference"]
 
 
 class PassengerSerializer(serializers.ModelSerializer):
@@ -94,7 +115,7 @@ class PassengerSerializer(serializers.ModelSerializer):
             "boarding_location",
             "dropping_location",
             "seat_number",
-            "fare"
+            "fare",
         ]
 
 

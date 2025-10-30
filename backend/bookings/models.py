@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from datetime import date
+from datetime import date,time
 
 
 # Create your models here.
@@ -22,10 +22,10 @@ class Bus(models.Model):
             ("Sleeper", "Sleeper Layout"),
         ],
     )
-    operator_mobile_no = models.CharField(max_length=15, blank=True, null=True)
+    operator_mobile = models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.bus_name}"
+        return f"{self.bus_name} {self.bus_type}"
 
 
 class Route(models.Model):
@@ -48,9 +48,9 @@ class RouteStop(models.Model):
     distance_from_start = models.FloatField(
         help_text="Distance in km from start", null=True, blank=True
     )
-    fare_from_start = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True
-    )
+    # fare_from_start = models.DecimalField(
+    #     max_digits=8, decimal_places=2, null=True, blank=True
+    # )
 
     class Meta:
         ordering = ["order"]
@@ -73,8 +73,8 @@ class Trip(models.Model):
 class TripStop(models.Model):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="trip_stops")
     route_stop = models.ForeignKey(RouteStop, on_delete=models.CASCADE)
-    arrival_time = models.TimeField()
-
+    arrival_time = models.TimeField(default=time(0,0))
+    fare_from_start=models.DecimalField(max_digits=8,decimal_places=2,null=True,blank=True)
     class Meta:
         ordering = ["route_stop__order"]
 
@@ -163,3 +163,31 @@ def create_seats_for_trip(sender, instance, created, **kwargs):
         total_seats = instance.bus.total_seats
         for i in range(1, total_seats + 1):
             Seat.objects.create(trip=instance, seat_number=str(i))
+
+# @receiver(post_save, sender=Trip)
+# def calculate_stop_fares(sender, instance, created, **kwargs):
+#     """
+#     Automatically calculate fare_from_start for each stop
+#     based on total trip price and distance proportion.
+#     """
+#     if not created:
+#         return
+
+#     route_stops = list(
+#         RouteStop.objects.filter(route=instance.route).order_by("order")
+#     )
+#     if len(route_stops) < 2:
+#         return
+
+#     total_distance = route_stops[-1].distance_from_start or 0
+#     if total_distance == 0:
+#         return
+
+#     for rs in route_stops:
+#         proportion = (rs.distance_from_start or 0) / total_distance
+#         fare= round(float(instance.price) * proportion, 2)
+#         TripStop.objects.create(
+#             trip=instance,
+#             route_stop=rs,
+#             fare_from_start=fare
+#         )

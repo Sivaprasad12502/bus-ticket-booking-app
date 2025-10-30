@@ -15,7 +15,7 @@ import {
 import { MdEventSeat } from "react-icons/md";
 import { toast } from "react-toastify";
 import Navbar from "../../component/Navbar/Navbar";
-import {motion} from "framer-motion"
+import { motion } from "framer-motion";
 const MyBooking = () => {
   const query = useQueryClient();
   const { apiUrl, token, navigate } = useContext(Context);
@@ -130,7 +130,7 @@ const MyBooking = () => {
           </div>
         ) : (
           <div className="bookings-list">
-            {filteredBookings?.map((booking,index) => (
+            {filteredBookings?.map((booking, index) => (
               <motion.div
                 key={booking.id}
                 className="ticket-card"
@@ -144,193 +144,236 @@ const MyBooking = () => {
                 viewport={{ once: false, amount: 0.2 }}
               >
                 {/* <div key={booking.id} className="ticket-card"> */}
-                  <div className="ticket-card__header">
-                    <div className="booking-info">
-                      <h3>Booking #{booking.id}</h3>
-                      <p className="booked-date">
-                        <FaCalendar /> Booked for:{" "}
-                        {new Date(booking.booked_date).toLocaleDateString(
-                          "en-IN",
-                          { day: "numeric", month: "short", year: "numeric" }
-                        )}
-                      </p>
-                    </div>
-                    <div className="status-badges">
-                      <span
-                        className={`badge badge--status ${booking.status.toLowerCase()}`}
-                      >
-                        {booking.status.replace("_", " ")}
-                      </span>
-                      {booking.payments && (
-                        <span
-                          className={`badge badge--payment ${booking.payments.payment_status.toLowerCase()}`}
-                        >
-                          {booking.payments.payment_status}
-                        </span>
+                <div className="ticket-card__header">
+                  <div className="booking-info">
+                    <h3>Booking #{booking.id}</h3>
+                    <p className="booked-date">
+                      <FaCalendar /> Booked for:{" "}
+                      {new Date(booking.booked_date).toLocaleDateString(
+                        "en-IN",
+                        { day: "numeric", month: "short", year: "numeric" }
                       )}
+                    </p>
+                  </div>
+                  <div className="status-badges">
+                    <span
+                      className={`badge badge--status ${booking.status.toLowerCase()}`}
+                    >
+                      {booking.status.replace("_", " ")}
+                    </span>
+                    {booking.payments && (
+                      <span
+                        className={`badge badge--payment ${booking.payments.payment_status.toLowerCase()}`}
+                      >
+                        {booking.payments.payment_status}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="ticket-card__body">
+                  <div className="trip-section">
+                    <div className="bus-details">
+                      <FaBus className="icon" />
+                      <div>
+                        <h4>{booking.trip.bus.bus_name}</h4>
+                        <span
+                          className={`bus-type ${
+                            booking.trip.bus.bus_type === "AC" ? "ac" : "non-ac"
+                          }`}
+                        >
+                          {booking.trip.bus.bus_type}
+                        </span>
+                        <div className="operator-details">
+                          <span>
+                            Operator Name{" "}
+                            <strong>{booking.trip.bus.operator_name}</strong>
+                          </span>
+                          <span>
+                            Mobile No:{" "}
+                            <strong>{booking.trip.bus.operator_mobile}</strong>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="route-section">
+                      <div className="route-point">
+                        <FaMapMarkerAlt className="icon-start" />
+                        <div>
+                          <p className="location">
+                            {booking.trip.route.start_location}
+                          </p>
+                          <p className="time">{booking.trip.departure_time}</p>
+                        </div>
+                      </div>
+                      <div className="route-line">
+                        <div className="line"></div>
+                        <span className="distance">
+                          {booking.trip.route.distance_km} km
+                        </span>
+                      </div>
+                      <div className="route-point">
+                        <FaMapMarkerAlt className="icon-end" />
+                        <div>
+                          <p className="location">
+                            {booking.trip.route.end_location}
+                          </p>
+                          <p className="time">{booking.trip.arrival_time}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="booking-meta">
+                      <div className="meta-item">
+                        <MdEventSeat className="icon" />
+                        <span>
+                          Seats:{" "}
+                          {booking.seats.map((s) => s.seat_number).join(", ")}
+                        </span>
+                      </div>
+                      <div className="meta-item price">
+                        <FaRupeeSign className="icon" />
+                        <span>Total: ₹{booking.total_amount}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="ticket-card__body">
-                    <div className="trip-section">
-                      <div className="bus-details">
-                        <FaBus className="icon" />
-                        <div>
-                          <h4>{booking.trip.bus.bus_name}</h4>
-                          <span
-                            className={`bus-type ${
-                              booking.trip.bus.bus_type === "AC"
-                                ? "ac"
-                                : "non-ac"
-                            }`}
-                          >
-                            {booking.trip.bus.bus_type}
-                          </span>
-                        </div>
-                      </div>
+                  {booking.passengers && booking.passengers.length > 0 && (
+                    <div className="passengers-section">
+                      <h5>Passenger Details:</h5>
+                      <div className="passengers-grid">
+                        {booking.passengers.map((p) => {
+                          // Find boarding and dropping stop times from trip_stops
+                          const boardingStop = booking.trip.trip_stops?.find(
+                            (stop) => stop.stop_name === p.boarding_location
+                          );
+                          const droppingStop = booking.trip.trip_stops?.find(
+                            (stop) => stop.stop_name === p.dropping_location
+                          );
 
-                      <div className="route-section">
-                        <div className="route-point">
-                          <FaMapMarkerAlt className="icon-start" />
-                          <div>
-                            <p className="location">
-                              {booking.trip.route.start_location}
-                            </p>
-                            <p className="time">
-                              {booking.trip.departure_time}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="route-line">
-                          <div className="line"></div>
-                          <span className="distance">
-                            {booking.trip.route.distance_km} km
-                          </span>
-                        </div>
-                        <div className="route-point">
-                          <FaMapMarkerAlt className="icon-end" />
-                          <div>
-                            <p className="location">
-                              {booking.trip.route.end_location}
-                            </p>
-                            <p className="time">{booking.trip.arrival_time}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="booking-meta">
-                        <div className="meta-item">
-                          <MdEventSeat className="icon" />
-                          <span>
-                            Seats:{" "}
-                            {booking.seats.map((s) => s.seat_number).join(", ")}
-                          </span>
-                        </div>
-                        <div className="meta-item price">
-                          <FaRupeeSign className="icon" />
-                          <span>Total: ₹{booking.total_amount}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {booking.passengers && booking.passengers.length > 0 && (
-                      <div className="passengers-section">
-                        <h5>Passenger Details:</h5>
-                        <div className="passengers-grid">
-                          {booking.passengers.map((p) => {
-                            // Find boarding and dropping stop times from trip_stops
-                            const boardingStop = booking.trip.trip_stops?.find(
-                              stop => stop.stop_name === p.boarding_location
-                            );
-                            const droppingStop = booking.trip.trip_stops?.find(
-                              stop => stop.stop_name === p.dropping_location
-                            );
-
-                            return (
-                              <div key={p.id} className="passenger-card">
-                                <div className="passenger-header">
-                                  <span className="name">{p.name}</span>
-                                  <span className="seat-badge">
-                                    Seat {p.seat_number}
+                          return (
+                            <div key={p.id} className="passenger-card">
+                              <div className="passenger-header">
+                                <span className="name">{p.name}</span>
+                                <span className="seat-badge">
+                                  Seat {p.seat_number}
+                                </span>
+                              </div>
+                              <div className="passenger-details">
+                                <span>
+                                  {p.age} yrs,{" "}
+                                  {p.gender === "M"
+                                    ? "Male"
+                                    : p.gender === "F"
+                                    ? "Female"
+                                    : "Other"}
+                                </span>
+                              </div>
+                              <div className="passenger-journey">
+                                <div className="journey-stop boarding-stop">
+                                  <span className="location">
+                                    📍 {p.boarding_location}
                                   </span>
+                                  {boardingStop?.arrival_time ? (
+                                    <span className="time">
+                                      <FaClock
+                                        style={{
+                                          fontSize: "12px",
+                                          marginRight: "4px",
+                                        }}
+                                      />
+                                      {boardingStop.arrival_time}
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className="time"
+                                      style={{
+                                        background: "#f0f0f0",
+                                        color: "#999",
+                                      }}
+                                    >
+                                      <FaClock
+                                        style={{
+                                          fontSize: "12px",
+                                          marginRight: "4px",
+                                        }}
+                                      />
+                                      Time N/A
+                                    </span>
+                                  )}
                                 </div>
-                                <div className="passenger-details">
-                                  <span>
-                                    {p.age} yrs, {p.gender === 'M' ? 'Male' : p.gender === 'F' ? 'Female' : 'Other'}
+                                <span className="arrow">→</span>
+                                <div className="journey-stop dropping-stop">
+                                  <span className="location">
+                                    📍 {p.dropping_location}
                                   </span>
-                                </div>
-                                <div className="passenger-journey">
-                                  <div className="journey-stop boarding-stop">
-                                    <span className="location">
-                                      📍 {p.boarding_location}
+                                  {droppingStop?.arrival_time ? (
+                                    <span className="time">
+                                      <FaClock
+                                        style={{
+                                          fontSize: "12px",
+                                          marginRight: "4px",
+                                        }}
+                                      />
+                                      {droppingStop.arrival_time}
                                     </span>
-                                    {boardingStop?.arrival_time ? (
-                                      <span className="time">
-                                        <FaClock style={{ fontSize: '12px', marginRight: '4px' }} />
-                                        {boardingStop.arrival_time}
-                                      </span>
-                                    ) : (
-                                      <span className="time" style={{ background: '#f0f0f0', color: '#999' }}>
-                                        <FaClock style={{ fontSize: '12px', marginRight: '4px' }} />
-                                        Time N/A
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="arrow">→</span>
-                                  <div className="journey-stop dropping-stop">
-                                    <span className="location">
-                                      📍 {p.dropping_location}
+                                  ) : (
+                                    <span
+                                      className="time"
+                                      style={{
+                                        background: "#f0f0f0",
+                                        color: "#999",
+                                      }}
+                                    >
+                                      <FaClock
+                                        style={{
+                                          fontSize: "12px",
+                                          marginRight: "4px",
+                                        }}
+                                      />
+                                      Time N/A
                                     </span>
-                                    {droppingStop?.arrival_time ? (
-                                      <span className="time">
-                                        <FaClock style={{ fontSize: '12px', marginRight: '4px' }} />
-                                        {droppingStop.arrival_time}
-                                      </span>
-                                    ) : (
-                                      <span className="time" style={{ background: '#f0f0f0', color: '#999' }}>
-                                        <FaClock style={{ fontSize: '12px', marginRight: '4px' }} />
-                                        Time N/A
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="passenger-fare">
-                                  Fare: ₹{p.fare}
+                                  )}
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
+                              <div className="passenger-fare">
+                                Fare: ₹{p.fare}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
 
-                  <div className="ticket-card__footer">
-                    {booking.status === "PENDING_PAYMENT" && (
-                      <button
-                        className="btn btn-pay"
-                        onClick={() =>
-                          handlePayNow(booking.id, booking.total_amount)
-                        }
-                      >
-                        💳 Pay Now
-                      </button>
-                    )}
-                    {booking.status === "CONFIRMED" && (
-                      <button className="btn btn-confirmed" disabled>
-                        ✅ Confirmed
-                      </button>
-                    )}
-                    {booking.status !== "CANCELLED" && (
-                      <button
-                        className="btn btn-cancel"
-                        onClick={() => mutation.mutate(booking.id)}
-                        disabled={mutation.isPending}
-                      >
-                        ❌ {mutation.isPending ? "Cancelling..." : "Cancel"}
-                      </button>
-                    )}
-                  </div>
+                <div className="ticket-card__footer">
+                  {booking.status === "PENDING_PAYMENT" && (
+                    <button
+                      className="btn btn-pay"
+                      onClick={() =>
+                        handlePayNow(booking.id, booking.total_amount)
+                      }
+                    >
+                      💳 Pay Now
+                    </button>
+                  )}
+                  {booking.status === "CONFIRMED" && (
+                    <button className="btn btn-confirmed" disabled>
+                      ✅ Confirmed
+                    </button>
+                  )}
+                  {booking.status !== "CANCELLED" && (
+                    <button
+                      className="btn btn-cancel"
+                      onClick={() => mutation.mutate(booking.id)}
+                      disabled={mutation.isPending}
+                    >
+                      ❌ {mutation.isPending ? "Cancelling..." : "Cancel"}
+                    </button>
+                  )}
+                </div>
                 {/* </div> */}
               </motion.div>
             ))}

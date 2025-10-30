@@ -50,7 +50,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .my-bookings {
@@ -94,16 +96,16 @@
       font-size: 1rem;
       color: $text-secondary;
     }
-    .filter-box{
-    margin-top: 0.5rem;
-    select{
-      padding: 0.5rem 1rem;
-      border:1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
+    .filter-box {
+      margin-top: 0.5rem;
+      select {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
     }
-  }
   }
 
   .no-bookings {
@@ -235,7 +237,8 @@
           }
 
           &--payment {
-            &.success, &.paid {
+            &.success,
+            &.paid {
               background: #e8f5e9;
               color: #2e7d32;
             }
@@ -299,6 +302,13 @@
               background: linear-gradient(135deg, #fff3e0, #ffe0b2);
               color: #e65100;
             }
+          }
+          .operator-details {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            padding: 4px;
+           
           }
         }
 
@@ -651,4 +661,3 @@
     }
   }
 }
-

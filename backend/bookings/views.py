@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
 from datetime import datetime, time, timedelta
-from .models import Bus, Route, Trip, Seat, Booking, Passenger, Payment, RouteStop
+from .models import Bus, Route, Trip, Seat, Booking, Passenger, Payment, RouteStop,TripStop
 from .serializers import (
     BusSerializer,
     RouteSerializer,
@@ -282,11 +282,11 @@ def create_bookings(request):
             dropping = p.get("dropping_location")
             passenger_fare = trip.price
             if boarding and dropping:
-                from_stop = RouteStop.objects.filter(
-                    route=trip.route, stop_name__iexact=boarding
+                from_stop = TripStop.objects.filter(
+                    trip=trip, route_stop__stop_name__iexact=boarding
                 ).first()
-                to_stop = RouteStop.objects.filter(
-                    route=trip.route, stop_name__iexact=dropping
+                to_stop = TripStop.objects.filter(
+                    trip=trip, route_stop__stop_name__iexact=dropping
                 ).first()
 
                 if from_stop and to_stop:
@@ -312,11 +312,11 @@ def create_bookings(request):
             boarding = p.get("boarding_location")
             dropping = p.get("dropping_location")
 
-            from_stop = RouteStop.objects.filter(
-                route=trip.route, stop_name__iexact=boarding
+            from_stop = TripStop.objects.filter(
+                trip=trip, route_stop__stop_name__iexact=boarding
             ).first()
-            to_stop = RouteStop.objects.filter(
-                route=trip.route, stop_name__iexact=dropping
+            to_stop = TripStop.objects.filter(
+                trip=trip, route_stop__stop_name__iexact=dropping
             ).first()
 
             fare = trip.price

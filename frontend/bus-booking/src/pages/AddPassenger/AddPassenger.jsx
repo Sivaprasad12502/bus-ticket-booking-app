@@ -36,9 +36,9 @@ const AddPassenger = () => {
       return response.data;
     },
   });
-
+  console.log(trip ,'tripdataaaa')
   // const tripStopes = trip?.trip_stops || [];
-  const tripStopes = trip?.route?.stops || [];
+  const tripStopes = trip?.trip_stops || [];
   console.log(tripStopes,'tripstopeesss from add passenger')
 
   const mutation = useMutation({

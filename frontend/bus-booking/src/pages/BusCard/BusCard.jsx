@@ -47,9 +47,22 @@ const BusCard = () => {
     },
   });
   const busType = [...new Set(data?.map((trip) => trip.bus.bus_type))];
-  const filteredData = selectedType
+
+  console.log(data,'bus datata')
+  // const filteredData = selectedType
+  //   ? data?.filter((trip) => trip.bus.bus_type === selectedType)
+  //   : data;
+const filteredData = (
+  selectedType
     ? data?.filter((trip) => trip.bus.bus_type === selectedType)
-    : data;
+    : data
+)?.sort((a, b) => {
+  return (
+    new Date(`1970/01/01 ${a.arrival_time}`) -
+    new Date(`1970/01/01 ${b.arrival_time}`)
+  );
+});
+
 
   if (isLoading) {
     return (
@@ -66,7 +79,7 @@ const BusCard = () => {
   if (isError) {
     return (
       <div className="bus-results-page">
-        <Navbar />
+        {/* <Navbar /> */}
         <div className="error-container">
           <p>⚠️ Error loading buses. Please try again.</p>
           <button onClick={() => navigate(-1)} className="btn-back">
@@ -149,7 +162,7 @@ const BusCard = () => {
                     </span>
                   </div>
                   <div className="price-section">
-                    <span className="price-label">Starting from</span>
+                    {/* <span className="price-label">Starting from</span> */}
                     <p className="price">
                       <FaRupeeSign /> {trip.price}
                     </p>
