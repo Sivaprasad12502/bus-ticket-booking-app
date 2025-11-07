@@ -27,10 +27,22 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
     
+class AdminUserSerializer(serializers.ModelSerializer):
+    password=serializers.CharField(write_only=True,required=True,validators=[validate_password])
+    class Meta:
+        model=User
+        fields=["id","username","email","password"]
+    def create(self,validated_data):
+        user=User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data.get("email",""),
+            password=validated_data["password"],
 
-
-
-
+        )
+        user.is_staff=True
+        user.is_superuser=True
+        user.save()
+        return user
 
 
 

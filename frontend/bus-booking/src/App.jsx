@@ -10,6 +10,14 @@ import Payment from "./pages/payement/Payment";
 import MyBooking from "./pages/MyBooking/MyBooking";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AdminLogin from "./pages/AdminLogin/AdminLogin";
+import AdminDashBoard from "./pages/AdminDashBoard/AdminDashBoard";
+import AdminLayout from "./Layout/AdminLayout/AdminLayout";
+import AdminBuses from "./pages/AdminBuses/AdminBuses";
+import AdminRoutes from "./pages/AdminRoutes/AdminRoutes";
+import AdminTrips from "./pages/AdminTrips/AdminTrips";
+import AdminBookings from "./pages/AdminBookings/AdminBookings";
+import AdminProtectedRoute from "./component/AdminProtectRoute/AdminProtectedRoute";
 
 function App() {
   return (
@@ -79,6 +87,17 @@ function App() {
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* ========== for admin ========== */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
+          <Route index element={<AdminDashBoard />} />
+          <Route path="dashboard" element={<AdminDashBoard />} />
+          <Route path="buses" element={<AdminBuses />} />
+          <Route path="routes" element={<AdminRoutes/>} />
+          <Route path="trips" element={<AdminTrips/>} />
+          <Route path="bookings" element={<AdminBookings/>} />
+        </Route>
       </Routes>
     </>
   );

@@ -30,6 +30,7 @@ class RouteStopSerializer(serializers.ModelSerializer):
         model = RouteStop
         fields = [
             "id",
+            "route",
             "stop_name",
             "order",
             "distance_from_start",
@@ -47,11 +48,21 @@ class RouteSerializer(serializers.ModelSerializer):
 
 class TripStopSerializer(serializers.ModelSerializer):
     stop_name = serializers.CharField(source="route_stop.stop_name", read_only=True)
-    arrival_time = serializers.SerializerMethodField()
+    # arrival_time = serializers.SerializerMethodField()
+    arrival_time = serializers.TimeField(
+        format="%I:%M %p", input_formats=["%H:%M", "%H:%M:%S"], required=False
+    )
 
     class Meta:
         model = TripStop
-        fields = ["id", "stop_name", "arrival_time",'fare_from_start']
+        fields = [
+            "id",
+            "stop_name",
+            "trip",
+            "route_stop",
+            "arrival_time",
+            "fare_from_start",
+        ]
 
     def get_arrival_time(self, obj):
         return obj.arrival_time.strftime("%I:%M %p") if obj.arrival_time else None
@@ -67,8 +78,8 @@ class TripSerializer(serializers.ModelSerializer):
     route_id = serializers.PrimaryKeyRelatedField(
         queryset=Route.objects.all(), source="route", write_only=True
     )
-    departure_time = serializers.SerializerMethodField()
-    arrival_time = serializers.SerializerMethodField()
+    # departure_time = serializers.SerializerMethodField()
+    # arrival_time = serializers.SerializerMethodField()
 
     class Meta:
         model = Trip
@@ -84,11 +95,26 @@ class TripSerializer(serializers.ModelSerializer):
             "trip_stops",
         ]
 
-    def get_departure_time(self, obj):
-        return obj.departure_time.strftime("%I:%M %p") if obj.departure_time else None
+    # Format only for output
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["departure_time"] = (
+            instance.departure_time.strftime("%I:%M %p")
+            if instance.departure_time
+            else None
+        )
+        data["arrival_time"] = (
+            instance.arrival_time.strftime("%I:%M %p")
+            if instance.arrival_time
+            else None
+        )
+        return data
 
-    def get_arrival_time(self, obj):
-        return obj.arrival_time.strftime("%I:%M %p") if obj.arrival_time else None
+    # def get_departure_time(self, obj):
+    #     return obj.departure_time.strftime("%I:%M %p") if obj.departure_time else None
+
+    # def get_arrival_time(self, obj):
+    #     return obj.arrival_time.strftime("%I:%M %p") if obj.arrival_time else None
 
 
 class SeatSerializer(serializers.ModelSerializer):

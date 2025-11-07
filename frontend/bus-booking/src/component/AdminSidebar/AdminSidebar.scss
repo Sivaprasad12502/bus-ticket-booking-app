@@ -1,0 +1,324 @@
+@import '../../styles/admin_variables';
+@import '../../styles/admin_mixins';
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: $admin-sidebar-width;
+  background: $admin-bg-sidebar;
+  color: $admin-text-white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: width $admin-transition-normal, transform $admin-transition-normal;
+  z-index: 100;
+  box-shadow: $admin-shadow-lg;
+
+  &--collapsed {
+    width: $admin-sidebar-collapsed-width;
+
+    .sidebar__logo-text,
+    .sidebar__label,
+    .sidebar__badge,
+    .sidebar__user-info {
+      display: none;
+    }
+
+    .sidebar__toggle {
+      svg {
+        transform: rotate(0deg);
+      }
+    }
+    
+    .sidebar__link {
+      justify-content: center;
+      padding: $admin-spacing-md;
+    }
+    
+    .sidebar__icon {
+      margin: 0;
+    }
+  }
+
+  /* Header */
+  &__header {
+    @include flex-between;
+    padding: $admin-spacing-lg $admin-spacing-md;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: $admin-header-height;
+  }
+
+  &__logo {
+    @include flex-center;
+    gap: $admin-spacing-sm;
+    flex: 1;
+
+    &-icon {
+      font-size: 1.8rem;
+      color: $admin-primary-light;
+      @include flex-center;
+      
+      svg {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    &-text {
+      font-size: $admin-font-size-xl;
+      font-weight: 700;
+      color: $admin-text-white;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  &__toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: $admin-text-white;
+    width: 32px;
+    height: 32px;
+    border-radius: $admin-radius-md;
+    cursor: pointer;
+    transition: all $admin-transition-fast;
+    @include flex-center;
+    flex-shrink: 0;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      transition: transform $admin-transition-normal;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.05);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+    
+    @include responsive(lg) {
+      display: none;
+    }
+  }
+
+  /* Navigation */
+  &__nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: $admin-spacing-md 0;
+    @include admin-scrollbar;
+  }
+
+  &__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__menu-item {
+    margin-bottom: $admin-spacing-xs;
+    padding: 0 $admin-spacing-sm;
+  }
+
+  &__link {
+    @include flex-center;
+    justify-content: flex-start;
+    gap: $admin-spacing-md;
+    padding: $admin-spacing-md $admin-spacing-md;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: $admin-font-size-sm;
+    font-weight: 500;
+    border-radius: $admin-radius-md;
+    border-left: 3px solid transparent;
+    transition: all $admin-transition-fast;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: rgba(255, 255, 255, 0.05);
+      transition: width $admin-transition-normal;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: $admin-text-white;
+      transform: translateX(4px);
+      
+      &::before {
+        width: 100%;
+      }
+    }
+
+    &--active {
+      background: $admin-primary;
+      color: $admin-text-white;
+      border-left-color: $admin-primary-light;
+      box-shadow: $admin-shadow-md;
+
+      &::before {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      .sidebar__icon {
+        color: $admin-text-white;
+      }
+    }
+  }
+
+  &__icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    @include flex-center;
+    width: 24px;
+    height: 24px;
+    color: rgba(255, 255, 255, 0.9);
+    
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  
+  &__label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__badge {
+    background: $admin-danger;
+    color: $admin-text-white;
+    font-size: $admin-font-size-xs;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: $admin-radius-full;
+    margin-left: auto;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* Footer */
+  &__footer {
+    padding: $admin-spacing-md;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $admin-spacing-sm;
+    padding: $admin-spacing-sm;
+    border-radius: $admin-radius-md;
+    transition: background $admin-transition-fast;
+    cursor: pointer;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  &__user-avatar {
+    background: linear-gradient(135deg, $admin-primary 0%, $admin-primary-light 100%);
+    color: $admin-text-white;
+    font-weight: 700;
+    font-size: $admin-font-size-base;
+    width: 40px;
+    height: 40px;
+    border-radius: $admin-radius-full;
+    @include flex-center;
+    flex-shrink: 0;
+    box-shadow: $admin-shadow-sm;
+  }
+
+  &__user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    min-width: 0;
+    flex: 1;
+
+    &-name {
+      font-weight: 600;
+      font-size: $admin-font-size-sm;
+      color: $admin-text-white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &-role {
+      font-size: $admin-font-size-xs;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  /* Mobile Responsive */
+  @include responsive(lg) {
+    transform: translateX(-100%);
+    
+    &.sidebar--open {
+      transform: translateX(0);
+    }
+    
+    // On mobile, when sidebar is open but also collapsed (icon-only mode)
+    &.sidebar--collapsed.sidebar--open {
+      transform: translateX(0);
+      width: $admin-sidebar-collapsed-width;
+    }
+    
+    // On mobile, collapsed sidebar should be hidden
+    &.sidebar--collapsed:not(.sidebar--open) {
+      transform: translateX(-100%);
+    }
+  }
+  
+  @include responsive(md) {
+    width: 240px;
+  }
+  
+  @include responsive(sm) {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+// Overlay for mobile
+.sidebar-overlay {
+  display: none;
+  
+  @include responsive(lg) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity $admin-transition-normal;
+    
+    &.sidebar-overlay--active {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+}

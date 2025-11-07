@@ -1,0 +1,31 @@
+﻿@import '../styles/variables';
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: $bg-main;
+
+  &__main {
+    flex: 1;
+    margin-left: $sidebar-width;
+    transition: $transition-base;
+    min-width: 0;
+
+    @media (max-width: $breakpoint-lg) {
+      margin-left: 0;
+    }
+  }
+
+  &__content {
+    padding: $spacing-xl;
+    min-height: calc(100vh - #{$header-height});
+
+    @media (max-width: $breakpoint-md) {
+      padding: $spacing-lg;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      padding: $spacing-md;
+    }
+  }
+}

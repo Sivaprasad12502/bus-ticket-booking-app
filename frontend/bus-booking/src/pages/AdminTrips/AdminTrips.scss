@@ -1,0 +1,199 @@
+@import '../../styles/admin_variables';
+@import '../../styles/admin_mixins';
+
+.admin-trip-page {
+  font-family: $admin-font-family;
+  
+  h2 {
+    font-size: $admin-font-size-3xl;
+    font-weight: 700;
+    color: $admin-text-primary;
+    margin-bottom: $admin-spacing-xl;
+  }
+  
+  // Trip Form
+  .admin-trip-form {
+    @include admin-card;
+    margin-bottom: $admin-spacing-2xl;
+    
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: $admin-spacing-md;
+    align-items: end;
+    
+    @include responsive(md) {
+      grid-template-columns: 1fr;
+    }
+    
+    input,
+    select {
+      @include admin-input;
+    }
+    
+    button {
+      @include admin-btn-primary;
+      white-space: nowrap;
+    }
+  }
+  
+  // Trips List
+  .admin-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $admin-spacing-lg;
+    
+    > li {
+      @include admin-card;
+      border-left: 4px solid $admin-accent;
+      font-size: $admin-font-size-base;
+      line-height: 1.8;
+      
+      strong {
+        color: $admin-text-primary;
+      }
+      
+      br {
+        margin: $admin-spacing-xs 0;
+      }
+    }
+  }
+  
+  // Action Buttons
+  .actions {
+    display: flex;
+    gap: $admin-spacing-sm;
+    flex-wrap: wrap;
+    margin-top: $admin-spacing-md;
+    
+    button {
+      @include admin-btn-base;
+      font-size: $admin-font-size-sm;
+      padding: $admin-spacing-xs $admin-spacing-md;
+      
+      &:nth-child(1) {
+        // Edit
+        background: $admin-warning;
+        color: white;
+        
+        &:hover {
+          background: darken($admin-warning, 10%);
+        }
+      }
+      
+      &:nth-child(2) {
+        // Delete
+        background: $admin-danger;
+        color: white;
+        
+        &:hover {
+          background: darken($admin-danger, 10%);
+        }
+      }
+      
+      &:nth-child(3) {
+        // Manage Stops
+        background: $admin-info;
+        color: white;
+        
+        &:hover {
+          background: darken($admin-info, 10%);
+        }
+      }
+    }
+  }
+  
+  // Stops Panel
+  .stops-panel {
+    @include admin-card;
+    margin-top: $admin-spacing-lg;
+    background: $admin-bg-hover;
+    border: 2px solid $admin-accent;
+    
+    h3 {
+      font-size: $admin-font-size-xl;
+      color: $admin-text-primary;
+      margin-bottom: $admin-spacing-lg;
+      padding-bottom: $admin-spacing-md;
+      border-bottom: 2px solid $admin-border-light;
+    }
+    
+    .stops-form {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: $admin-spacing-md;
+      margin-bottom: $admin-spacing-xl;
+      
+      @include responsive(md) {
+        grid-template-columns: 1fr;
+      }
+      
+      input,
+      select {
+        @include admin-input;
+      }
+      
+      button {
+        @include admin-btn-success;
+        white-space: nowrap;
+      }
+    }
+    
+    .stops-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: $admin-spacing-md;
+      
+      @include responsive(sm) {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .stop-card {
+      background: white;
+      padding: $admin-spacing-md;
+      border-radius: $admin-radius-md;
+      border-left: 3px solid $admin-success;
+      @include flex-between;
+      gap: $admin-spacing-md;
+      
+      strong {
+        font-size: $admin-font-size-base;
+        color: $admin-text-primary;
+        flex: 1;
+      }
+      
+      div {
+        display: flex;
+        gap: $admin-spacing-xs;
+        
+        button {
+          @include admin-btn-base;
+          padding: $admin-spacing-xs $admin-spacing-sm;
+          font-size: $admin-font-size-sm;
+          min-width: 36px;
+          
+          &:nth-child(1) {
+            background: $admin-warning;
+            color: white;
+          }
+          
+          &:nth-child(2) {
+            background: $admin-danger;
+            color: white;
+          }
+        }
+      }
+    }
+  }
+  
+  // Loading
+  p {
+    text-align: center;
+    color: $admin-text-secondary;
+    padding: $admin-spacing-xl;
+    font-size: $admin-font-size-lg;
+  }
+}

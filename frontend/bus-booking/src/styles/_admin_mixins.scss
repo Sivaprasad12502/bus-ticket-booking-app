@@ -1,0 +1,236 @@
+@import './admin_variables';
+
+// Flexbox utilities
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Card styles
+@mixin admin-card {
+  background: $admin-bg-card;
+  border-radius: $admin-radius-lg;
+  padding: $admin-spacing-xl;
+  box-shadow: $admin-shadow-sm;
+  border: 1px solid $admin-border-light;
+}
+
+// Button styles
+@mixin admin-btn-base {
+  padding: $admin-spacing-sm $admin-spacing-lg;
+  border-radius: $admin-radius-md;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $admin-transition-normal;
+  border: none;
+  font-size: $admin-font-size-sm;
+  outline: none;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin admin-btn-primary {
+  @include admin-btn-base;
+  background: $admin-primary;
+  color: $admin-text-white;
+  
+  &:hover:not(:disabled) {
+    background: $admin-primary-dark;
+    transform: translateY(-1px);
+    box-shadow: $admin-shadow-md;
+  }
+  
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}
+
+@mixin admin-btn-secondary {
+  @include admin-btn-base;
+  background: $admin-bg-hover;
+  color: $admin-text-primary;
+  
+  &:hover:not(:disabled) {
+    background: $admin-border-light;
+  }
+}
+
+@mixin admin-btn-danger {
+  @include admin-btn-base;
+  background: $admin-danger;
+  color: $admin-text-white;
+  
+  &:hover:not(:disabled) {
+    background: darken($admin-danger, 8%);
+  }
+}
+
+@mixin admin-btn-success {
+  @include admin-btn-base;
+  background: $admin-success;
+  color: $admin-text-white;
+  
+  &:hover:not(:disabled) {
+    background: darken($admin-success, 8%);
+  }
+}
+
+// Input styles
+@mixin admin-input {
+  padding: $admin-spacing-sm $admin-spacing-md;
+  border: 1px solid $admin-border-medium;
+  border-radius: $admin-radius-md;
+  font-size: $admin-font-size-base;
+  transition: border-color $admin-transition-fast, box-shadow $admin-transition-fast;
+  outline: none;
+  width: 100%;
+  
+  &:focus {
+    border-color: $admin-primary;
+    box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+  }
+  
+  &::placeholder {
+    color: $admin-text-light;
+  }
+}
+
+// Table styles
+@mixin admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $admin-bg-card;
+  border-radius: $admin-radius-lg;
+  overflow: hidden;
+  
+  thead {
+    background: $admin-bg-hover;
+    
+    th {
+      padding: $admin-spacing-md $admin-spacing-lg;
+      text-align: left;
+      font-weight: 600;
+      color: $admin-text-primary;
+      font-size: $admin-font-size-sm;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+  
+  tbody {
+    tr {
+      border-bottom: 1px solid $admin-border-light;
+      transition: background $admin-transition-fast;
+      
+      &:hover {
+        background: $admin-bg-hover;
+      }
+      
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+    
+    td {
+      padding: $admin-spacing-md $admin-spacing-lg;
+      color: $admin-text-secondary;
+      font-size: $admin-font-size-sm;
+    }
+  }
+}
+
+// Badge styles
+@mixin admin-badge($color) {
+  display: inline-flex;
+  align-items: center;
+  padding: $admin-spacing-xs $admin-spacing-sm;
+  border-radius: $admin-radius-full;
+  font-size: $admin-font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba($color, 0.1);
+  color: darken($color, 10%);
+}
+
+// Loading spinner
+@mixin admin-spinner {
+  border: 3px solid $admin-border-light;
+  border-top: 3px solid $admin-primary;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive breakpoints
+@mixin responsive($breakpoint) {
+  @if $breakpoint == xs {
+    @media (max-width: $breakpoint-xs) { @content; }
+  } @else if $breakpoint == sm {
+    @media (max-width: $breakpoint-sm) { @content; }
+  } @else if $breakpoint == md {
+    @media (max-width: $breakpoint-md) { @content; }
+  } @else if $breakpoint == lg {
+    @media (max-width: $breakpoint-lg) { @content; }
+  } @else if $breakpoint == xl {
+    @media (max-width: $breakpoint-xl) { @content; }
+  }
+}
+
+// Scrollbar styles
+@mixin admin-scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $admin-bg-hover;
+    border-radius: $admin-radius-sm;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $admin-border-medium;
+    border-radius: $admin-radius-sm;
+    
+    &:hover {
+      background: $admin-border-dark;
+    }
+  }
+}
+
+// Truncate text
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Multi-line truncate
+@mixin line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

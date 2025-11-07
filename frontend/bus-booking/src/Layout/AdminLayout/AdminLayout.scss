@@ -1,0 +1,133 @@
+@import '../../../src/styles/admin_variables';
+@import '../../../src/styles/admin_mixins';
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: $admin-bg-light;
+  position: relative;
+
+  /* Overlay for mobile sidebar */
+  &__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    animation: fadeIn $admin-transition-fast ease-out;
+    
+    @include responsive(lg) {
+      display: block;
+    }
+  }
+
+  /* Sidebar Container */
+  &__sidebar {
+    // Just a container, the sidebar itself handles its positioning
+    position: relative;
+    z-index: 100;
+  }
+
+  /* Main Content Area */
+  &__main {
+    flex: 1;
+    margin-left: $admin-sidebar-width;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: margin-left $admin-transition-normal;
+    width: calc(100% - #{$admin-sidebar-width});
+    
+    @include responsive(lg) {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+
+  /* Content Section */
+  &__content {
+    flex: 1;
+    padding: $admin-spacing-xl;
+    background: $admin-bg-light;
+    overflow-y: auto;
+    overflow-x: hidden;
+    @include admin-scrollbar;
+    
+    // Add smooth scroll behavior
+    scroll-behavior: smooth;
+    
+    // Ensure content doesn't overflow on mobile
+    max-width: 100%;
+    
+    @include responsive(lg) {
+      padding: $admin-spacing-lg;
+    }
+    
+    @include responsive(md) {
+      padding: $admin-spacing-md;
+    }
+    
+    @include responsive(sm) {
+      padding: $admin-spacing-sm;
+    }
+  }
+
+  /* Footer */
+  &__footer {
+    background: $admin-bg-white;
+    border-top: 1px solid $admin-border-light;
+    padding: $admin-spacing-md $admin-spacing-xl;
+    text-align: center;
+    margin-top: auto;
+    
+    p {
+      margin: 0;
+      font-size: $admin-font-size-sm;
+      color: $admin-text-secondary;
+      font-weight: 500;
+    }
+    
+    @include responsive(lg) {
+      padding: $admin-spacing-md $admin-spacing-lg;
+    }
+    
+    @include responsive(md) {
+      padding: $admin-spacing-sm $admin-spacing-md;
+      
+      p {
+        font-size: $admin-font-size-xs;
+      }
+    }
+  }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide in animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Prevent body scroll when mobile sidebar is open */
+body.sidebar-open {
+  overflow: hidden;
+  
+  @include responsive(lg) {
+    overflow: auto;
+  }
+}

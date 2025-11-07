@@ -1,0 +1,264 @@
+@import '../../styles/variables';
+
+.buses {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-xl;
+    gap: $spacing-lg;
+
+    @media (max-width: $breakpoint-md) {
+      flex-direction: column;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 0 0 $spacing-xs 0;
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    margin: 0;
+  }
+
+  &__btn {
+    padding: $spacing-sm $spacing-lg;
+    border: none;
+    border-radius: $border-radius;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: $transition-fast;
+    font-family: $font-family;
+
+    &--primary {
+      background: $primary-color;
+      color: $text-white;
+
+      &:hover {
+        background: $primary-dark;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      }
+    }
+
+    &--secondary {
+      background: $bg-light;
+      color: $text-primary;
+      border: 1px solid $border-color;
+
+      &:hover {
+        background: $bg-main;
+      }
+    }
+  }
+
+  &__filters {
+    display: flex;
+    gap: $spacing-md;
+    margin-bottom: $spacing-xl;
+
+    @media (max-width: $breakpoint-md) {
+      flex-direction: column;
+    }
+  }
+
+  &__search {
+    position: relative;
+    flex: 1;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: $spacing-md;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+  }
+
+  &__search-input {
+    width: 100%;
+    padding: $spacing-sm $spacing-md $spacing-sm 44px;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    font-size: $font-size-sm;
+    font-family: $font-family;
+    transition: $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+  }
+
+  &__filter-group {
+    display: flex;
+    gap: $spacing-sm;
+  }
+
+  &__select {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    font-size: $font-size-sm;
+    font-family: $font-family;
+    cursor: pointer;
+    transition: $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: $spacing-lg;
+
+    @media (max-width: $breakpoint-sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__card {
+    background: $card-bg;
+    border: 1px solid $card-border;
+    border-radius: $card-radius;
+    padding: $spacing-lg;
+    transition: $transition-fast;
+    display: flex;
+    flex-direction: column;
+
+    &:hover {
+      box-shadow: $card-shadow-hover;
+      transform: translateY(-2px);
+    }
+  }
+
+  &__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-md;
+  }
+
+  &__card-icon {
+    font-size: 48px;
+  }
+
+  &__status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: capitalize;
+
+    &--active {
+      background: rgba(34, 197, 94, 0.1);
+      color: $success-color;
+    }
+
+    &--inactive {
+      background: rgba(107, 114, 128, 0.1);
+      color: $text-secondary;
+    }
+
+    &--maintenance {
+      background: rgba(245, 158, 11, 0.1);
+      color: $warning-color;
+    }
+  }
+
+  &__card-body {
+    flex: 1;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__bus-name {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 0 0 $spacing-xs 0;
+  }
+
+  &__bus-number {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    font-weight: $font-weight-medium;
+    margin-bottom: $spacing-md;
+    font-family: 'Courier New', monospace;
+  }
+
+  &__details {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__detail {
+    display: flex;
+    justify-content: space-between;
+    padding: $spacing-xs 0;
+    border-bottom: 1px solid $bg-light;
+  }
+
+  &__detail-label {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+
+  &__detail-value {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__card-footer {
+    display: flex;
+    gap: $spacing-xs;
+    padding-top: $spacing-md;
+    border-top: 1px solid $border-color;
+  }
+
+  &__action-btn {
+    flex: 1;
+    padding: $spacing-sm;
+    border: 1px solid $border-color;
+    background: $bg-light;
+    border-radius: $border-radius;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: $transition-fast;
+    font-family: $font-family;
+
+    &:hover {
+      background: $bg-main;
+    }
+
+    &--edit:hover {
+      border-color: $primary-color;
+      color: $primary-color;
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    &--view:hover {
+      border-color: $info-color;
+      color: $info-color;
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    &--delete:hover {
+      border-color: $danger-color;
+      color: $danger-color;
+      background: rgba(239, 68, 68, 0.1);
+    }
+  }
+}
