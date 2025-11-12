@@ -5,17 +5,17 @@ import { useLocation } from "react-router-dom";
 import { Context } from "../../context/Context";
 import "./SeatDetail.scss";
 import { toast } from "react-toastify";
-import { 
-  FaBus, 
-  FaMapMarkerAlt, 
-  FaCalendarAlt, 
-  FaClock, 
+import {
+  FaBus,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaClock,
   FaRupeeSign,
   FaChair,
   FaCheckCircle,
   FaSpinner,
   FaExclamationCircle,
-  FaArrowRight
+  FaArrowRight,
 } from "react-icons/fa";
 import { MdEventSeat, MdAirlineSeatReclineNormal } from "react-icons/md";
 import { GiSteeringWheel } from "react-icons/gi";
@@ -25,8 +25,16 @@ export const SeatDetail = () => {
   const { apiUrl, token, navigate } = useContext(Context);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
+  
   const tripid = params.get("tripid");
   const date = params.get("date");
+  const returnTripId = params.get("returnTripId");
+  const returnDate = params.get("returnDate");
+  const tripType = params.get("tripType") || "oneway";
+  const tripPhase=params.get("tripPhase")||"onward"
+  const onwayTripId=params.get("onwayTripId")
+  const onwayDate=params.get("onwayDate")
+  const onwaySeats=params.get("onwaySeats")
   const queryClient = useQueryClient();
   const [selectedSeats, setSelectedSeats] = useState([]);
 
@@ -69,46 +77,16 @@ export const SeatDetail = () => {
   const availableSet = new Set(
     (availableSeats || []).map((s) => String(s.seat_number))
   );
-  const seatInfoMap=new Map();
-  (availableSeats||[]).forEach((s)=>{
-    seatInfoMap.set(String(s.seat_number),s);
-  })
+  const seatInfoMap = new Map();
+  (availableSeats || []).forEach((s) => {
+    seatInfoMap.set(String(s.seat_number), s);
+  });
   const seatNumbers = Array.from({ length: totalSeats }, (_, i) =>
     String(i + 1)
   );
-  console.log(availableSet,"avillalala")
-  console.log(seatInfoMap,"seatInfomaaaap")
-  // const mutation = useMutation({
-  //   mutationFn: async (seatIds) => {
-  //     if (!token) throw new Error("Authentication required");
-  //     return await axios.post(
-  //       `${apiUrl}bookings/bookings/`,
-  //       {
-  //         trip_id: tripid,
-  //         seats: seatIds,
-  //         booked_date: date,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-  //   },
-  //   onSuccess: ({ data }) => {
-  //     queryClient.invalidateQueries(["seats", tripid, date]);
-  //     const bookingId = data.booking_id;
-  //     const seatsQuery = selectedSeats.join(",");
-  //     const totalamount = data.total_amount;
-  //     setSelectedSeats([]);
-  //     toast.success("Seats booked successfully!");
-  //     navigate(`/selectSeat/addpassenger?bookingId=${bookingId}&seats=${seatsQuery}&totalamount=${totalamount}`);
-  //   },
-  //   onError: (error) => {
-  //     const msg = error?.response?.data?.error || error.message || "Booking failed";
-  //     toast.error(msg);
-  //   },
-  // });
+  console.log(availableSet, "avillalala");
+  console.log(seatInfoMap, "seatInfomaaaap");
+  
 
   const toggleSeat = (seatNumber, isAvailable) => {
     if (!isAvailable) return; // cannot toggle booked seats
@@ -129,11 +107,26 @@ export const SeatDetail = () => {
       toast.error("Please select at least one seat!");
       return;
     }
-    // mutation.mutate(selectedSeats);
+   
     const seatsQuery = selectedSeats.join(",");
-    navigate(
-      `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}`
-    );
+    //CASE 1:Onward Phase of a roundTrip
+    if(tripType==="roundtrip"&&tripPhase==="onward"){
+      navigate(
+        `/busDetails?from=${trip.route.start_location}&to=${trip.route.end_location}&date=${returnDate}&tripType=roundtrip&returnDate=${returnDate}&onwayTripId=${tripid}&onwayDate=${date}&onwaySeats=${seatsQuery}&tripPhase=return`
+      )
+    }
+    //CASE 2: Return phase of a roundtrip
+    else if(tripType==="roundtrip"&&tripPhase==="return") {
+      navigate(
+        `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}&onwayTripId=${onwayTripId}&onwayDate=${onwayDate}&onwaySeats=${onwaySeats}`
+      )
+
+    }
+    //CASE 3:one-way trip
+    else{
+      navigate(
+        `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}`)
+    }
   };
 
   if (tripLoading || seatsLoading) {
@@ -149,7 +142,7 @@ export const SeatDetail = () => {
       </>
     );
   }
-  
+
   if (!seatsSuccess) {
     return (
       <>
@@ -190,9 +183,11 @@ export const SeatDetail = () => {
                   return (
                     <button
                       key={num}
-                      className={`seat sleeper ${!isAvailable ? "booked" : ""} ${
-                        isSelected ? "selected" : ""
-                      } ${isWomenOnly ? "women-only" : ""}`}
+                      className={`seat sleeper ${
+                        !isAvailable ? "booked" : ""
+                      } ${isSelected ? "selected" : ""} ${
+                        isWomenOnly ? "women-only" : ""
+                      }`}
                       disabled={!isAvailable}
                       onClick={() => toggleSeat(num, isAvailable)}
                       title={isWomenOnly ? "Reserved for Women" : ""}
@@ -221,9 +216,11 @@ export const SeatDetail = () => {
                   return (
                     <button
                       key={num}
-                      className={`seat sleeper ${!isAvailable ? "booked" : ""} ${
-                        isSelected ? "selected" : ""
-                      } ${isWomenOnly ? "women-only" : ""}`}
+                      className={`seat sleeper ${
+                        !isAvailable ? "booked" : ""
+                      } ${isSelected ? "selected" : ""} ${
+                        isWomenOnly ? "women-only" : ""
+                      }`}
                       disabled={!isAvailable}
                       onClick={() => toggleSeat(num, isAvailable)}
                       title={isWomenOnly ? "Reserved for Women" : ""}
@@ -239,42 +236,45 @@ export const SeatDetail = () => {
       );
     }
     //default 2*2 seat layout
-    const perRow=4;
-    const rows=[];
-    for(let i=0;i<seatNumbers.length;i+=perRow){
-      rows.push(seatNumbers.slice(i,i+perRow))
+    const perRow = 4;
+    const rows = [];
+    for (let i = 0; i < seatNumbers.length; i += perRow) {
+      rows.push(seatNumbers.slice(i, i + perRow));
     }
-    return rows.map((row,rIdx)=>(
+    return rows.map((row, rIdx) => (
       <div className="seat-row" key={`row-${rIdx}`}>
         <div className="seat-block left">
-          {row.slice(0,2).map((num)=>renderSeat(num))}
+          {row.slice(0, 2).map((num) => renderSeat(num))}
         </div>
-        <div className="aisle"/>
+        <div className="aisle" />
         <div className="seat-block right">
-          {row.slice(2,4).map((num)=>renderSeat(num))}
+          {row.slice(2, 4).map((num) => renderSeat(num))}
         </div>
       </div>
-    ))
+    ));
   };
   //Helper render seat
-  const renderSeat=(num)=>{
-    const seatData=seatInfoMap.get(num)
-    const genderPref=seatData?.gender_preference||"ANY"
-    const isWomenOnly=genderPref==="WOMEN_ONLY"
-    const isAvailable=availableSet.has(num);
-    const isSelected=selectedSeats.includes(num);
-    return(
-      <button 
-      key={num}
-      className={`seat ${!isAvailable?"booked":""} ${isSelected?"selected":""} ${isWomenOnly?"women-only":""}`}
-      disabled={!isAvailable}
-      onClick={()=>toggleSeat(num,isAvailable)}
-      title={isWomenOnly?"Reserved for Women":""}>
+  const renderSeat = (num) => {
+    const seatData = seatInfoMap.get(num);
+    const genderPref = seatData?.gender_preference || "ANY";
+    const isWomenOnly = genderPref === "WOMEN_ONLY";
+    const isAvailable = availableSet.has(num);
+    const isSelected = selectedSeats.includes(num);
+    return (
+      <button
+        key={num}
+        className={`seat ${!isAvailable ? "booked" : ""} ${
+          isSelected ? "selected" : ""
+        } ${isWomenOnly ? "women-only" : ""}`}
+        disabled={!isAvailable}
+        onClick={() => toggleSeat(num, isAvailable)}
+        title={isWomenOnly ? "Reserved for Women" : ""}
+      >
         {num}
-        {isWomenOnly&&<span className="seat-icon">♀</span>}
+        {isWomenOnly && <span className="seat-icon">♀</span>}
       </button>
-    )
-  }
+    );
+  };
   return (
     <>
       {/* <Navbar /> */}
@@ -286,23 +286,28 @@ export const SeatDetail = () => {
             <div className="seat-container__header">
               <h1>
                 <FaBus />
-                Select Your Seats
+                {
+                  tripPhase==="onward"?"Select onward trip Seats":"Select Return Trip Seats"
+                }
               </h1>
               <div className="seat-container__header-details">
                 <div className="seat-container__header-details-item">
                   <FaMapMarkerAlt />
                   <span>
-                    <strong>{trip?.source}</strong> → <strong>{trip?.destination}</strong>
+                    <strong>{trip?.source}</strong> →{" "}
+                    <strong>{trip?.destination}</strong>
                   </span>
                 </div>
                 <div className="seat-container__header-details-item">
                   <FaCalendarAlt />
-                  <span>{new Date(date).toLocaleDateString('en-IN', { 
-                    weekday: 'short', 
-                    day: 'numeric', 
-                    month: 'short', 
-                    year: 'numeric' 
-                  })}</span>
+                  <span>
+                    {new Date(date).toLocaleDateString("en-IN", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
                 </div>
                 <div className="seat-container__header-details-item">
                   <FaClock />
@@ -310,11 +315,16 @@ export const SeatDetail = () => {
                 </div>
                 <div className="seat-container__header-details-item">
                   <FaBus />
-                  <span><strong>{trip?.bus?.bus_name}</strong> ({trip?.bus?.bus_type})</span>
+                  <span>
+                    <strong>{trip?.bus?.bus_name}</strong> (
+                    {trip?.bus?.bus_type})
+                  </span>
                 </div>
                 <div className="seat-container__header-details-item">
                   <FaRupeeSign />
-                  <span><strong>₹{pricePerSeat}</strong> per seat</span>
+                  <span>
+                    <strong>₹{pricePerSeat}</strong> per seat
+                  </span>
                 </div>
               </div>
             </div>
@@ -325,10 +335,8 @@ export const SeatDetail = () => {
                 <GiSteeringWheel />
                 Driver
               </div>
-              
-              <div className="seat-grid">
-                {renderSeats()}
-              </div>
+
+              <div className="seat-grid">{renderSeats()}</div>
             </div>
 
             {/* Seat Legend */}
@@ -407,10 +415,11 @@ export const SeatDetail = () => {
               disabled={selectedSeats.length === 0}
             >
               <FaCheckCircle />
-              {selectedSeats.length > 0 
-                ? `Proceed to Book (${selectedSeats.length} ${selectedSeats.length === 1 ? 'Seat' : 'Seats'})`
-                : 'Select Seats to Continue'
-              }
+              {selectedSeats.length > 0
+                ? `Proceed to Book (${selectedSeats.length} ${
+                    selectedSeats.length === 1 ? "Seat" : "Seats"
+                  })`
+                : "Select Seats to Continue"}
               <FaArrowRight />
             </button>
           </div>

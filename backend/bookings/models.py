@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date,time
+import uuid
 
 
 # Create your models here.
@@ -102,6 +103,7 @@ class Booking(models.Model):
     booking_date = models.DateTimeField(auto_now_add=True)
     # Use today's date as default when a booking date is not provided
     booked_date = models.DateField(default=date.today)
+    roundtrip_id=models.UUIDField(null=True,blank=True)
     payment_deadline = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
@@ -191,3 +193,25 @@ def create_seats_for_trip(sender, instance, created, **kwargs):
 #             route_stop=rs,
 #             fare_from_start=fare
 #         )
+
+#Creates reverse trip if not exists
+@receiver(post_save,sender=Trip)
+def create_trip_stops(sender,instance,created,**kwargs):
+    if created:
+        reverse_exists=Trip.objects.filter(
+            bus=instance.bus,
+            route__start_location=instance.route.end_location,
+            route__end_location=instance.route.start_location,
+        ).exists()
+        if not reverse_exists:
+            Trip.objects.create(
+                bus=instance.bus,
+                route=Route.objects.get_or_create(
+                    start_location=instance.route.end_location,
+                    end_location=instance.route.start_location
+
+                )[0],
+                departure_time=instance.arrival_time,
+                arrival_time=instance.departure_time,
+                price=instance.price,
+            )

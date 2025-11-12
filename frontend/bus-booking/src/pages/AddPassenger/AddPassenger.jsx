@@ -13,13 +13,22 @@ const AddPassenger = () => {
   const { apiUrl, token } = useContext(Context);
   const navigate = useNavigate();
   const params = new URLSearchParams(useLocation().search);
-  const seatNumbers = params.get("seats")?.split(",");
-  const triipid = params.get("tripid");
-  const travelDate = params.get("date");
+ 
+  //---Trip info ---
+  const tripId = params.get("tripid");//Return trip id(current page)
+  const date = params.get("date");
+  const seats=params.get("seats")?.split(",")||[]
+  //--onward trip info(for previous) ---
+  const onwayTripId=params.get("onwayTripId")
+  const onwayDate=params.get("onwayDate")
+  const onwaySeats=params.get("onwaySeats")?.split(",")||[]
   const [fareStart,setFareStart]=useState(0)
   const [fareEnd,setFareEnd]=useState(0)
+  
+  const isRoundTrip=!!onwayTripId
+
   const [passengers, setPassengers] = useState(
-    seatNumbers.map((seat) => ({
+    seats.map((seat) => ({
       seat_number: seat,
       name: "",
       age: "",
@@ -29,68 +38,58 @@ const AddPassenger = () => {
     }))
   );
 
-  const { data: trip, isLoading } = useQuery({
-    queryKey: ["trip-details", triipid],
+  // --- Fetch Onward Trip ---
+  const { data: onwayTrip, isLoading } = useQuery({
+    queryKey: ["onway-trip", onwayTripId],
+    enabled:!!onwayTripId,
     queryFn: async () => {
-      const response = await axios.get(`${apiUrl}bookings/trips/${triipid}/`);
+      const response = await axios.get(`${apiUrl}bookings/trips/${onwayTripId}/`);
       return response.data;
+      
     },
   });
-  console.log(trip ,'tripdataaaa')
+  console.log(onwayTrip ,'tripdataaaa')
   // const tripStopes = trip?.trip_stops || [];
-  const tripStopes = trip?.trip_stops || [];
+  const tripStopes = onwayTrip?.trip_stops || [];
   console.log(tripStopes,'tripstopeesss from add passenger')
+ 
+  //--- Fetch Return Trip ---
+  const {data:returnTrip}=useQuery({
+    queryKey:["return-trip",tripId],
+    queryFn:async () => {
+      const res=await axios.get(`${apiUrl}bookings/trips/${tripId}`)
+      return res.data
+    },
+    enabled:!!tripId
+  })
 
   const mutation = useMutation({
     mutationFn: async (data) =>
       axios.post(`${apiUrl}bookings/bookings/`, data, {
         headers: { Authorization: `Bearer ${token}` },
       }),
-    onSuccess: ({ data }) => {
-      toast.success("Passenger details added successfully", {
-        onClose: () => {
-          const booking_id = data.booking_id;
-          const totalamount = data.total_amount;
-          navigate(
-            `/payment?bookingId=${booking_id}&totalamount=${totalamount}&seats=${seatNumbers}`
-          );
-        },
-        autoClose: 2000,
-      });
-    },
-    onError: (error) => {
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error(
-          "Error adding passenger details. Please check and try again."
-        );
-      }
-      console.log(error);
-    },
   });
-  const calculateFare=(boarding,dropping)=>{
+  const calculateFare=(tripStopes,boarding,dropping)=>{
     const start=tripStopes.find((s)=>s.stop_name===boarding)
     const end=tripStopes.find((s)=>s.stop_name===dropping)
     if(!start ||!end)return 0
     const fare=parseFloat(end.fare_from_start)-parseFloat(start.fare_from_start)
     return fare>0?fare:0
   }
-  const handleChange = (index, field, value) => {
-    const newData = [...passengers];
-    newData[index][field] = value;
+  const handleChange = (index, field, value,tripStopes) => {
+    const updated = [...passengers];
+    updated[index][field] = value;
     //reacalculate fare if boarding or droppping changes
     if(field==="boarding_location"||field==="dropping_location"){
-      const boarding=newData[index].boarding_location;
-      const dropping=newData[index].dropping_location
-      if (boarding&&dropping){
-        newData[index].fare=calculateFare(boarding,dropping)
+      const {boarding_location,dropping_location}=updated[index];
+      if (boarding_location&&dropping_location){
+        updated[index].fare=calculateFare(tripStopes,boarding_location,dropping_location)
       }
     }
-    setPassengers(newData);
+    setPassengers(updated);
   };
-
-  const handleSubmit = (e) => {
+  //--- Handle Submit ---
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (passengers.some((p) => !/^[A-Za-z\s]+$/.test(p.name.trim()))) {
       toast.error("Name should contain only letters");
@@ -109,12 +108,33 @@ const AddPassenger = () => {
       toast.error("Please fill all passenger details");
       return;
     }
-    mutation.mutate({
-      trip_id: params.get("tripid"),
-      booked_date: params.get("date"),
-      seats: seatNumbers,
-      passengers,
-    });
+    try {
+      if(isRoundTrip){
+        // Make two bookings (onward + return)
+        const [onwardRes,returnRes]=await Promise.all([
+          axios.post(`${apiUrl}bookings/bookings/`,{
+            trip_id:onwayTripId,
+            booked_date:onwayDate,
+            seats:onwaySeats,
+            passengers,
+          },{
+            headers:{Authorization:`Bearer ${token}`}
+          }),
+          axios.post(`${apiUrl}bookings/bookings/`,{
+            trip_id:tripId,
+            booked_date:date,
+            seats,
+            passengers,
+          },{
+            headers:{Authorization:`Bearer ${token}`}
+          })
+
+        ])
+      }
+      
+    } catch (error) {
+      
+    }
   };
 
   if (isLoading) {
@@ -157,7 +177,7 @@ const AddPassenger = () => {
               <div className="info-item">
                 <FaCalendar className="icon" />
                 <span>
-                  {new Date(travelDate).toLocaleDateString("en-IN", {
+                  {new Date(date).toLocaleDateString("en-IN", {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
@@ -167,7 +187,7 @@ const AddPassenger = () => {
               <div className="info-item">
                 <MdEventSeat className="icon" />
                 <span>
-                  {seatNumbers.length} Seat(s): {seatNumbers.join(", ")}
+                  {seats.length} Seat(s): {seats.join(", ")}
                 </span>
               </div>
             </div>

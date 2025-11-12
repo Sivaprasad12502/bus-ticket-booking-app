@@ -5,7 +5,17 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
 from datetime import datetime, time, timedelta
-from .models import Bus, Route, Trip, Seat, Booking, Passenger, Payment, RouteStop,TripStop
+from .models import (
+    Bus,
+    Route,
+    Trip,
+    Seat,
+    Booking,
+    Passenger,
+    Payment,
+    RouteStop,
+    TripStop,
+)
 from .serializers import (
     BusSerializer,
     RouteSerializer,
@@ -14,7 +24,7 @@ from .serializers import (
     PassengerSerializer,
     PaymentSerializer,
     BookingSerializer,
-    RouteStopSerializer
+    RouteStopSerializer,
 )
 from django.db.models import Q
 
@@ -62,7 +72,8 @@ def bus_detail(request, pk):
         bus.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-#route-Stop_list
+
+# route-Stop_list
 # @api_view(["GET","POST"])
 # # @permission_classes([IsAuthenticated])
 # def route_stop_list(request):
@@ -119,14 +130,27 @@ def trip_list(request):
         # trips=Trip.objects.filter(departure_time__gte=timezone.localtime().time())#only future trips
         # Optional:filter by start and end locations if provided in query params
         travel_date = request.query_params.get("date")
+        # roundTrip
+        return_date = request.query_params.get("returnDate")
         start = request.query_params.get("from")
         end = request.query_params.get("to")
         trips = Trip.objects.all()
-        if start and end:
-            trips = trips.filter(
-                route__start_location__icontains=start,
-                route__end_location__icontains=end,
+        onward_trips = trips.filter(
+            route__start_location__iexact=start,
+            route__end_location__iexact=end,
+        )
+        # if start and end:
+        #     trips = trips.filter(
+        #         route__start_location__icontains=start,
+        #         route__end_location__icontains=end,
+        #     )
+        return_trips = []
+        if return_date:
+            # find trips in reverse direction
+            return_trips = trips.filter(
+                route__start_location__iexact=end, route__end_location__iexact=start
             )
+        # filter by date logic
         if travel_date:
             travel_date = datetime.strptime(travel_date, "%Y-%m-%d").date()
             today = timezone.localdate()
@@ -136,9 +160,23 @@ def trip_list(request):
                 # print(current_dt, "currrrent-timeee")
                 # trips = trips.filter(departure_time__gte=time_plus_3hr.time())
                 now = timezone.localtime().time()
-                trips = trips.filter(departure_time__gte=now)
-        serializer = TripSerializer(trips, many=True)
-        return Response(serializer.data)
+                # trips = trips.filter(departure_time__gte=now)
+                onward_trips = onward_trips.filter(departure_time__gte=now)
+        if return_date:
+            return_date = datetime.strptime(return_date, "%Y-%m-%d").date()
+            today = timezone.localdate()
+            if return_date == today:
+                now = timezone.localtime().time()
+        # serializer = TripSerializer(trips, many=True)
+        onward_serializer = TripSerializer(onward_trips, many=True)
+        return_serializer = TripSerializer(return_trips, many=True)
+        # return Response(serializer.data)
+        return Response(
+            {
+                "onwardTrips": onward_serializer.data,
+                "returnTrips": return_serializer.data,
+            }
+        )
     elif request.method == "POST":
         serializer = TripSerializer(data=request.data)
         if serializer.is_valid():
@@ -225,127 +263,232 @@ def create_bookings(request):
         return Response(serializer.data)
     elif request.method == "POST":
         user = request.user
-        trip_id = request.data.get("trip_id")
-        seat_numbers = request.data.get("seats")
-        booked_date = request.data.get("booked_date")
-        passengers_data = request.data.get("passengers", [])
-        if not trip_id or not seat_numbers or not booked_date:
+        onward_trip_id = request.data.get("trip_id")
+        return_trip_id = request.data.get("return_trip_id")  # optional
+        onward_seats = request.data.get("onward_seats", [])
+        return_seats = request.data.get("return_seats", [])
+        onward_passengers = request.data.get("onward_passengers", [])
+        return_passengers = request.data.get("return_passengers", [])
+        onward_date = request.data.get("onward_date")
+        return_date = request.data.get("return_date")
+        # trip_id = request.data.get("trip_id")
+        # seat_numbers = request.data.get("seats")
+        # booked_date = request.data.get("booked_date")
+        # passengers_data = request.data.get("passengers", [])
+        if not onward_trip_id or not onward_seats or not onward_date:
             return Response(
-                {"error": "trip_id, seats, and booked_date are required"},
+                {
+                    "error": "trip_id,seats, and booked_date are required for onward trip trip"
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if isinstance(seat_numbers, str):
-            seat_numbers = [seat_numbers]
-        try:
-            trip = Trip.objects.get(pk=trip_id)
-        except Trip.DoesNotExist:
-            return Response(
-                {"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        # seats = Seat.objects.filter(
-        #     trip=trip, seat_number__in=seat_numbers, is_booked=False
-        # )
-       
-        booked_seat_numbers = Booking.objects.filter(
-            trip=trip, booked_date=booked_date, status="CONFIRMED"
-        ).values_list("seats__seat_number", flat=True)
-        # filter seats that are not already booked for that date
-        seats = Seat.objects.filter(trip=trip, seat_number__in=seat_numbers).exclude(
-            seat_number__in=booked_seat_numbers
-        )
-        if seats.count() != len(seat_numbers):
-            return Response(
-                {"error": "One or more seats are already booked"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        #gender restriction for seats
-        for p,seat in zip(passengers_data,seats):
-            gender=p.get("gender")
-            #if the seat is women-only but passenger is male
-            if seat.gender_preference=="WOMEN_ONLY" and gender!="F":
-                return Response(
-                    {"error":f"Seat{seat.seat_number} is reserved for women only"},
-                    status=status.HTTP_400_BAD_REQUEST
+        create_bookings = []
+
+        # Helper function to create a booking
+        def process_trip_bookings(trip_id, seats, passengers, date):
+            try:
+                trip = Trip.objects.get(pk=trip_id)
+            except Trip.DoesNotExist:
+                return None, Response({"error": f"trip{trip_id} not found"}, status=400)
+            booked_seat_numbers = bookings.objects.filter(
+                trip=trip, booked_date=date, status="CONFIRMED"
+            ).values_list("seats__seat_number", flat=True)
+            available_seats = Seat.objects.filter(
+                trip=trip, seat_number__in=seats
+            ).exclude(seat_number__in=booked_seat_numbers)
+            if available_seats.count() != len(seats):
+                return None, Response(
+                    {"error": "One or more seats are already booked"}, status=400
                 )
-        # require at least one passenger per (same count as seats)
-        if not passengers_data or len(passengers_data) != len(seat_numbers):
-            return Response(
-                {"error": "passengers passengers details for all seats"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # total_amount = sum([trip.price for _ in seats])
-        # total_amount = trip.price * len(seat_numbers)
-        # calculate toal fare based on boarding/dropping
-        total_amount = 0
-        for p in passengers_data:
-            boarding = p.get("boarding_location")
-            dropping = p.get("dropping_location")
-            passenger_fare = trip.price
-            if boarding and dropping:
+            if not passengers or len(passengers) != len(seats):
+                return None, Response(
+                    {"error": "passengers info required for all seat"}, status=400
+                )
+            # Fare calculation per passenger
+            total_amount = 0
+            for p in passengers:
+                boarding = p.get("boarding_location")
+                dropping = p.get("dropping_location")
                 from_stop = TripStop.objects.filter(
                     trip=trip, route_stop__stop_name__iexact=boarding
                 ).first()
                 to_stop = TripStop.objects.filter(
                     trip=trip, route_stop__stop_name__iexact=dropping
                 ).first()
-
+                fare = trip.price
                 if from_stop and to_stop:
                     try:
-                        distance_fare = float(to_stop.fare_from_start or 0) - float(from_stop.fare_from_start or 0)
-                        passenger_fare = max(distance_fare, 0)
+                        distance_fare = float(to_stop.fare_from_start or 0) - float(
+                            from_stop.fare_from_start or 0
+                        )
+                        fare = max(distance_fare, 0)
                     except (TypeError, ValueError):
-                        passenger_fare = trip.price
-            total_amount += passenger_fare
-        # Create Booking
-        booking = Booking.objects.create(
-            user=user,
-            trip=trip,
-            total_amount=total_amount,
-            booked_date=booked_date,
-            payment_deadline=timezone.now() + timedelta(minutes=10),  # hold for 10 mins
+                        fare = trip.price
+                    total_amount += fare
+                    booking = Booking.objects.create(
+                        user=user,
+                        trip=trip,
+                        total_amount=total_amount,
+                        booked_date=date,
+                        payment_deadline=timezone.now() + timedelta(minutes=10),
+                    )
+                    booking.seats.set(available_seats)
+                    for p in passengers:
+                        Passenger.objects.create(
+                            booking=booking,
+                            name=p.get("name"),
+                            age=p.get("age"),
+                            gender=p.get("gender"),
+                            boarding_location=p.get("boarding_location"),
+                            dropping_location=p.get("dropping_location"),
+                            seat_number=p.get("seat_number"),
+                            fare=trip.price,
+                        )
+                    return booking, None
+
+        # process onward Trip
+        onward_booking, error = process_trip_bookings(
+            onward_trip_id, onward_seats, onward_passengers, onward_date
         )
-        booking.seats.set(seats)
-        # Mark seats as booked
-        # seats.update(is_booked=True)
-        # Create passengers
-        for p in passengers_data:
-            boarding = p.get("boarding_location")
-            dropping = p.get("dropping_location")
-
-            from_stop = TripStop.objects.filter(
-                trip=trip, route_stop__stop_name__iexact=boarding
-            ).first()
-            to_stop = TripStop.objects.filter(
-                trip=trip, route_stop__stop_name__iexact=dropping
-            ).first()
-
-            fare = trip.price
-            if from_stop and to_stop:
-                fare = max(
-                    float(to_stop.fare_from_start) - float(from_stop.fare_from_start), 0
-                )
-
-            Passenger.objects.create(
-                booking=booking,
-                name=p.get("name"),
-                age=p.get("age"),
-                gender=p.get("gender"),
-                # boarding_location=p.get("boarding_location"),
-                # dropping_location=p.get("dropping_location"),
-                boarding_location=boarding,
-                dropping_location=dropping,
-                fare=fare,
-                seat_number=p.get("seat_number"),
+        if error:
+            return error
+        create_bookings.append(onward_booking)
+        # process return Trip if provided
+        if return_trip_id and return_seats and return_date:
+            return_booking, error = process_trip_bookings(
+                return_trip_id, return_seats, return_passengers, return_date
             )
+            if error:
+                return error
+            create_bookings.append(return_booking)
+        total_amount = sum(b.total_amount for b in create_bookings)
         return Response(
             {
-                "booking_id": booking.id,
-                "total_amount": total_amount,
-                "booked_seats": seat_numbers,
-                "passengers": passengers_data,
+                "bookings":[
+                    {"booking_id": b.id, "trip_id": b.trip.id, "amount": b.total_amount}
+                    for b in create_bookings
+                ],
+                "total_amount":total_amount,
             },
             status=status.HTTP_201_CREATED,
         )
+        # if not trip_id or not seat_numbers or not booked_date:
+        #     return Response(
+        #         {"error": "trip_id, seats, and booked_date are required"},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
+        # if isinstance(seat_numbers, str):
+        #     seat_numbers = [seat_numbers]
+        # try:
+        #     trip = Trip.objects.get(pk=trip_id)
+        # except Trip.DoesNotExist:
+        #     return Response(
+        #         {"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND
+        #     )
+        # seats = Seat.objects.filter(
+        #     trip=trip, seat_number__in=seat_numbers, is_booked=False
+        # )
+
+        # booked_seat_numbers = Booking.objects.filter(
+        #     trip=trip, booked_date=booked_date, status="CONFIRMED"
+        # ).values_list("seats__seat_number", flat=True)
+        # # filter seats that are not already booked for that date
+        # seats = Seat.objects.filter(trip=trip, seat_number__in=seat_numbers).exclude(
+        #     seat_number__in=booked_seat_numbers
+        # )
+        # if seats.count() != len(seat_numbers):
+        #     return Response(
+        #         {"error": "One or more seats are already booked"},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
+        # #gender restriction for seats
+        # for p,seat in zip(passengers_data,seats):
+        #     gender=p.get("gender")
+        #     #if the seat is women-only but passenger is male
+        #     if seat.gender_preference=="WOMEN_ONLY" and gender!="F":
+        #         return Response(
+        #             {"error":f"Seat{seat.seat_number} is reserved for women only"},
+        #             status=status.HTTP_400_BAD_REQUEST
+        #         )
+        # # require at least one passenger per (same count as seats)
+        # if not passengers_data or len(passengers_data) != len(seat_numbers):
+        #     return Response(
+        #         {"error": "passengers passengers details for all seats"},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
+        # # total_amount = sum([trip.price for _ in seats])
+        # # total_amount = trip.price * len(seat_numbers)
+        # # calculate toal fare based on boarding/dropping
+        # total_amount = 0
+        # for p in passengers_data:
+        #     boarding = p.get("boarding_location")
+        #     dropping = p.get("dropping_location")
+        #     passenger_fare = trip.price
+        #     if boarding and dropping:
+        #         from_stop = TripStop.objects.filter(
+        #             trip=trip, route_stop__stop_name__iexact=boarding
+        #         ).first()
+        #         to_stop = TripStop.objects.filter(
+        #             trip=trip, route_stop__stop_name__iexact=dropping
+        #         ).first()
+
+        #         if from_stop and to_stop:
+        #             try:
+        #                 distance_fare = float(to_stop.fare_from_start or 0) - float(from_stop.fare_from_start or 0)
+        #                 passenger_fare = max(distance_fare, 0)
+        #             except (TypeError, ValueError):
+        #                 passenger_fare = trip.price
+        #     total_amount += passenger_fare
+        # # Create Booking
+        # booking = Booking.objects.create(
+        #     user=user,
+        #     trip=trip,
+        #     total_amount=total_amount,
+        #     booked_date=booked_date,
+        #     payment_deadline=timezone.now() + timedelta(minutes=10),  # hold for 10 mins
+        # )
+        # booking.seats.set(seats)
+        # # Mark seats as booked
+        # # seats.update(is_booked=True)
+        # # Create passengers
+        # for p in passengers_data:
+        #     boarding = p.get("boarding_location")
+        #     dropping = p.get("dropping_location")
+
+        #     from_stop = TripStop.objects.filter(
+        #         trip=trip, route_stop__stop_name__iexact=boarding
+        #     ).first()
+        #     to_stop = TripStop.objects.filter(
+        #         trip=trip, route_stop__stop_name__iexact=dropping
+        #     ).first()
+
+        #     fare = trip.price
+        #     if from_stop and to_stop:
+        #         fare = max(
+        #             float(to_stop.fare_from_start) - float(from_stop.fare_from_start), 0
+        #         )
+
+        #     Passenger.objects.create(
+        #         booking=booking,
+        #         name=p.get("name"),
+        #         age=p.get("age"),
+        #         gender=p.get("gender"),
+        #         # boarding_location=p.get("boarding_location"),
+        #         # dropping_location=p.get("dropping_location"),
+        #         boarding_location=boarding,
+        #         dropping_location=dropping,
+        #         fare=fare,
+        #         seat_number=p.get("seat_number"),
+        #     )
+        # return Response(
+        #     {
+        #         "booking_id": booking.id,
+        #         "total_amount": total_amount,
+        #         "booked_seats": seat_numbers,
+        #         "passengers": passengers_data,
+        #     },
+        #     status=status.HTTP_201_CREATED,
+        # )
 
 
 # passengers to booking
@@ -399,52 +542,71 @@ def add_passengers(request, booking_id):
 #     return Response(serializer.data)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_payment_intent(request, booking_Id):
-    try:
-        booking = Booking.objects.get(pk=booking_Id, user=request.user)
-    except Booking.DoesNotExist:
-        return Response({"error": "Booking not found"}, status=404)
-    if booking.status != "PENDING_PAYMENT":
+def create_payment_intent(request):
+    booking_ids=request.data.get("booking_ids",[])
+    if not booking_ids:
+        return Response({"error":"booking_ids are required"},status=400)
+    bookings=Booking.objects.filter(pk__in=booking_ids,user=request.user)
+    if not bookings.exists():
+        return Response({"error":"No valid bookings found"},status=404)
+    # total_amount=sum(b.total_amount for b in bookings)
+    # amount=int(total_amount*100)
+
+    if bookings.status != "PENDING_PAYMENT":
         return Response(
             {"error": "This booking is cannot be paind anymore."}, status=400
         )
-    if booking.payment_deadline and timezone.now() > booking.payment_deadline:
-        booking.status = "EXPIRED"
-        booking.save()
+    if bookings.payment_deadline and timezone.now() > bookings.payment_deadline:
+        bookings.status = "EXPIRED"
+        bookings.save()
         return Response({"error": "Payment time expired. Please rebook."}, status=400)
-    amount = int(booking.total_amount * 100)  # convert to paise
-    currency = "inr"
+    total_amount=sum(b.total_amount for b in bookings)
+    amount=int(total_amount*100)
     try:
         # create Stripe PaymentIntent
         intent = stripe.PaymentIntent.create(
             amount=amount,
-            currency=currency,
+            currency="inr",
             # payment_method_types=["card","upi","netbanking","wallet"],
-            metadata={"booking_Id": booking.id, "user": request.user.username},
+            metadata={"booking_Ids":",".join(map(str,booking_ids)), "user": request.user.username},
         )
+        #Create or update Payment entries
+        for b in bookings:
+            Payment.objects.update_or_create(
+                bookings=b,
+                defaults={
+                    "amount":b.total_amount,
+                    "stripe_payment_intent_id":intent.id,
+                    "payment_status":"PENDING",
+                    "curency":"inr"
+                }
+            )
+
         # Save Payment info in DB
-        payment, created = Payment.objects.get_or_create(
-            booking=booking,
-            defaults={
-                "amount": booking.total_amount,
-                "stripe_payment_intent_id": intent.id,
-                "currency": currency,
-                "payment_status": "PENDING",
-            },
-        )
-        if not created:
-            payment.amount = booking.total_amount
-            payment.stripe_payment_intent_id = intent.id
-            payment.currency = currency
-            payment.payment_status = "PENDING"
-            payment.save()
-        serializer = PaymentSerializer(payment)
+        # payment, created = Payment.objects.get_or_create(
+        #     booking=booking,
+        #     defaults={
+        #         "amount": booking.total_amount,
+        #         "stripe_payment_intent_id": intent.id,
+        #         "currency": currency,
+        #         "payment_status": "PENDING",
+        #     },
+        # )
+        # if not created:
+        #     payment.amount = booking.total_amount
+        #     payment.stripe_payment_intent_id = intent.id
+        #     payment.currency = currency
+        #     payment.payment_status = "PENDING"
+        #     payment.save()
+        # serializer = PaymentSerializer()
         return Response(
             {
                 "clientSecret": intent.client_secret,
                 "publishableKey": settings.STRIPE_PUBLISHABLE_KEY,
-                "payment": serializer.data,
-            }
+                # "payment": serializer.data,
+                "totalAmount":total_amount,
+            },
+            status=200,
         )
     except Exception as e:
         return Response({"error": str(e)}, status=400)
@@ -452,21 +614,28 @@ def create_payment_intent(request, booking_Id):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def confirm_payment(request, booking_Id):
+def confirm_payment(request):
+    booking_ids=request.data.get("booking_ids",[])
+    if not booking_ids:
+        return Response({"error":"No booking IDs provided"},status=400)
     try:
-        booking = Booking.objects.get(pk=booking_Id, user=request.user)
+        bookings = Booking.objects.filter(pk__in=booking_ids, user=request.user)
     except Booking.DoesNotExist:
         return Response({"error": "Booking not found"}, status=404)
+    for booking in bookings:
 
-    payment = Payment.objects.filter(booking=booking).first()
-    if not payment:
-        return Response({"error": "Payment not found"}, status=404)
+        payment = Payment.objects.filter(booking=booking).first()
+        if payment:
+            payment.payment_status="SUCCESS"
+            payment.save()
 
-    payment.payment_status = "SUCCESS"
-    payment.save()
-    booking.status = "CONFIRMED"
-    booking.payment_deadline = None  # clear deadline
-    booking.save()
+            payment.payment_status = "SUCCESS"
+        payment.save()
+        booking.status = "CONFIRMED"
+        booking.payment_deadline = None  # clear deadline
+        booking.save()
+        if not payment:
+            return Response({"error": "Payment not found"}, status=404)
 
     serializer = PaymentSerializer(payment)
     return Response(serializer.data, status=200)

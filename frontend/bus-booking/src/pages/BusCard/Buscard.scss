@@ -131,6 +131,26 @@
     margin-bottom: 2rem;
   }
 }
+.trip-toggle-container{
+  margin-top:1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  button{
+    padding: 6px 10px;
+    border: 2px solid $border-color;
+    border-radius: 12px;
+    background-color: $white;
+    font-size: 14px;
+    font-weight: 600;
+    &.active{
+      border-color: $primary-red;
+      background-color: $primary-red;
+      color: $white;
+      
+    }
+  }
+}
 
 .bus-results {
   display: flex;
