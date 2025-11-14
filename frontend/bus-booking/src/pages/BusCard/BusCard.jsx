@@ -8,6 +8,7 @@ import { MdEventSeat } from "react-icons/md";
 import Navbar from "../../component/Navbar/Navbar";
 import "./Buscard.scss";
 import { motion } from "framer-motion";
+import { BusSearch } from "../../component/BusSearch/BusSearch";
 
 const SeatsAvailability = ({ tripId, date }) => {
   const { apiUrl } = useContext(Context);
@@ -36,17 +37,19 @@ const BusCard = () => {
   const from = params.get("from");
   const to = params.get("to");
   const date = params.get("date");
-  const tripType = params.get("tripType")||"oneway";
+  const tripType = params.get("tripType") || "oneway";
   const returnDate = params.get("returnDate");
-  const tripPhase= params.get("tripPhase")||"onward"
-  const onwayTripId=params.get("onwayTripId")
-  const onwayDate=params.get("onwayDate")
-  const onwaySeats=params.get("onwaySeats")
-  const [selectedType,setSelectedType]=useState("")
-  const [selectedTripType,setSelectedTripType]=useState(tripPhase=="return"?"roundtrip":"oneway")
+  const tripPhase = params.get("tripPhase") || "onward";
+  const onwayTripId = params.get("onwayTripId");
+  const onwayDate = params.get("onwayDate");
+  const onwaySeats = params.get("onwaySeats");
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedTripType, setSelectedTripType] = useState(
+    tripPhase == "return" ? "roundtrip" : "oneway"
+  );
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["buses", from, to, date,tripType,returnDate],
-    enabled:!!from&&!!to&&!!date,
+    queryKey: ["buses", from, to, date, tripType, returnDate],
+    enabled: !!from && !!to && !!date,
     queryFn: async () => {
       let url = `${apiUrl}bookings/trips/?from=${from}&to=${to}&date=${date}`;
       if (tripType === "roundtrip" && returnDate) {
@@ -65,8 +68,8 @@ const BusCard = () => {
 
   console.log(data, "bus datata");
   console.log("tripType", tripType);
-  console.log("date form bus card",date);
-  console.log("returnDate form bus card",returnDate)
+  console.log("date form bus card", date);
+  console.log("returnDate form bus card", returnDate);
   // const filteredData = selectedType
   //   ? data?.filter((trip) => trip.bus.bus_type === selectedType)
   //   : data;
@@ -83,24 +86,26 @@ const BusCard = () => {
       new Date(`1970/01/01 ${b.arrival_time}`)
     );
   });
-  const handleSelectSeat=(trip)=>{
+  const handleSelectSeat = (trip) => {
     // For one-way trips
-    if(tripType==="oneway"){
-      navigate(`/busDetails/selectSeat?tripid=${trip.id}&date=${date}&tripType=oneway`)
+    if (tripType === "oneway") {
+      navigate(
+        `/busDetails/selectSeat?tripid=${trip.id}&date=${date}&tripType=oneway`
+      );
     }
     // For round-trip trips
-    if(tripType==="roundtrip" && tripPhase==="onward"){
+    if (tripType === "roundtrip" && tripPhase === "onward") {
       navigate(
         `/busDetails/selectSeat?tripid=${trip.id}&date=${date}&tripType=roundtrip&tripPhase=onward&returnDate=${returnDate}&from=${from}&to=${to}`
-      )
+      );
     }
     //For round-trip return selection
-    if(tripType==="roundtrip"&&tripPhase==="return"){
+    if (tripType === "roundtrip" && tripPhase === "return") {
       navigate(
         `/busDetails/selectSeat?tripid=${trip.id}&date=${date}&tripType=roundtrip&tripPhase=return&onwayTripId=${onwayTripId}&onwayDate=${onwayDate}&onwaySeats=${onwaySeats}`
-      )
+      );
     }
-  }
+  };
   if (isLoading) {
     return (
       <div className="bus-results-page">
@@ -129,7 +134,16 @@ const BusCard = () => {
 
   return (
     <div className="bus-results-page">
-      <Navbar />
+      <div className="buscard-navbar">
+        <div className="navbar-inner">
+          <BusSearch compact={true} 
+          defaultFrom={from}
+          defaultTo={to}
+          defaultDate={date}
+          defaultTripType={tripType}
+          defaultReturnDate={returnDate}/>
+        </div>
+      </div>
       <div className="bus-results-container">
         <div className="search-info">
           <h2>Available Buses</h2>
@@ -174,14 +188,14 @@ const BusCard = () => {
             <div className="trip-toggle-container">
               <button
                 className={selectedTripType === "oneway" ? "active" : ""}
-                onClick={() => setSelectedTripType("oneway")}
+                // onClick={() => setSelectedTripType("oneway")}
               >
                 Onward Trip:{from} - {to} ,{date}
               </button>
               {tripType === "roundtrip" && (
                 <button
                   className={selectedTripType === "roundtrip" ? "active" : ""}
-                  onClick={() => setSelectedTripType("roundtrip")}
+                  // onClick={() => setSelectedTripType("roundtrip")}
                 >
                   return Trip {to} - {from}, {returnDate}
                 </button>
@@ -295,8 +309,7 @@ const BusCard = () => {
                     </div>
                     <button
                       className="btn-select-seat"
-                      onClick={()=>handleSelectSeat(trip)}
-                        
+                      onClick={() => handleSelectSeat(trip)}
                     >
                       <MdEventSeat /> Select Seats
                     </button>

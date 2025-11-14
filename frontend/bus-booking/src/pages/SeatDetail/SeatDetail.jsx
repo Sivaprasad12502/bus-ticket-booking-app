@@ -25,16 +25,16 @@ export const SeatDetail = () => {
   const { apiUrl, token, navigate } = useContext(Context);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  
+
   const tripid = params.get("tripid");
   const date = params.get("date");
   const returnTripId = params.get("returnTripId");
   const returnDate = params.get("returnDate");
   const tripType = params.get("tripType") || "oneway";
-  const tripPhase=params.get("tripPhase")||"onward"
-  const onwayTripId=params.get("onwayTripId")
-  const onwayDate=params.get("onwayDate")
-  const onwaySeats=params.get("onwaySeats")
+  const tripPhase = params.get("tripPhase") || "onward";
+  const onwayTripId = params.get("onwayTripId");
+  const onwayDate = params.get("onwayDate");
+  const onwaySeats = params.get("onwaySeats");
   const queryClient = useQueryClient();
   const [selectedSeats, setSelectedSeats] = useState([]);
 
@@ -86,7 +86,6 @@ export const SeatDetail = () => {
   );
   console.log(availableSet, "avillalala");
   console.log(seatInfoMap, "seatInfomaaaap");
-  
 
   const toggleSeat = (seatNumber, isAvailable) => {
     if (!isAvailable) return; // cannot toggle booked seats
@@ -107,25 +106,25 @@ export const SeatDetail = () => {
       toast.error("Please select at least one seat!");
       return;
     }
-   
+
     const seatsQuery = selectedSeats.join(",");
     //CASE 1:Onward Phase of a roundTrip
-    if(tripType==="roundtrip"&&tripPhase==="onward"){
+    if (tripType === "roundtrip" && tripPhase === "onward") {
       navigate(
         `/busDetails?from=${trip.route.start_location}&to=${trip.route.end_location}&date=${returnDate}&tripType=roundtrip&returnDate=${returnDate}&onwayTripId=${tripid}&onwayDate=${date}&onwaySeats=${seatsQuery}&tripPhase=return`
-      )
+      );
     }
     //CASE 2: Return phase of a roundtrip
-    else if(tripType==="roundtrip"&&tripPhase==="return") {
+    else if (tripType === "roundtrip" && tripPhase === "return") {
       navigate(
         `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}&onwayTripId=${onwayTripId}&onwayDate=${onwayDate}&onwaySeats=${onwaySeats}`
-      )
-
+      );
     }
     //CASE 3:one-way trip
-    else{
+    else {
       navigate(
-        `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}`)
+        `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}`
+      );
     }
   };
 
@@ -286,9 +285,9 @@ export const SeatDetail = () => {
             <div className="seat-container__header">
               <h1>
                 <FaBus />
-                {
-                  tripPhase==="onward"?"Select onward trip Seats":"Select Return Trip Seats"
-                }
+                {tripPhase === "onward"
+                  ? "Select onward trip Seats"
+                  : "Select Return Trip Seats"}
               </h1>
               <div className="seat-container__header-details">
                 <div className="seat-container__header-details-item">
@@ -415,11 +414,14 @@ export const SeatDetail = () => {
               disabled={selectedSeats.length === 0}
             >
               <FaCheckCircle />
-              {selectedSeats.length > 0
+              {tripType === "roundtrip" && tripPhase === "onward"
+                ? "Proceed to Return Trip"
+                : selectedSeats.length > 0
                 ? `Proceed to Book (${selectedSeats.length} ${
                     selectedSeats.length === 1 ? "Seat" : "Seats"
                   })`
                 : "Select Seats to Continue"}
+
               <FaArrowRight />
             </button>
           </div>

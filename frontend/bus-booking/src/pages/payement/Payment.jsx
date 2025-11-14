@@ -10,24 +10,37 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { toast } from "react-toastify";
-import { FaRupeeSign, FaCreditCard, FaCheckCircle, FaUser } from "react-icons/fa";
+import {
+  FaRupeeSign,
+  FaCreditCard,
+  FaCheckCircle,
+  FaUser,
+} from "react-icons/fa";
 import { MdEventSeat } from "react-icons/md";
 import Navbar from "../../component/Navbar/Navbar";
 import "./payment.scss";
 import { useQuery } from "@tanstack/react-query";
+const stripePromise = loadStripe(
+  "pk_test_51SL3Ra2MbjQATJw5jJdivM5nUnL4OIElPyPU82FF2YPa9b6N9BXR4cG0ZTvEVRXPeoumM94yVzqRTtiJxuZld1gT00MjmH6nGB"
+);
 
 const CheckoutForm = ({
-  booking_Id,
+  onwardBookingId,
+  returnBookingId,
   clientSecret,
+  returnClientSecret,
+  isRoundTrip,
   token,
   apiUrl,
   navigate,
+  totalAmount,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [paymentStep,setPaymentStep]=useState("");//Track which payment is processing
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,41 +48,37 @@ const CheckoutForm = ({
     setError("");
 
     try {
-      const result = await stripe.confirmCardPayment(clientSecret, {
+      const result1 = await stripe.confirmCardPayment(clientSecret, {
         payment_method: { card: elements.getElement(CardElement) },
       });
 
-      if (result.error) {
-        setError(result.error.message);
-        setLoading(false);
-        toast.error(result.error.message);
-      } else if (result.paymentIntent.status === "succeeded") {
+      if (result1.error) throw new Error(result1.error.message);
+      await axios.post(
+        `${apiUrl}bookings/bookings/confirm-payment/`,
+        { booking_ids: [Number(onwardBookingId)] },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Return payment if round trip
+      if (isRoundTrip && returnClientSecret) {
+        const result2 = await stripe.confirmCardPayment(returnClientSecret, {
+          payment_method: { card: elements.getElement(CardElement) },
+        });
+        if (result2.error) throw new Error(result2.error.message);
         await axios.post(
-          `${apiUrl}bookings/bookings/${booking_Id}/confirm-payment/`,
-          {},
+          `${apiUrl}bookings/bookings/confirm-payment/`,
+          { booking_ids: [Number(returnBookingId)] },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log("Payment successful", result.paymentIntent);
-        setSuccess(true);
-        setLoading(false);
       }
+      toast.success("payment Successful");
+      navigate("/bookings");
     } catch (err) {
       setError(err.message);
       setLoading(false);
       toast.error(err.message);
     }
   };
-
-  useEffect(() => {
-    if (success) {
-      toast.success("Payment successful! Redirecting...", {
-        onClose: () => {
-          navigate("/bookings");
-        },
-        autoClose: 2000,
-      });
-    }
-  }, [success, navigate]);
 
   return (
     <div className="checkout-form-wrapper">
@@ -80,14 +89,14 @@ const CheckoutForm = ({
             options={{
               style: {
                 base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
+                  fontSize: "16px",
+                  color: "#424770",
+                  "::placeholder": {
+                    color: "#aab7c4",
                   },
                 },
                 invalid: {
-                  color: '#9e2146',
+                  color: "#9e2146",
                 },
               },
             }}
@@ -99,7 +108,11 @@ const CheckoutForm = ({
             <FaCheckCircle /> Payment Successful!
           </div>
         )}
-        <button type="submit" disabled={!stripe || loading || success} className="btn-pay">
+        <button
+          type="submit"
+          disabled={!stripe || loading || success}
+          className="btn-pay"
+        >
           {loading ? (
             <>
               <span className="spinner"></span> Processing...
@@ -122,16 +135,17 @@ const CheckoutForm = ({
 const Payment = () => {
   const { apiUrl, token, navigate } = useContext(Context);
   const params = new URLSearchParams(useLocation().search);
-  const booking_Id = params.get("bookingId");
+  const onwardBookingId = params.get("onwardId");
+  const returnBookingId = params.get("returnId"); //may be null
   const totalAmount = params.get("totalamount");
-
+  const isRoundTrip = !!returnBookingId;
   const [clientSecret, setClientSecret] = useState("");
-  const stripePromise = loadStripe(
-    "pk_test_51SL3Ra2MbjQATJw5jJdivM5nUnL4OIElPyPU82FF2YPa9b6N9BXR4cG0ZTvEVRXPeoumM94yVzqRTtiJxuZld1gT00MjmH6nGB"
-  );
-
+  const [returnClientSecret, setReturnClientSecret] = useState("");
+  console.log("onwardBookingId:", onwardBookingId);
+  console.log("returnBookingId:", returnBookingId);
+  console.log("token:", token);
   const {
-    data: bookings,
+    data: allbookings,
     isLoading,
     isError,
   } = useQuery({
@@ -145,29 +159,49 @@ const Payment = () => {
     onError: (err) => console.log(err),
   });
 
-  const bookedTickets = bookings?.find((b) => b.id == Number(booking_Id));
+  const onwardBooking = allbookings?.find(
+    (b) => b.id == Number(onwardBookingId)
+  );
+  const returnBooking = allbookings?.find(
+    (b) => b.id == Number(returnBookingId)
+  );
+  if(onwardBooking){
 
+    console.log("onwardBooking: in pyament page", onwardBooking)
+  }
+  if(returnBooking){
+    console.log("returnBooking: in payment page",returnBooking)
+  }
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        console.log("Creating payment intent for booking:", booking_Id);
-        const res = await axios.post(
-          `${apiUrl}bookings/bookings/${booking_Id}/create-payment-intent/`,
-          {},
+        const onwardRes = await axios.post(
+          `${apiUrl}bookings/bookings/create-payment-intent/`,
+          { booking_ids: [Number(onwardBookingId)] },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setClientSecret(res.data.clientSecret);
-        console.log("Payment Intent Response:", res.data);
+        setClientSecret(onwardRes.data.clientSecret);
+        console.log("Payment Intent Reponse", onwardRes.data);
+        console.log("Payment Intent Response:", onwardRes.data);
+        if (isRoundTrip) {
+          const returnRes = await axios.post(
+            `${apiUrl}bookings/bookings/create-payment-intent/`,
+            { booking_ids: [Number(returnBookingId)] },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setReturnClientSecret(returnRes.data.clientSecret);
+          console.log("return payment intent response:", returnRes.data);
+        }
       } catch (err) {
         console.error(err);
         toast.error("Failed to initialize payment. Please try again.");
       }
     };
 
-    if (booking_Id) createPaymentIntent();
-  }, [booking_Id, apiUrl, token]);
+    if (onwardBookingId) createPaymentIntent();
+  }, [onwardBookingId, returnBookingId, isRoundTrip]);
 
-  if (isLoading || !clientSecret) {
+  if (isLoading || !clientSecret || (isRoundTrip && !returnClientSecret)) {
     return (
       <div className="payment-page">
         <Navbar />
@@ -199,14 +233,16 @@ const Payment = () => {
       <div className="payment-container">
         <div className="payment-header">
           <h2>Complete Your Payment</h2>
-          <p className="booking-id">Booking #{booking_Id}</p>
+          <p className="trip-type-badge">
+            {isRoundTrip ? "Round Trip Booking":"One Way Booking"}
+          </p>
         </div>
 
         <div className="payment-content">
           <div className="booking-summary">
-            <h3>Booking Summary</h3>
+            <h3 className="summary-title">Onward Trip</h3>
 
-            {bookedTickets && (
+            {onwardBooking && (
               <>
                 <div className="summary-total">
                   <span>Total Amount</span>
@@ -217,7 +253,7 @@ const Payment = () => {
 
                 <div className="passengers-list">
                   <h4>Passenger Details</h4>
-                  {bookedTickets.passengers?.map((item, index) => (
+                  {onwardBooking.passengers?.map((item, index) => (
                     <div key={item.id} className="passenger-item">
                       <div className="passenger-header">
                         <span className="passenger-name">
@@ -237,6 +273,32 @@ const Payment = () => {
                       </div>
                     </div>
                   ))}
+                  {isRoundTrip && returnBooking && (
+                    <>
+                      <h3>Return Trip</h3>
+                      {returnBooking.passengers?.map((item, index) => (
+                        <div key={item.id} className="passenger-item">
+                          <div className="passenger-header">
+                            <span className="passenger-name">
+                              <FaUser /> {item.name}
+                            </span>
+                            <span className="seat-badge">
+                              <MdEventSeat /> {item.seat_number}
+                            </span>
+                          </div>
+                          <div className="passenger-details">
+                            <p className="journey">
+                              {item.boarding_location} →{" "}
+                              {item.dropping_location}
+                            </p>
+                            <p className="fare">
+                              Fare: <FaRupeeSign /> {item.fare}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -244,15 +306,22 @@ const Payment = () => {
 
           <div className="payment-form-section">
             <h3>Payment Information</h3>
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
-              <CheckoutForm
-                booking_Id={booking_Id}
-                clientSecret={clientSecret}
-                token={token}
-                apiUrl={apiUrl}
-                navigate={navigate}
-              />
-            </Elements>
+
+            {clientSecret && (
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <CheckoutForm
+                  onwardBookingId={onwardBookingId}
+                  returnBookingId={returnBookingId}
+                  clientSecret={clientSecret}
+                  returnClientSecret={returnClientSecret}
+                  isRoundTrip={isRoundTrip}
+                  token={token}
+                  apiUrl={apiUrl}
+                  navigate={navigate}
+                />
+              </Elements>
+            )}
+
             <div className="security-note">
               <p>🔒 Your payment information is secure and encrypted</p>
             </div>
@@ -264,4 +333,3 @@ const Payment = () => {
 };
 
 export default Payment;
-

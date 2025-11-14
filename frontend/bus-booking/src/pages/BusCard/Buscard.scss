@@ -3,6 +3,39 @@
 .bus-results-page {
   min-height: 100vh;
   background: linear-gradient(to bottom, #f5f5f5, #ffffff);
+  .buscard-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow-x: scroll;
+    .navbar-inner {
+     
+      
+      .bus-search-container {
+        padding: 0;
+        background: none;
+        min-height: auto;
+        flex-direction: column;
+        box-shadow: none;
+        &::before {
+          display: none;
+          padding: 0;
+        }
+        .title {
+          display: none;
+        }
+        .form-group {
+          display: flex;
+          padding: 10px;
+          box-shadow: none;
+          justify-content: center;
+         
+        }
+      }
+    }
+  }
 }
 
 .loader-container,
@@ -131,23 +164,22 @@
     margin-bottom: 2rem;
   }
 }
-.trip-toggle-container{
-  margin-top:1rem;
+.trip-toggle-container {
+  margin-top: 1rem;
   margin-bottom: 1rem;
   display: flex;
   justify-content: center;
-  button{
+  button {
     padding: 6px 10px;
     border: 2px solid $border-color;
     border-radius: 12px;
     background-color: $white;
     font-size: 14px;
     font-weight: 600;
-    &.active{
+    &.active {
       border-color: $primary-red;
       background-color: $primary-red;
       color: $white;
-      
     }
   }
 }
@@ -461,6 +493,33 @@
 
 // Responsive Design
 @media (max-width: 768px) {
+  .buscard-navbar {
+    .bus-search-container {
+      .form-group {
+        display: flex !important;
+        overflow-x: scroll;
+        padding: 15px !important;
+        gap: 12px;
+        justify-content:unset !important;
+        .search-btn {
+          grid-column: 1/-1;
+          width: 100%;
+        }
+        button{
+          padding: 10px 10px;
+          font-size: 10px;
+        }
+        .form-field{
+          select{
+            padding: 8px 8px;
+          }
+          input[type="date"]{
+            padding: 8px 8px;
+          }
+        }
+      }
+    }
+  }
   .bus-card {
     &__header {
       flex-direction: column;
@@ -495,6 +554,22 @@
 }
 
 @media (max-width: 480px) {
+  .buscard-navbar {
+    
+    padding: 0.6rem 0;
+    .bus-search-container .form-group {
+      display: flex;
+      padding: 0;
+      justify-content: unset !important;
+      .form-field {
+        width: 100%;
+      }
+      .search-btn {
+        width: 100%;
+        padding: 12px;
+      }
+    }
+  }
   .search-info {
     padding: 1rem;
 

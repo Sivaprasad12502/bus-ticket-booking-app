@@ -64,7 +64,7 @@ const MyBooking = () => {
 
   const handlePayNow = (bookingId, total_amount) => {
     console.log("handle pay now clicked", bookingId, total_amount);
-    navigate(`/payment?bookingId=${bookingId}&totalamount=${total_amount}`);
+    navigate(`/payment?onwardId=${bookingId}&totalamount=${total_amount}`);
   };
 
   if (isLoading) {

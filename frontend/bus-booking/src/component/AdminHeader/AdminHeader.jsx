@@ -62,15 +62,7 @@ const AdminHeader = ({ onMenuToggle }) => {
       </div>
 
       <div className="admin-header__right">
-        {/* Notifications */}
-        {/* <div className="admin-header__notifications">
-          <button aria-label="Notifications">
-            <IoNotifications />
-          </button>
-          <span className="admin-header__notifications-badge">3</span>
-        </div> */}
-
-        {/* User Profile */}
+        
         <div 
           className="admin-header__user"
           onClick={() => setShowUserMenu(!showUserMenu)}

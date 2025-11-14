@@ -22,12 +22,12 @@ urlpatterns = [
     ),
     # path('bookings/<int:booking_id>/payment/',views.create_payment,name='payement'),
     path(
-        "bookings/<int:booking_Id>/create-payment-intent/",
+        "bookings/create-payment-intent/",
         views.create_payment_intent,
         name="create-payment-intent",
     ),
     path(
-        "bookings/<int:booking_Id>/confirm-payment/",
+        "bookings/confirm-payment/",
         views.confirm_payment,
         name="confirm-payment",
     ),

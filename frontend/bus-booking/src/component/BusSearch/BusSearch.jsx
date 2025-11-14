@@ -5,13 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import "./BusSearch.scss";
 
-export const BusSearch = () => {
+export const BusSearch = ({ defaultFrom, defaultTo, defaultDate, defaultTripType, defaultReturnDate }) => {
   const { apiUrl, navigate } = useContext(Context);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [date, setDate] = useState("");
-  const [returnDate, setRuturnDate] = useState("");
-  const [tripType, setTripType] = useState("oneway");
+  const [from, setFrom] = useState(defaultFrom||"");
+  const [to, setTo] = useState(defaultTo||"");
+  const [date, setDate] = useState(defaultDate||"");
+  const [returnDate, setRuturnDate] = useState(defaultReturnDate||"");
+  const [tripType, setTripType] = useState(defaultTripType||"oneway");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["routes"],
