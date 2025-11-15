@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useContext } from "react";
 import { Context } from "../../context/Context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -123,10 +123,18 @@ const AdminBuses = () => {
       operator_mobile: bus.operator_mobile,
     });
   };
-  setTimeout(() => {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    inputRef.current?.focus();
-  }, 100);
+  useEffect(() => {
+    if (editingBus) {
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        inputRef.current?.focus();
+      }, 100);
+    }
+  },[editingBus]);
+
   return (
     <div className="admin-buses">
       <h2 className="admin-buses__title">
@@ -145,7 +153,7 @@ const AdminBuses = () => {
           required
         />
         <input
-          ref={inputRef}
+         
           type="number"
           name="total_seats"
           placeholder="Total Seats"
@@ -164,7 +172,7 @@ const AdminBuses = () => {
           <option value="Sleeper">Sleeper</option>
         </select>
         <input
-          ref={inputRef}
+         
           name="operator_name"
           placeholder="Operator Name"
           value={values.operator_name}
@@ -178,11 +186,11 @@ const AdminBuses = () => {
           required
         >
           <option value="2*2">2*2</option>
-          <option value="1*2">1*2</option>
+          <option value="2*3">2*3</option>
           <option value="Sleeper">Sleeper</option>
         </select>
         <input
-          ref={inputRef}
+          
           name="operator_mobile"
           placeholder="Operator Mobile"
           value={values.operator_mobile}

@@ -10,9 +10,10 @@
     background: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     overflow-x: scroll;
+    svg {
+      display: none;
+    }
     .navbar-inner {
-     
-      
       .bus-search-container {
         padding: 0;
         background: none;
@@ -31,7 +32,6 @@
           padding: 10px;
           box-shadow: none;
           justify-content: center;
-         
         }
       }
     }
@@ -490,7 +490,13 @@
     }
   }
 }
+@media (max-width:1024px) {
+  .form-group{
+    justify-content: unset !important;
+  }
 
+  
+}
 // Responsive Design
 @media (max-width: 768px) {
   .buscard-navbar {
@@ -500,20 +506,20 @@
         overflow-x: scroll;
         padding: 15px !important;
         gap: 12px;
-        justify-content:unset !important;
+        justify-content: unset !important;
         .search-btn {
           grid-column: 1/-1;
           width: 100%;
         }
-        button{
+        button {
           padding: 10px 10px;
           font-size: 10px;
         }
-        .form-field{
-          select{
+        .form-field {
+          select {
             padding: 8px 8px;
           }
-          input[type="date"]{
+          input[type="date"] {
             padding: 8px 8px;
           }
         }
@@ -555,18 +561,39 @@
 
 @media (max-width: 480px) {
   .buscard-navbar {
-    
-    padding: 0.6rem 0;
-    .bus-search-container .form-group {
-      display: flex;
-      padding: 0;
-      justify-content: unset !important;
-      .form-field {
-        width: 100%;
+    position: relative;
+    overflow: visible !important;
+    display: flex;
+    svg {
+      display: block !important;
+      font-size: 1.5rem;
+      margin: 1rem;
+      position: relative;
+      z-index: 9999;
+      cursor: pointer;
+    }
+    .navbar-inner {
+      display: none;
+      &.show-search {
+        display: block;
+        position: absolute;
+        inset: 0;
+        background: white;
+        z-index: 999;
       }
-      .search-btn {
-        width: 100%;
-        padding: 12px;
+      padding: 0.6rem 0;
+      .bus-search-container .form-group {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        justify-content: unset !important;
+        .form-field {
+          width: 100%;
+        }
+        .search-btn {
+          width: 100%;
+          padding: 12px;
+        }
       }
     }
   }

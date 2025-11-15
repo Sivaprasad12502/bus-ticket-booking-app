@@ -3,7 +3,14 @@ import React, { useState, useContext } from "react";
 import { Context } from "../../context/Context";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
-import { FaBus, FaClock, FaMapMarkerAlt, FaRupeeSign } from "react-icons/fa";
+import {
+  FaBus,
+  FaClock,
+  FaMapMarkerAlt,
+  FaRupeeSign,
+  FaSearch,
+} from "react-icons/fa";
+import { RiCloseLine } from "react-icons/ri";
 import { MdEventSeat } from "react-icons/md";
 import Navbar from "../../component/Navbar/Navbar";
 import "./Buscard.scss";
@@ -47,6 +54,7 @@ const BusCard = () => {
   const [selectedTripType, setSelectedTripType] = useState(
     tripPhase == "return" ? "roundtrip" : "oneway"
   );
+  const [showSearchBar, setShowSearchBar] = useState(false);
   const { data, isLoading, isError } = useQuery({
     queryKey: ["buses", from, to, date, tripType, returnDate],
     enabled: !!from && !!to && !!date,
@@ -135,13 +143,21 @@ const BusCard = () => {
   return (
     <div className="bus-results-page">
       <div className="buscard-navbar">
-        <div className="navbar-inner">
-          <BusSearch compact={true} 
-          defaultFrom={from}
-          defaultTo={to}
-          defaultDate={date}
-          defaultTripType={tripType}
-          defaultReturnDate={returnDate}/>
+        {showSearchBar ? (
+          <RiCloseLine onClick={() => setShowSearchBar(false)} />
+        ) : (
+          <FaSearch onClick={() => setShowSearchBar(true)} />
+        )}
+
+        <div className={`navbar-inner ${showSearchBar ? "show-search" : ""}`}>
+          <BusSearch
+            defaultFrom={from}
+            defaultTo={to}
+            defaultDate={date}
+            defaultTripType={tripType}
+            defaultReturnDate={returnDate}
+            setShowSearchBar={setShowSearchBar}
+          />
         </div>
       </div>
       <div className="bus-results-container">

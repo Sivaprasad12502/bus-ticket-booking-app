@@ -19,7 +19,7 @@ class Bus(models.Model):
         max_length=20,
         choices=[
             ("2*2", "2*2 Seating"),
-            ("1*2", "1*2 seating"),
+            ("2*3", "2*3 Seating"),
             ("Sleeper", "Sleeper Layout"),
         ],
     )

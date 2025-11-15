@@ -131,7 +131,6 @@ export const SeatDetail = () => {
   if (tripLoading || seatsLoading) {
     return (
       <>
-        <Navbar />
         <div className="seat-container">
           <div className="seat-container__loading">
             <FaSpinner />
@@ -161,6 +160,8 @@ export const SeatDetail = () => {
 
   // sleeper
   const busType = trip?.bus?.bus_type || "AC";
+  // 2*3
+  const layout_type = trip?.bus?.layout_type || "2*2";
   const renderSeats = () => {
     if (busType === "Sleeper") {
       return (
@@ -234,23 +235,67 @@ export const SeatDetail = () => {
         </div>
       );
     }
+    if (layout_type === "2*3") {
+      const perRow = 5;
+      const rows = [];
+      const total = seatNumbers.length;
+      //Leave last 5 or 6 seats for back row
+      const backRowSeatsCount = 5;
+      const normalSeatsCount = total - backRowSeatsCount;
+      //Normal rows
+      for (let i = 0; i < normalSeatsCount; i += perRow) {
+        rows.push(seatNumbers.slice(i, i + perRow));
+      }
+      //Back row
+      const backRow = seatNumbers.slice(normalSeatsCount);
+      return (
+        <>
+          {rows.map((row, ridx) => (
+            <div className="seat-row" key={`row-${ridx}`}>
+              <div className="seat-block left">
+                {row.slice(0, 2).map((num) => renderSeat(num))}
+              </div>
+              <div className="aisle" />
+              <div className="seat-block right">
+                {row.slice(2, 5).map((num) => renderSeat(num))}
+              </div>
+            </div>
+          ))}
+          {/*back row*/}
+          <div className="seat-row back-row">
+            {backRow.map((num) => renderSeat(num))}
+          </div>
+        </>
+      );
+    }
     //default 2*2 seat layout
     const perRow = 4;
     const rows = [];
-    for (let i = 0; i < seatNumbers.length; i += perRow) {
+    const total = seatNumbers.length;
+    const backRowSeatsCount = 6;
+    const normalSeatsCount = total - backRowSeatsCount;
+    for (let i = 0; i < normalSeatsCount; i += perRow) {
       rows.push(seatNumbers.slice(i, i + perRow));
     }
-    return rows.map((row, rIdx) => (
-      <div className="seat-row" key={`row-${rIdx}`}>
-        <div className="seat-block left">
-          {row.slice(0, 2).map((num) => renderSeat(num))}
+    const backRow = seatNumbers.slice(normalSeatsCount);
+    return (
+      <>
+        {rows.map((row, rIdx) => (
+          <div className="seat-row" key={`row-${rIdx}`}>
+            <div className="seat-block left">
+              {row.slice(0, 2).map((num) => renderSeat(num))}
+            </div>
+            <div className="aisle" />
+            <div className="seat-block right">
+              {row.slice(2, 4).map((num) => renderSeat(num))}
+            </div>
+          </div>
+        ))}
+        <div className="seat-row back-row">
+          {backRow.map((num) => renderSeat(num))}
         </div>
-        <div className="aisle" />
-        <div className="seat-block right">
-          {row.slice(2, 4).map((num) => renderSeat(num))}
-        </div>
-      </div>
-    ));
+      </>
+    );
   };
   //Helper render seat
   const renderSeat = (num) => {
@@ -330,12 +375,14 @@ export const SeatDetail = () => {
 
             {/* Bus Visualization */}
             <div className="bus-wrapper">
-              <div className="driver">
-                <GiSteeringWheel />
-                Driver
+              <div className="seat-grid">
+                <div className="driver">
+                  <GiSteeringWheel />
+                  Driver
+                </div>
+                <div className=" conductor">C</div>
+                {renderSeats()}
               </div>
-
-              <div className="seat-grid">{renderSeats()}</div>
             </div>
 
             {/* Seat Legend */}
@@ -357,6 +404,10 @@ export const SeatDetail = () => {
                 <div className="legend__item">
                   <div className="box box--women"></div>
                   <span>Women Only</span>
+                </div>
+                <div className="legend__item">
+                  <div className="box box--conductor"></div>
+                  <span>Conductor</span>
                 </div>
               </div>
             </div>

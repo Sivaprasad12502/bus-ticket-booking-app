@@ -5,13 +5,20 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import "./BusSearch.scss";
 
-export const BusSearch = ({ defaultFrom, defaultTo, defaultDate, defaultTripType, defaultReturnDate }) => {
+export const BusSearch = ({
+  defaultFrom,
+  defaultTo,
+  defaultDate,
+  defaultTripType,
+  defaultReturnDate,
+  setShowSearchBar,
+}) => {
   const { apiUrl, navigate } = useContext(Context);
-  const [from, setFrom] = useState(defaultFrom||"");
-  const [to, setTo] = useState(defaultTo||"");
-  const [date, setDate] = useState(defaultDate||"");
-  const [returnDate, setRuturnDate] = useState(defaultReturnDate||"");
-  const [tripType, setTripType] = useState(defaultTripType||"oneway");
+  const [from, setFrom] = useState(defaultFrom || "");
+  const [to, setTo] = useState(defaultTo || "");
+  const [date, setDate] = useState(defaultDate || "");
+  const [returnDate, setRuturnDate] = useState(defaultReturnDate || "");
+  const [tripType, setTripType] = useState(defaultTripType || "oneway");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["routes"],
@@ -29,17 +36,19 @@ export const BusSearch = ({ defaultFrom, defaultTo, defaultDate, defaultTripType
       e.preventDefault();
       alert("Please fill all fields before searching.");
     }
-    const params=new URLSearchParams({
-      from:from.trim(),
-      to:to.trim(),
-      date:date,
+    const params = new URLSearchParams({
+      from: from.trim(),
+      to: to.trim(),
+      date: date,
       tripType,
-
-    })
-    if(tripType==="roundtrip"&&returnDate){
-      params.append("returnDate",returnDate)
+    });
+    if (tripType === "roundtrip" && returnDate) {
+      params.append("returnDate", returnDate);
     }
-    navigate(`/busDetails?${params.toString()}`)
+    if (setShowSearchBar) {
+      setShowSearchBar(false);
+    }
+    navigate(`/busDetails?${params.toString()}`);
   };
 
   return (
@@ -101,18 +110,18 @@ export const BusSearch = ({ defaultFrom, defaultTo, defaultDate, defaultTripType
             min={new Date().toISOString().split("T")[0]} // prevent past dates
           />
         </div>
-        {tripType==="roundtrip"&&(
+        {tripType === "roundtrip" && (
           <div className="form-field">
-          <label htmlFor="returndate">Return Date</label>
-          <input
-            type="date"
-            id="returndate"
-            value={returnDate}
-            onChange={(e) => setRuturnDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]} // prevent past dates
-            disabled={tripType === "oneway"}
-          />
-        </div>
+            <label htmlFor="returndate">Return Date</label>
+            <input
+              type="date"
+              id="returndate"
+              value={returnDate}
+              onChange={(e) => setRuturnDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]} // prevent past dates
+              disabled={tripType === "oneway"}
+            />
+          </div>
         )}
 
         <button
