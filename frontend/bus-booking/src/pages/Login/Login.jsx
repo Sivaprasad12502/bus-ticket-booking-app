@@ -10,6 +10,8 @@ import { FaUser, FaLock, FaBus } from "react-icons/fa";
 
 export const Login = () => {
   const { apiUrl, user, setUser, navigate, setToken } = useContext(Context);
+  const params=new URLSearchParams(location.search)
+  const next=params.get("next")||"/"
   const { values, handleChange } = useForm({
     username: "",
     password: "",
@@ -28,7 +30,9 @@ export const Login = () => {
       setUser(userData);
       toast.success("Logged in successfully", {
         onClose: () => {
-          navigate("/");
+          if(next){
+            navigate(next)
+          }
         },
         autoClose: 2000,
       });
@@ -53,7 +57,7 @@ export const Login = () => {
             <FaBus className="icon-bus" />
             <h2>First time here?</h2>
             <p>Register with us to unlock exciting offers and discounts on bus bookings.</p>
-            <Link to="/register">
+            <Link to={`/register?next=${encodeURIComponent(next)}`}>
               <button className="btn-register">Create Account</button>
             </Link>
           </div>

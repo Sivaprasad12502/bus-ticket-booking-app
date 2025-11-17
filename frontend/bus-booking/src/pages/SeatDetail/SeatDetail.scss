@@ -263,12 +263,16 @@
     -webkit-tap-highlight-color: transparent; // Remove tap highlight on mobile
     user-select: none; // Prevent text selection on long press
     touch-action: manipulation; // Improve touch responsiveness
+    &.berth{
+      height: 128px;
+    }
 
     &:hover:not(.booked) {
       transform: translateY(-4px) scale(1.05);
       box-shadow: 0 6px 16px rgba(216, 78, 85, 0.25);
       border-color: $primary-red;
-      background: #fff5f5;
+      // background: #fff5f5;
+      background: #1e066c;
     }
 
     &:active:not(.booked) {
@@ -295,6 +299,7 @@
     // Booked Seat
     &.booked {
       background: #f5f5f5;
+      // background-color: rgb(43, 55, 96);
       color: #999;
       border-color: #e0e0e0;
       cursor: not-allowed;
@@ -382,6 +387,14 @@
       border-radius: 16px;
       padding: 25px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      .deck-header{
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+      }
 
       h4 {
         font-size: 18px;
@@ -403,14 +416,24 @@
         gap: 12px;
       }
     }
-
-    .seat.sleeper {
-      width: 100%;
-      max-width: 120px;
-      height: 45px;
-      border-radius: 8px;
+  }
+  .sleeper-row{
+    display: flex;
+    // align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    background: #fafafa;
+    border-radius: 8px;
+    &:hover{
+      background: #f5f5f5;
+    }
+    .berth-block{
+      display: flex;
+      gap: 0.5rem;
+      
     }
   }
+  
 
   // Right Sidebar - Booking Summary
   &__sidebar {
@@ -825,6 +848,9 @@
       height: 48px;
       font-size: 12px;
       border-radius: 10px;
+      &.berth{
+        height: 80px !important;
+      }
 
       &::after {
         width: 14px;

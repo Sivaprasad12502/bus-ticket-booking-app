@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
   if (!token || isTokenExpired(token)) {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
-    return <Navigate to="/login" replace />;
+    // return <Navigate to="/login" replace />;
   }
 
   return children;

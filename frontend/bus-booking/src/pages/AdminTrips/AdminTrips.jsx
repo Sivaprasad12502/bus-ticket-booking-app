@@ -324,6 +324,7 @@ const AdminTrips = () => {
                     <AdminSeats
                       tripId={selectedTrip.id}
                       onBack={() => setSelectedTrip(null)}
+                      bus={t.bus}
                     />
                   ) : (
                     <div className="stops-panel">

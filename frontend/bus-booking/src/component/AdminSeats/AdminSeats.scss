@@ -1,3 +1,4 @@
+@import "../../style.scss";
 .admin-seats {
   padding: 1.5rem;
   background: #f8f9fa;
@@ -70,6 +71,9 @@
 }
 
 .seat-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 35px;
   height: 35px;
   border-radius: 6px;
@@ -80,7 +84,9 @@
   cursor: pointer;
   transition: 0.2s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
+  &.berth {
+    height: 128px;
+  }
   &.any {
     background: #f0f0f0;
     border: 1px solid #ccc;
@@ -93,6 +99,63 @@
 
   &:hover {
     transform: scale(1.08);
+  }
+}
+// Sleeper Layout
+.sleeper-layout {
+  display: flex;
+  // flex-direction: column;
+  gap: 40px;
+  padding: 20px;
+
+  .deck {
+    // background: white;
+    border-radius: 16px;
+    padding: 25px;
+    // box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    .deck-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    h4 {
+      font-size: 18px;
+      font-weight: 700;
+      color: $text-primary;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      svg {
+        color: $primary-red;
+      }
+    }
+
+    .deck-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+}
+.sleeper-row {
+  display: flex;
+  // align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  background: #fafafa;
+  border-radius: 8px;
+  &:hover {
+    background: #f5f5f5;
+  }
+  .berth-block {
+    display: flex;
+    gap: 0.5rem;
   }
 }
 
@@ -173,6 +236,22 @@
 
       .cancel-btn {
         background: #ccc;
+      }
+    }
+  }
+}
+@media screen and (max-width: 460px) {
+  .admin-seats__layout {
+    background: none;
+    box-shadow: none;
+    .sleeper-layout {
+      gap: 0px;
+      background: #fff;
+      .deck {
+        padding: 5px;
+        .berth{
+          height:80px;
+        }
       }
     }
   }

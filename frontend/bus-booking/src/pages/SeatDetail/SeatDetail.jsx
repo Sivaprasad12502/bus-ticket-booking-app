@@ -16,6 +16,7 @@ import {
   FaSpinner,
   FaExclamationCircle,
   FaArrowRight,
+  FaUser,
 } from "react-icons/fa";
 import { MdEventSeat, MdAirlineSeatReclineNormal } from "react-icons/md";
 import { GiSteeringWheel } from "react-icons/gi";
@@ -97,9 +98,18 @@ export const SeatDetail = () => {
   };
 
   const handleBookNow = () => {
+    const seatsQuery = selectedSeats.join(",");
     if (!token) {
       toast.error("Please login to book seats.");
-      navigate(`/login?next=/selectSeat?tripid=${tripid}&date=${date}`);
+      const nextUrl =
+        tripType === "roundtrip" && tripPhase === "onward"
+          ? `/busDetails?from=${trip.route.start_location}&to=${trip.route.end_location}&date=${returnDate}&tripType=roundtrip&returnDate=${returnDate}&onwayTripId=${tripid}&onwayDate=${date}&onwaySeats=${seatsQuery}&tripPhase=return`
+          : // const nextUrl=tripType==="roundtrip"&&tripPhase==="onward"? `/busDetails/selectSeat?from=${trip.route.start_location}&to=${trip.route.end_location}&date=${returnDate}&tripType=roundtrip&returnDate=${returnDate}&onwayTripId=${tripid}&onwayDate=${date}&onwaySeats=${seatsQuery}&tripPhase=return`
+
+          tripType === "roundtrip" && tripPhase === "return"
+          ? `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}&onwayTripId=${onwayTripId}&onwayDate=${onwayDate}&onwaySeats=${onwaySeats}`
+          : `/selectSeat/addpassenger?tripid=${tripid}&date=${date}&seats=${seatsQuery}`;
+      navigate(`/login?next=${encodeURIComponent(nextUrl)}`);
       return;
     }
     if (selectedSeats.length === 0) {
@@ -107,7 +117,7 @@ export const SeatDetail = () => {
       return;
     }
 
-    const seatsQuery = selectedSeats.join(",");
+    // const seatsQuery = selectedSeats.join(",");
     //CASE 1:Onward Phase of a roundTrip
     if (tripType === "roundtrip" && tripPhase === "onward") {
       navigate(
@@ -159,44 +169,51 @@ export const SeatDetail = () => {
   const totalPrice = (selectedSeats.length * pricePerSeat).toFixed(2);
 
   // sleeper
+  const generateSlpperLayout = (seatNumbers) => {
+    const rows = [];
+    for (let i = 0; i < seatNumbers.length; i += 3) {
+      rows.push({
+        left: seatNumbers[i] || null,
+        right: [seatNumbers[i + 1] || null, seatNumbers[i + 2] || null],
+      });
+    }
+    //split into upper + lower
+    const mid = Math.ceil(rows.length / 2);
+    return {
+      upper: rows.slice(0, mid),
+      lower: rows.slice(mid),
+    };
+  };
   const busType = trip?.bus?.bus_type || "AC";
   // 2*3
   const layout_type = trip?.bus?.layout_type || "2*2";
   const renderSeats = () => {
     if (busType === "Sleeper") {
+      const layout = generateSlpperLayout(seatNumbers);
       return (
         <div className="sleeper-layout">
+          {/*Upper deck*/}
           <div className="deck upper-deck">
             <h4>
               <MdAirlineSeatReclineNormal />
               Upper Deck
             </h4>
             <div className="deck-rows">
-              {seatNumbers
-                .filter((_, i) => i % 2 == 0) //example split upper/lower
-                .map((num) => {
-                  const seatData = seatInfoMap.get(num);
-                  const genderPref = seatData?.gender_preference || "ANY";
-                  const isWomenOnly = genderPref === "WOMEN_ONLY";
-                  const isAvailable = availableSet.has(num);
-                  const isSelected = selectedSeats.includes(num);
-                  return (
-                    <button
-                      key={num}
-                      className={`seat sleeper ${
-                        !isAvailable ? "booked" : ""
-                      } ${isSelected ? "selected" : ""} ${
-                        isWomenOnly ? "women-only" : ""
-                      }`}
-                      disabled={!isAvailable}
-                      onClick={() => toggleSeat(num, isAvailable)}
-                      title={isWomenOnly ? "Reserved for Women" : ""}
-                    >
-                      {num}
-                      {isWomenOnly && <span className="seat-icon">♀</span>}
-                    </button>
-                  );
-                })}
+              {layout.upper.map((row, ridx) => (
+                <div className="sleeper-row" key={`upper-row ${ridx}`}>
+                  {/**lef single - Single Berth */}
+                  <div className="berth-block left-block">
+                    {row.left && renderSleeperBerth(row.left)}
+                    {/**Aisle */}
+                    <div className="sleeper-aisle"></div>
+                  </div>
+                  {/* {right side -Double Berths} */}
+                  <div className="berth-block right-block">
+                    {row.right[0] && renderSleeperBerth(row.right[0])}
+                    {row.right[1] && renderSleeperBerth(row.right[1])}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
           <div className="deck lower-deck">
@@ -205,31 +222,23 @@ export const SeatDetail = () => {
               Lower Deck
             </h4>
             <div className="deck-rows">
-              {seatNumbers
-                .filter((_, i) => i % 2 !== 0) //example split upper/lower
-                .map((num) => {
-                  const seatData = seatInfoMap.get(num);
-                  const genderPref = seatData?.gender_preference || "ANY";
-                  const isWomenOnly = genderPref === "WOMEN_ONLY";
-                  const isAvailable = availableSet.has(num);
-                  const isSelected = selectedSeats.includes(num);
-                  return (
-                    <button
-                      key={num}
-                      className={`seat sleeper ${
-                        !isAvailable ? "booked" : ""
-                      } ${isSelected ? "selected" : ""} ${
-                        isWomenOnly ? "women-only" : ""
-                      }`}
-                      disabled={!isAvailable}
-                      onClick={() => toggleSeat(num, isAvailable)}
-                      title={isWomenOnly ? "Reserved for Women" : ""}
-                    >
-                      {num}
-                      {isWomenOnly && <span className="seat-icon">♀</span>}
-                    </button>
-                  );
-                })}
+              {layout.lower.map((row, ridx) => (
+                <div className="sleeper-row" key={`lower-row-${ridx}`}>
+                  {/* Left Side - Single Berth */}
+                  <div className="berth-block left-block">
+                    {row.left && renderSleeperBerth(row.left)}
+                  </div>
+
+                  {/* Aisle */}
+                  <div className="sleeper-aisle"></div>
+
+                  {/* Right Side - Double Berths */}
+                  <div className="berth-block right-block">
+                    {row.right[0] && renderSleeperBerth(row.right[0])}
+                    {row.right[1] && renderSleeperBerth(row.right[1])}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -319,6 +328,33 @@ export const SeatDetail = () => {
       </button>
     );
   };
+  //New helper function to render sleepr berth
+  const renderSleeperBerth = (num) => {
+    if (!num) return null;
+    const seatData = seatInfoMap.get(String(num));
+    const genderPref = seatData?.gender_preference || "ANY";
+    const isWomenOnly = genderPref === "WOMEN_ONLY";
+    const isAvailable = availableSet.has(String(num));
+    const isSelected = selectedSeats.includes(String(num));
+    return (
+      <button
+        key={num}
+        className={`seat berth ${!isAvailable ? "booked" : ""} ${
+          isSelected ? "selected" : ""
+        } ${isWomenOnly ? "women-only" : ""}`}
+        disabled={!isAvailable}
+        onClick={() => toggleSeat(String(num), isAvailable)}
+        title={isWomenOnly ? "Reserved for Women" : `Berth ${num}`}
+      >
+        <div className="berth-content">
+          <span className="berth-number">{num}</span>
+          {isWomenOnly && <span className="seat-icon">♀</span>}
+          {!isAvailable && <span className="berth-status">Booked</span>}
+        </div>
+        <div className="berth-pillow"></div>
+      </button>
+    );
+  };
   return (
     <>
       {/* <Navbar /> */}
@@ -330,9 +366,14 @@ export const SeatDetail = () => {
             <div className="seat-container__header">
               <h1>
                 <FaBus />
+
                 {tripPhase === "onward"
-                  ? "Select onward trip Seats"
-                  : "Select Return Trip Seats"}
+                  ? `Select onward trip ${
+                      trip?.bus?.bus_type === "Sleeper" ? "Births" : " seats"
+                    }`
+                  : `Select Return Trip ${
+                      trip?.bus?.bus_type === "Sleeper" ? "Births" : " seats"
+                    }`}
               </h1>
               <div className="seat-container__header-details">
                 <div className="seat-container__header-details-item">
@@ -464,16 +505,24 @@ export const SeatDetail = () => {
               onClick={handleBookNow}
               disabled={selectedSeats.length === 0}
             >
-              <FaCheckCircle />
-              {tripType === "roundtrip" && tripPhase === "onward"
-                ? "Proceed to Return Trip"
-                : selectedSeats.length > 0
-                ? `Proceed to Book (${selectedSeats.length} ${
-                    selectedSeats.length === 1 ? "Seat" : "Seats"
-                  })`
-                : "Select Seats to Continue"}
+              {token ? (
+                <>
+                  <FaCheckCircle />
+                  {tripType === "roundtrip" && tripPhase === "onward"
+                    ? "Proceed to Return Trip"
+                    : selectedSeats.length > 0
+                    ? `Proceed to Book (${selectedSeats.length} ${
+                        selectedSeats.length === 1 ? "Seat" : "Seats"
+                      })`
+                    : "Select Seats to Continue"}
 
-              <FaArrowRight />
+                  <FaArrowRight />
+                </>
+              ) : (
+                <>
+                  <FaUser /> Please login to proceed {tripType==="roundtrip"&&tripPhase==="onward"?"Return Trip":""}
+                </>
+              )}
             </button>
           </div>
         </div>

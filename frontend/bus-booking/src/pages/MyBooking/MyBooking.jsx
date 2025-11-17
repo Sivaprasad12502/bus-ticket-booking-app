@@ -61,7 +61,10 @@ const MyBooking = () => {
     },
     onError: (er) => console.log(er),
   });
-
+  const {data:cancelData}=mutation
+  if(cancelData){
+    console.log("canceledData in booking page", cancelData)
+  }
   const handlePayNow = (bookingId, total_amount) => {
     console.log("handle pay now clicked", bookingId, total_amount);
     navigate(`/payment?onwardId=${bookingId}&totalamount=${total_amount}`);

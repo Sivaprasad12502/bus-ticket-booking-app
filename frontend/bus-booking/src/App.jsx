@@ -35,30 +35,9 @@ function App() {
       />
       <Routes>
         {/* Protected routes */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/busDetails"
-          element={
-            <ProtectedRoute>
-              <BusCard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/busDetails/selectSeat"
-          element={
-            <ProtectedRoute>
-              <SeatDetail />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/busDetails" element={<BusCard />} />
+        <Route path="/busDetails/selectSeat" element={<SeatDetail />} />
         <Route
           path="/selectSeat/addpassenger"
           element={
@@ -90,13 +69,20 @@ function App() {
 
         {/* ========== for admin ========== */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
+        <Route
+          path="/admin/"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }
+        >
           <Route index element={<AdminDashBoard />} />
           <Route path="dashboard" element={<AdminDashBoard />} />
           <Route path="buses" element={<AdminBuses />} />
-          <Route path="routes" element={<AdminRoutes/>} />
-          <Route path="trips" element={<AdminTrips/>} />
-          <Route path="bookings" element={<AdminBookings/>} />
+          <Route path="routes" element={<AdminRoutes />} />
+          <Route path="trips" element={<AdminTrips />} />
+          <Route path="bookings" element={<AdminBookings />} />
         </Route>
       </Routes>
     </>

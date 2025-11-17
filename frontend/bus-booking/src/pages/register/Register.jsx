@@ -9,6 +9,8 @@ import { toast } from "react-toastify";
 import { FaUser, FaEnvelope, FaLock, FaPhone, FaBus } from "react-icons/fa";
 
 const Register = () => {
+  const params=new URLSearchParams(location.search);
+  const next=params.get("next")||"/"
   const { apiUrl, setUser, navigate, setToken } = useContext(Context);
   const { values, handleChange } = useForm({
     username: "",
@@ -42,7 +44,10 @@ const Register = () => {
       setUser(userData);
       toast.success("User registered successfully", {
         onClose: () => {
-          navigate("/");
+          if(next){
+
+            navigate(next);
+          }
         },
         autoClose: 2000,
       });

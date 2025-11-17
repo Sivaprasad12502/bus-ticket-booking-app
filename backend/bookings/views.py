@@ -515,6 +515,26 @@ def confirm_payment(request):
     return Response(serializer.data, status=200)
 
 
+#Applying cancellation policies
+def get_refund_percentage(booking):
+    trip_date=booking.booked_date
+    trip_time=booking.trip.departure_time
+
+    #combine into one datetime
+    trip_datetime=timezone.make_aware(datetime.combine(trip_date,trip_time))
+    now=timezone.now()
+    hours_left=(trip_datetime - now).total_seconds()/3600
+    if hours_left>72:
+        return 1.0 #100%
+    elif 48< hours_left <=72:
+        return 0.90
+    elif 24 <hours_left <=48:
+        return 0.75
+    elif 12 <hours_left <=24:
+        return 0.50
+    else:
+        return 0.0
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def cancel_bookings(request, booking_Id):
@@ -543,18 +563,28 @@ def cancel_bookings(request, booking_Id):
         return Response(
             {"message": "Booking deleted (no payment found)"}, status=status.HTTP_200_OK
         )
+    # Payment exists -> Determine refund amount based on policy
+    refund_percent=get_refund_percentage(booking)
+    refund_amount=float(booking.total_amount)*refund_percent
+    refund_paise=int(refund_amount*100)
     try:
         # only refund successfull payments
         if payment.payment_status == "SUCCESS" and payment.stripe_payment_intent_id:
             intent = stripe.PaymentIntent.retrieve(payment.stripe_payment_intent_id)
             if intent.status == "succeeded" and intent.latest_charge:
-                refund = stripe.Refund.create(
-                    payment_intent=payment.stripe_payment_intent_id
-                )
-                payment.refund_id = refund.id
-                payment.payment_status = "REFUNDED"
-                payment.save()
-                refund_message = "Refund initialted succesfully"
+                if refund_paise>0:
+                    
+                    refund = stripe.Refund.create(
+                        payment_intent=payment.stripe_payment_intent_id,
+                        amount=int(refund_amount*100)
+                    )
+                    payment.refund_id = refund.id
+                    payment.payment_status = "REFUNDED"
+                    payment.save()
+                    refund_message = "Refund initialted succesfully"
+                else:
+                    payment.payment_status="NO_REFUND"
+                    payment.save()
             else:
                 refund_message = f"no refund - PaymentIntent status is {intent.status}"
         else:
@@ -570,6 +600,8 @@ def cancel_bookings(request, booking_Id):
                 "message": "Booking cancelled successfully and refund initiated (if applicable)",
                 "booking_id": booking_id,
                 "refund_id": getattr(payment, "refund_id", None),
+                "refund_percentage":refund_amount,
+                "refund_amount":refund_amount,
                 "status": booking.status,
             },
             status=status.HTTP_200_OK,

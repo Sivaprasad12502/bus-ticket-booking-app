@@ -9,6 +9,7 @@ import {
   FaMapMarkerAlt,
   FaRupeeSign,
   FaSearch,
+  FaBed
 } from "react-icons/fa";
 import { RiCloseLine } from "react-icons/ri";
 import { MdEventSeat } from "react-icons/md";
@@ -16,8 +17,9 @@ import Navbar from "../../component/Navbar/Navbar";
 import "./Buscard.scss";
 import { motion } from "framer-motion";
 import { BusSearch } from "../../component/BusSearch/BusSearch";
+import TicketCancellation from "../../component/TicketCancellation/TicketCancellation";
 
-const SeatsAvailability = ({ tripId, date }) => {
+const SeatsAvailability = ({ tripId, date,busType }) => {
   const { apiUrl } = useContext(Context);
   const { data, isLoading, isError } = useQuery({
     queryKey: ["availableSeats", tripId, date],
@@ -32,7 +34,7 @@ const SeatsAvailability = ({ tripId, date }) => {
   if (isError) return <p className="seat-status error">Error</p>;
   return (
     <p className="seat-status success">
-      <MdEventSeat /> {data.length} seats available
+      {busType === "Sleeper" ? <><FaBed /> {data.length} births available</> : <><MdEventSeat /> {data.length} seats available</>}
     </p>
   );
 };
@@ -290,6 +292,7 @@ const BusCard = () => {
                         </div>
                       </div>
                     </div>
+                    <TicketCancellation />
 
                     {trip.trip_stops && trip.trip_stops.length > 0 && (
                       <div className="stops-section">
@@ -321,13 +324,13 @@ const BusCard = () => {
 
                   <div className="bus-card__footer">
                     <div className="seat-info">
-                      <SeatsAvailability tripId={trip.id} date={date} />
+                      <SeatsAvailability tripId={trip.id} date={date} busType={trip.bus.bus_type} />
                     </div>
                     <button
                       className="btn-select-seat"
                       onClick={() => handleSelectSeat(trip)}
                     >
-                      <MdEventSeat /> Select Seats
+                      {trip.bus.bus_type=== "Sleeper"? <><FaBed/> select Births</>:<><MdEventSeat /> Select Seats</>}
                     </button>
                   </div>
                   {/* </div> */}
