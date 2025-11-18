@@ -21,8 +21,7 @@ class BusSerializer(serializers.ModelSerializer):
             "total_seats",
             "bus_type",
             "layout_type",
-            "operator_name",
-            "operator_mobile",
+           
         ]
 
 

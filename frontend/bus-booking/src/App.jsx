@@ -18,6 +18,7 @@ import AdminRoutes from "./pages/AdminRoutes/AdminRoutes";
 import AdminTrips from "./pages/AdminTrips/AdminTrips";
 import AdminBookings from "./pages/AdminBookings/AdminBookings";
 import AdminProtectedRoute from "./component/AdminProtectRoute/AdminProtectedRoute";
+import AdminOperators from "./pages/AdminOperators/AdminOperators";
 
 function App() {
   return (
@@ -83,6 +84,7 @@ function App() {
           <Route path="routes" element={<AdminRoutes />} />
           <Route path="trips" element={<AdminTrips />} />
           <Route path="bookings" element={<AdminBookings />} />
+          <Route path="operators" element={<AdminOperators />} />
         </Route>
       </Routes>
     </>

@@ -36,8 +36,24 @@ $shadow-medium: rgba(0, 0, 0, 0.12);
     display: flex;
     align-items: center;
     gap: 16px;
+    ul{
+      margin-left: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      li{
+        list-style: none;
+        font-size: 16px;
+        color: $primary-red;
+        font-weight: bold;
+      }
+    }
 
     button {
+      display: flex;
+      align-items: center;
+      gap: 2px;
       background: transparent;
       border: 2px solid $primary-red;
       border-radius: 8px;

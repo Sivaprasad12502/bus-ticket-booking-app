@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User,Operator
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.validators import UniqueValidator
 class UserSerializer(serializers.ModelSerializer):
@@ -45,6 +45,9 @@ class AdminUserSerializer(serializers.ModelSerializer):
         return user
 
 
-
-
-
+class OperatorSerializer(serializers.ModelSerializer):
+     username=serializers.CharField(source="user.username",read_only=True)
+     class Meta:
+         model=Operator
+         fields = ["id", "company_name", "operator_key", "phone", "username", "user"]
+         

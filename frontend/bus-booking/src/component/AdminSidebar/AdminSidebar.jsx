@@ -8,7 +8,8 @@ import {
   MdConfirmationNumber,
   MdBookOnline,
   MdChevronLeft,
-  MdChevronRight
+  MdChevronRight,
+  MdPerson,
 } from 'react-icons/md';
 import { FaBus } from 'react-icons/fa';
 const AdminSidebar = ({ isOpen, onClose, isMobile }) => {
@@ -44,6 +45,12 @@ const AdminSidebar = ({ isOpen, onClose, isMobile }) => {
       path: '/admin/bookings',
       icon: MdBookOnline,
       label: 'Bookings',
+      badge: null
+    },
+    {
+      path: '/admin/operators',
+      icon: MdPerson,
+      label: 'Operators',
       badge: null
     }
   ];

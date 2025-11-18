@@ -14,7 +14,7 @@ class Bus(models.Model):
         max_length=50,
         choices=[("AC", "AC"), ("Non-AC", "Non-AC"), ("Sleeper", "sleeper")],
     )
-    operator_name = models.CharField(max_length=100)
+    # operator_name = models.CharField(max_length=100)
     layout_type = models.CharField(
         max_length=20,
         choices=[
@@ -23,7 +23,7 @@ class Bus(models.Model):
             ("Sleeper", "Sleeper Layout"),
         ],
     )
-    operator_mobile = models.CharField(max_length=15, blank=True, null=True)
+    # operator_mobile = models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
         return f"{self.bus_name} {self.bus_type}"
@@ -61,6 +61,7 @@ class RouteStop(models.Model):
 
 
 class Trip(models.Model):
+    operator=models.ForeignKey("users.Operator",on_delete=models.CASCADE,null=True,blank=True,related_name="trips")
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     departure_time = models.TimeField()
