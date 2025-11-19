@@ -11,6 +11,7 @@ const AdminTrips = () => {
   const { values, setValues, handleChange, resetForm } = useForm({
     bus_id: "",
     route_id: "",
+    operator_id: "",
     departure_time: "",
     arrival_time: "",
     price: "",
@@ -40,9 +41,7 @@ const AdminTrips = () => {
       console.error("Admin Buses error:", error);
     },
   });
-  if (buses) {
-    console.log("Admin buses data", buses);
-  }
+
   const { data: routes } = useQuery({
     queryKey: ["routes"],
     queryFn: async () => {
@@ -55,6 +54,25 @@ const AdminTrips = () => {
       console.log("fetching error in routes", error);
     },
   });
+  const { data: operators } = useQuery({
+    queryKey: ["operators"],
+    queryFn: async () => {
+      const res = await axios.get(`${apiUrl}users/operators/`, {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+        },
+      });
+      return res.data;
+    },
+    onSuccess: (operators) => {
+      console.log("Admin Operators data:", operators);
+    },
+    onError: (error) => {
+      console.error("Admin Operators error:", error);
+    },
+  });
+ 
+
   // Fetch all trips
   const { data: trips, isLoading: isLoadingTrips } = useQuery({
     queryKey: ["trips"],
@@ -187,7 +205,7 @@ const AdminTrips = () => {
     },
   });
   const handleTripSubmit = (e) => {
-    console.log("form values", values);
+   
     e.preventDefault();
     if (editingTrip) editTrip.mutate({ ...editingTrip, ...values });
     else addTrip.mutate(values);
@@ -197,6 +215,7 @@ const AdminTrips = () => {
     setValues({
       bus_id: trip.bus.id,
       route_id: trip.route.id,
+      operator_id: trip.operator.id,
       departure_time: trip.departure_time?.slice(0, 5),
       arrival_time: trip.arrival_time?.slice(0, 5),
       price: trip.price,
@@ -204,7 +223,7 @@ const AdminTrips = () => {
   };
   const handleStopSubmit = (e) => {
     e.preventDefault();
-    console.log("stop form values",stopValues)
+    console.log("stop form values", stopValues);
     if (editingStop) editStop.mutate({ ...editingStop, ...stopValues });
     else addStop.mutate(stopValues);
   };
@@ -255,6 +274,19 @@ const AdminTrips = () => {
             </option>
           ))}
         </select>
+        <select
+          name="operator_id"
+          value={values.operator_id}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Select Operator</option>
+          {operators?.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.username} - {o.company_name}
+            </option>
+          ))}
+        </select>
         <label htmlFor="">
           Enter departure_time
           <input
@@ -296,6 +328,7 @@ const AdminTrips = () => {
             <li key={t.id}>
               🚌 {t.bus.bus_name} — {t.route.start_location} →{" "}
               {t.route.end_location}
+              <br /> operator: {t.operator?.username} - {t.operator?.company_name}
               <br />⏰ {t.departure_time} → {t.arrival_time} 💰 ₹{t.price}
               <div className="actions">
                 <button onClick={() => handleEditTrip(t)}>✏️ Edit</button>

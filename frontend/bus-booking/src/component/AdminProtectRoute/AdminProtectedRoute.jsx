@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Context } from "../../context/Context";
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
@@ -21,14 +21,23 @@ const AdminProtectedRoute = ({ children }) => {
     adminRefreshToken,
     setAdminRefreshToken,
   } = useContext(Context);
-  if (
-    !adminAccessToken ||
-    isTokenExpired(adminAccessToken) ||
-    adminUser.is_staff !== true
-  ) {
-    setAdminAccessToken(null);
-    setAdminRefreshToken(null);
-    setAdminUser({});
+  const [authorized, setAuthorized] = useState(null);
+  useEffect(() => {
+    const isInvalid =
+      !adminAccessToken ||
+      isTokenExpired(adminAccessToken) ||
+      adminUser?.is_staff !== true;
+    if (isInvalid) {
+      setAdminAccessToken(null);
+      setAdminRefreshToken(null);
+      setAdminUser({});
+      setAuthorized(false);
+    } else {
+      setAuthorized(true);
+    }
+  }, [adminAccessToken]);
+  if(authorized===null) return null;//or loadign
+  if (!authorized) {
     return <Navigate to="/admin/login" replace />;
   }
   return children;

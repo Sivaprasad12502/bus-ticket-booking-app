@@ -3,7 +3,6 @@ import React, { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { Context } from "../../context/Context";
 
-
 function isTokenExpired(token) {
   if (!token) return true;
   try {
@@ -17,6 +16,11 @@ function isTokenExpired(token) {
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useContext(Context);
+  // if (!isTokenExpired(token)) {
+  //   localStorage.removeItem("access");
+  //   localStorage.removeItem("refresh");
+  //   return <Navigate to="/login" replace />;
+  // }/// issue in after booking to login redirection 
 
   if (!token || isTokenExpired(token)) {
     localStorage.removeItem("access");

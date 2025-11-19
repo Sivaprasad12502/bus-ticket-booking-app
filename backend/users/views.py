@@ -165,6 +165,9 @@ def create_operator(request):
             "message": "Operator created successfully",
             "operator_id": str(operator.operator_key),
             "username": username,
+            "company_name": company_name,
+            "id": operator.id,
+            "is_staff": user.is_staff,
         }
     )
 
@@ -190,6 +193,8 @@ def login_operator(request):
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "username": user.username,
+            "id": operator.id,
+            "is_staff": user.is_staff,
             "company_name": operator.company_name,
             "operator_key": str(operator.operator_key),
         }

@@ -212,6 +212,7 @@ def create_trip_stops(sender,instance,created,**kwargs):
                     end_location=instance.route.start_location
 
                 )[0],
+                operator=instance.operator,
                 departure_time=instance.arrival_time,
                 arrival_time=instance.departure_time,
                 price=instance.price,

@@ -19,6 +19,9 @@ import AdminTrips from "./pages/AdminTrips/AdminTrips";
 import AdminBookings from "./pages/AdminBookings/AdminBookings";
 import AdminProtectedRoute from "./component/AdminProtectRoute/AdminProtectedRoute";
 import AdminOperators from "./pages/AdminOperators/AdminOperators";
+import OperatorLogin from "./pages/OperatorLogin/OperatorLogin";
+import OperatorTripManageMent from "./pages/OperatorTripManagement/OperatorTripManageMent";
+import OperatorProtectedRoute from "./component/OperatorProtectRoute/OperatorProtec";
 
 function App() {
   return (
@@ -86,6 +89,16 @@ function App() {
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="operators" element={<AdminOperators />} />
         </Route>
+        {/* =============== for operator ============== */}
+        <Route path="/operator/login" element={<OperatorLogin />} />
+        <Route
+          path="/operator/trip"
+          element={
+            <OperatorProtectedRoute>
+              <OperatorTripManageMent />
+            </OperatorProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );

@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from users.models import Operator
+from users.serializers import OperatorSerializer
 from .models import (
     Bus,
     Route,
@@ -21,7 +23,6 @@ class BusSerializer(serializers.ModelSerializer):
             "total_seats",
             "bus_type",
             "layout_type",
-           
         ]
 
 
@@ -71,6 +72,7 @@ class TripStopSerializer(serializers.ModelSerializer):
 class TripSerializer(serializers.ModelSerializer):
     bus = BusSerializer(read_only=True)
     route = RouteSerializer(read_only=True)
+    operator = OperatorSerializer(read_only=True)
     trip_stops = TripStopSerializer(many=True, read_only=True)
     bus_id = serializers.PrimaryKeyRelatedField(
         queryset=Bus.objects.all(), source="bus", write_only=True
@@ -78,6 +80,10 @@ class TripSerializer(serializers.ModelSerializer):
     route_id = serializers.PrimaryKeyRelatedField(
         queryset=Route.objects.all(), source="route", write_only=True
     )
+    operator_id = serializers.PrimaryKeyRelatedField(
+        queryset=Operator.objects.all(), source="operator", write_only=True
+    )
+
     # departure_time = serializers.SerializerMethodField()
     # arrival_time = serializers.SerializerMethodField()
 
@@ -89,6 +95,8 @@ class TripSerializer(serializers.ModelSerializer):
             "route",
             "bus_id",
             "route_id",
+            "operator_id",
+            "operator",
             "departure_time",
             "arrival_time",
             "price",

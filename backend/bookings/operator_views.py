@@ -19,7 +19,7 @@ def operator_manage_trip(request, operator_id):
         serializer=TripSerializer(operator_trips,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     if request.method=="PUT":
-        trip_id=request.data.get("trip_id")
+        trip_id=request.data.get("id")
         try:
             trip=operator_trips.get(id=trip_id)
         except Trip.DoesNotExist:
@@ -30,7 +30,7 @@ def operator_manage_trip(request, operator_id):
             return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     if request.method=="DELETE":
-        trip_id=request.data.get("trip_id")
+        trip_id=request.data.get("id")
         try:
             trip=operator_trips.get(id=trip_id)
         except Trip.DoesNotExist:
