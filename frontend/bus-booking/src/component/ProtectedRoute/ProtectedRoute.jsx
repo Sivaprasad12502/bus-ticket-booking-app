@@ -16,11 +16,12 @@ function isTokenExpired(token) {
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useContext(Context);
-  // if (!isTokenExpired(token)) {
-  //   localStorage.removeItem("access");
-  //   localStorage.removeItem("refresh");
-  //   return <Navigate to="/login" replace />;
-  // }/// issue in after booking to login redirection 
+  if (isTokenExpired(token)) {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    return <Navigate to="/login" replace />;
+    // issue fixed
+  }
 
   if (!token || isTokenExpired(token)) {
     localStorage.removeItem("access");

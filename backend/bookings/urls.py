@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from . import admin_views ,operator_views
+from . import admin_views, operator_views
 
 urlpatterns = [
     path("buses/", views.bus_list, name="bus-list"),
@@ -100,5 +100,19 @@ urlpatterns = [
     ),
     path("admin/payments/", admin_views.admin_all_payments, name="admin_all_payments"),
     # path to operator to manage their trips
-    path("operator/<int:operator_id>/trips/",operator_views.operator_manage_trip,name="operator_manage_trip"),
+    path(
+        "operator/<int:operator_id>/trips/",
+        operator_views.operator_manage_trip,
+        name="operator_manage_trip",
+    ),
+    path(
+        "operator/trips/<int:trip_id>/tripstops/",
+        operator_views.operator_trip_stops,
+        name="operator_trip_stops",
+    ),
+    path(
+        "operator/tripstops/<int:trip_stop_id>/",
+        operator_views.operator_manage_trip_stop_detail,
+        name="operator_manage_trip_stop_detail",
+    ),
 ]

@@ -110,9 +110,9 @@ const OperatorTripManageMent = () => {
     queryFn: async () => {
       if (!selectedTrip) return [];
       const res = await axios.get(
-        `${apiUrl}bookings/admin/trips/${selectedTrip.id}/tripstops/`,
+        `${apiUrl}bookings/operator/trips/${selectedTrip.id}/tripstops/`,
         {
-          headers: { Authorization: `Bearer ${adminAccessToken}` },
+          headers: { Authorization: `Bearer ${operatorAccessToken}` },
         }
       );
       return res.data;
@@ -134,9 +134,9 @@ const OperatorTripManageMent = () => {
   const addStop = useMutation({
     mutationFn: async (stop) => {
       const res = await axios.post(
-        `${apiUrl}bookings/admin/trips/${selectedTrip.id}/tripstops/`,
+        `${apiUrl}bookings/operator/trips/${selectedTrip.id}/tripstops/`,
         stop,
-        { headers: { Authorization: `Bearer ${adminAccessToken}` } }
+        { headers: { Authorization: `Bearer ${operatorAccessToken}` } }
       );
       return res.data;
     },
@@ -148,9 +148,9 @@ const OperatorTripManageMent = () => {
   const editStop = useMutation({
     mutationFn: async (stop) => {
       const res = await axios.put(
-        `${apiUrl}bookings/admin/tripstops/${stop.id}/`,
+        `${apiUrl}bookings/operator/tripstops/${stop.id}/`,
         stop,
-        { headers: { Authorization: `Bearer ${adminAccessToken}` } }
+        { headers: { Authorization: `Bearer ${operatorAccessToken}` } }
       );
       return res.data;
     },
@@ -166,8 +166,8 @@ const OperatorTripManageMent = () => {
   const deleteStop = useMutation({
     mutationFn: async (id) => {
       const res = await axios.delete(
-        `${apiUrl}bookings/admin/tripstops/${id}/`,
-        { headers: { Authorization: `Bearer ${adminAccessToken}` } }
+        `${apiUrl}bookings/operator/tripstops/${id}/`,
+        { headers: { Authorization: `Bearer ${operatorAccessToken}` } }
       );
       return res.data;
     },
@@ -177,6 +177,21 @@ const OperatorTripManageMent = () => {
       // resetStop();
     },
   });
+  //Time conversion function
+  const convertTo24Hour=(time12)=>{
+    if(!time12) return "";
+    const [time, modifier]=time12.split(" ")
+    let [hours, minutes]=time.split(":")
+    // Convert to number
+    hours=parseInt(hours)
+    if(modifier==="PM"&& hours!==12){
+      hours+=12
+    }
+    if(modifier==="AM" && hours===12){
+      hours=0
+    }
+    return `${hours.toString().padStart(2, "0")}:${minutes}`;
+  }
   const handleTripSubmit = (e) => {
     e.preventDefault();
     if (editingTrip) editTrip.mutate({ ...editingTrip, ...values });
@@ -188,8 +203,8 @@ const OperatorTripManageMent = () => {
       bus_id: trip.bus.id,
       route_id: trip.route.id,
       operator_id: trip.operator.id,
-      departure_time: trip.departure_time?.slice(0, 5),
-      arrival_time: trip.arrival_time?.slice(0, 5),
+      departure_time: convertTo24Hour(trip.departure_time),
+      arrival_time: convertTo24Hour(trip.arrival_time),
       price: trip.price,
     });
   };
@@ -203,7 +218,7 @@ const OperatorTripManageMent = () => {
     seEditingStop(stop);
     setStopValues({
       route_stop: stop.route_stop,
-      arrival_time: stop.arrival_time?.slice(0, 5),
+      arrival_time:convertTo24Hour(stop.arrival_time),
       fare_from_start: stop.fare_from_start,
     });
   };
@@ -211,6 +226,7 @@ const OperatorTripManageMent = () => {
   return (
     <div className="operator-trip">
       <nav>
+        <div><span>{operator?.username}</span></div>
         <button onClick={() => mutation.mutate()}>
           <MdLogout />
           Logout

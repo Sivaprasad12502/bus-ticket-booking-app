@@ -13,9 +13,7 @@ const AdminBuses = () => {
     bus_name: "",
     total_seats: "",
     bus_type: "AC",
-    operator_name: "",
     layout_type: "2*2",
-    operator_mobile: "",
   });
   const [editingBus, setEditingBus] = useState(null);
   const formRef = useRef(null);
@@ -133,7 +131,7 @@ const AdminBuses = () => {
         inputRef.current?.focus();
       }, 100);
     }
-  },[editingBus]);
+  }, [editingBus]);
 
   return (
     <div className="admin-buses">
@@ -153,7 +151,6 @@ const AdminBuses = () => {
           required
         />
         <input
-         
           type="number"
           name="total_seats"
           placeholder="Total Seats"
@@ -171,14 +168,7 @@ const AdminBuses = () => {
           <option value="Non-AC">Non-AC</option>
           <option value="Sleeper">Sleeper</option>
         </select>
-        <input
-         
-          name="operator_name"
-          placeholder="Operator Name"
-          value={values.operator_name}
-          onChange={handleChange}
-          required
-        />
+
         <select
           name="layout_type"
           value={values.layout_type}
@@ -189,14 +179,7 @@ const AdminBuses = () => {
           <option value="2*3">2*3</option>
           <option value="Sleeper">Sleeper</option>
         </select>
-        <input
-          
-          name="operator_mobile"
-          placeholder="Operator Mobile"
-          value={values.operator_mobile}
-          onChange={handleChange}
-          required
-        />
+
         <button
           type="submit"
           className="btn btn--primary"

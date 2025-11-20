@@ -203,6 +203,9 @@ def create_trip_stops(sender,instance,created,**kwargs):
             bus=instance.bus,
             route__start_location=instance.route.end_location,
             route__end_location=instance.route.start_location,
+            departure_time=instance.arrival_time,
+            arrival_time=instance.departure_time,
+            price=instance.price,
         ).exists()
         if not reverse_exists:
             Trip.objects.create(

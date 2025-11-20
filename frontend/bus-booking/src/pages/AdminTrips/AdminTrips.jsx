@@ -204,6 +204,21 @@ const AdminTrips = () => {
       // resetStop();
     },
   });
+  //Time conversion function
+  const convertTo24Hour=(time12)=>{
+    if(!time12) return "";
+    const [time, modifier]=time12.split(" ")
+    let [hours, minutes]=time.split(":")
+    // Convert to number
+    hours=parseInt(hours)
+    if(modifier==="PM"&& hours!==12){
+      hours+=12
+    }
+    if(modifier==="AM" && hours===12){
+      hours=0
+    }
+    return `${hours.toString().padStart(2, "0")}:${minutes}`;
+  }
   const handleTripSubmit = (e) => {
    
     e.preventDefault();
@@ -216,8 +231,8 @@ const AdminTrips = () => {
       bus_id: trip.bus.id,
       route_id: trip.route.id,
       operator_id: trip.operator.id,
-      departure_time: trip.departure_time?.slice(0, 5),
-      arrival_time: trip.arrival_time?.slice(0, 5),
+      departure_time: convertTo24Hour(trip.departure_time),
+      arrival_time: convertTo24Hour(trip.arrival_time),
       price: trip.price,
     });
   };
@@ -231,7 +246,7 @@ const AdminTrips = () => {
     seEditingStop(stop);
     setStopValues({
       route_stop: stop.route_stop,
-      arrival_time: stop.arrival_time?.slice(0, 5),
+      arrival_time: convertTo24Hour(stop.arrival_time),
       fare_from_start: stop.fare_from_start,
     });
   };
