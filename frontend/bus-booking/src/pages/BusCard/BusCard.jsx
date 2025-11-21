@@ -9,7 +9,7 @@ import {
   FaMapMarkerAlt,
   FaRupeeSign,
   FaSearch,
-  FaBed
+  FaBed,
 } from "react-icons/fa";
 import { RiCloseLine } from "react-icons/ri";
 import { MdEventSeat } from "react-icons/md";
@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 import { BusSearch } from "../../component/BusSearch/BusSearch";
 import TicketCancellation from "../../component/TicketCancellation/TicketCancellation";
 
-const SeatsAvailability = ({ tripId, date,busType }) => {
+const SeatsAvailability = ({ tripId, date, busType }) => {
   const { apiUrl } = useContext(Context);
   const { data, isLoading, isError } = useQuery({
     queryKey: ["availableSeats", tripId, date],
@@ -34,7 +34,15 @@ const SeatsAvailability = ({ tripId, date,busType }) => {
   if (isError) return <p className="seat-status error">Error</p>;
   return (
     <p className="seat-status success">
-      {busType === "Sleeper" ? <><FaBed /> {data.length} births available</> : <><MdEventSeat /> {data.length} seats available</>}
+      {busType === "Sleeper" ? (
+        <>
+          <FaBed /> {data.length} births available
+        </>
+      ) : (
+        <>
+          <MdEventSeat /> {data.length} seats available
+        </>
+      )}
     </p>
   );
 };
@@ -57,6 +65,38 @@ const BusCard = () => {
     tripPhase == "return" ? "roundtrip" : "oneway"
   );
   const [showSearchBar, setShowSearchBar] = useState(false);
+  //Date formating
+  const formattedDateTime = (datetime) => {
+    if (!datetime) return "";
+    // Format Date
+    const date = new Date(datetime.replace(" ", "T"));
+    const formattedDate = date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    //Format time
+    const time = date.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${formattedDate}, ${time}`;
+  };
+  const calculateDuration = (start, end) => {
+    if (!start || !end) return "";
+    const startDate = new Date(start.replace(" ", "T"));
+    const endDate = new Date(end.replace(" ", "T"));
+    let diff = endDate - startDate; // milliseconds
+
+    if (diff < 0) return ""; // safety check
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    console.log("duration", hours, minutes);
+
+    return `${hours}h ${minutes}m`;
+  };
   const { data, isLoading, isError } = useQuery({
     queryKey: ["buses", from, to, date, tripType, returnDate],
     enabled: !!from && !!to && !!date,
@@ -76,10 +116,6 @@ const BusCard = () => {
     ...new Set(data?.onwardTrips.map((trip) => trip.bus.bus_type)),
   ];
 
-  console.log(data, "bus datata");
-  console.log("tripType", tripType);
-  console.log("date form bus card", date);
-  console.log("returnDate form bus card", returnDate);
   // const filteredData = selectedType
   //   ? data?.filter((trip) => trip.bus.bus_type === selectedType)
   //   : data;
@@ -155,7 +191,7 @@ const BusCard = () => {
           <BusSearch
             defaultFrom={from}
             defaultTo={to}
-            defaultDate={date}
+            defaultDate={tripPhase === "return" ? onwayDate : date}
             defaultTripType={tripType}
             defaultReturnDate={returnDate}
             setShowSearchBar={setShowSearchBar}
@@ -220,122 +256,164 @@ const BusCard = () => {
               )}
             </div>
             <div className="bus-results">
-              {filteredData?.map((trip, index) => (
-                <motion.div
-                  key={trip.id}
-                  className="bus-card"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.6,
-                    delay: index * 0.1,
-                    ease: "easeOut",
-                  }}
-                  viewport={{ once: false, amount: 0.2 }}
-                >
-                  {/* <div key={trip.id} className="bus-card"> */}
-                  <div className="bus-card__header">
-                    <div className="bus-info">
-                      <h3 className="bus-name">
-                        <FaBus /> {trip.bus.bus_name}
-                      </h3>
-                      <span
-                        className={`bus-type ${
-                          trip.bus.bus_type === "AC" ? "ac" : "non-ac"
-                        }`}
-                      >
-                        {trip.bus.bus_type}
-                      </span>
-                    </div>
-                    <div className="price-section">
-                      {/* <span className="price-label">Starting from</span> */}
-                      <p className="price">
-                        <FaRupeeSign /> {trip.price}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bus-card__body">
-                    <div className="route-details">
-                      <div className="route-point">
-                        <FaMapMarkerAlt className="icon-start" />
-                        <div>
-                          <p className="location">
-                            {trip.route.start_location}
-                          </p>
-                          <p className="time">{trip.departure_time}</p>
-                        </div>
-                      </div>
-
-                      <div className="route-line">
-                        <span className="distance">
-                          {trip.route.distance_km} km
-                        </span>
-                        <motion.div
-                          className="line"
-                          initial={{ scaleX: 0 }}
-                          whileInView={{ scaleX: 1 }}
-                          transition={{ duration: 0.8, ease: "easeOut" }}
-                          viewport={{ once: true }}
-                          style={{ transformOrigin: "left" }}
-                        >
-                          {/* <div className="line"></div> */}
-                        </motion.div>
-                        <FaClock className="duration-icon" />
-                      </div>
-
-                      <div className="route-point">
-                        <FaMapMarkerAlt className="icon-end" />
-                        <div>
-                          <p className="location">{trip.route.end_location}</p>
-                          <p className="time">{trip.arrival_time}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <TicketCancellation />
-
-                    {trip.trip_stops && trip.trip_stops.length > 0 && (
-                      <div className="stops-section">
-                        <button
-                          className="view-stops-btn"
-                          onClick={(e) => {
-                            e.currentTarget.parentElement.classList.toggle(
-                              "expanded"
-                            );
-                          }}
-                        >
-                          View Stops ({trip.trip_stops.length})
-                        </button>
-                        <div className="stops-list">
-                          {trip.trip_stops.map((stop, i) => (
-                            <div key={i} className="stop-item">
-                              <span className="stop-name">
-                                {stop.stop_name}
-                              </span>
-                              <span className="stop-time">
-                                {stop.arrival_time}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="bus-card__footer">
-                    <div className="seat-info">
-                      <SeatsAvailability tripId={trip.id} date={date} busType={trip.bus.bus_type} />
-                    </div>
-                    <button
-                      className="btn-select-seat"
-                      onClick={() => handleSelectSeat(trip)}
+              {filteredData.length === 0 ? (
+                <div className="no-results">
+                  <FaBus className="no-results-icon" />
+                  <h3>No buses found</h3>
+                  <p>
+                    Try adjusting your search criteria or selecting a different
+                    date
+                  </p>
+                  {/* <button
+                    onClick={() => navigate(-1)}
+                    className="btn-search-again"
+                  >
+                    Search Again
+                  </button> */}
+                </div>
+              ) : (
+                <>
+                  {filteredData?.map((trip, index) => (
+                    <motion.div
+                      key={trip.id}
+                      className="bus-card"
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.6,
+                        delay: index * 0.1,
+                        ease: "easeOut",
+                      }}
+                      viewport={{ once: false, amount: 0.2 }}
                     >
-                      {trip.bus.bus_type=== "Sleeper"? <><FaBed/> select Births</>:<><MdEventSeat /> Select Seats</>}
-                    </button>
-                  </div>
-                  {/* </div> */}
-                </motion.div>
-              ))}
+                      {/* <div key={trip.id} className="bus-card"> */}
+                      <div className="bus-card__header">
+                        <div className="bus-info">
+                          <h3 className="bus-name">
+                            <FaBus /> {trip.bus.bus_name}
+                          </h3>
+                          <span
+                            className={`bus-type ${
+                              trip.bus.bus_type === "AC" ? "ac" : "non-ac"
+                            }`}
+                          >
+                            {trip.bus.bus_type}
+                          </span>
+                        </div>
+                        <div className="price-section">
+                          {/* <span className="price-label">Starting from</span> */}
+                          <p className="price">
+                            <FaRupeeSign /> {trip.price}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bus-card__body">
+                        <div className="route-details">
+                          <div className="route-point">
+                            <FaMapMarkerAlt className="icon-start" />
+                            <div>
+                              <p className="location">
+                                {trip.route.start_location}
+                              </p>
+                              <p className="time">
+                                Departure: {formattedDateTime(trip.departure)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="route-line">
+                            <span className="distance">
+                              {trip.route.distance_km} km
+                            </span>
+
+                            <motion.div
+                              className="line"
+                              initial={{ scaleX: 0 }}
+                              whileInView={{ scaleX: 1 }}
+                              transition={{ duration: 0.8, ease: "easeOut" }}
+                              viewport={{ once: true }}
+                              style={{ transformOrigin: "left" }}
+                            >
+                              {/* <div className="line"></div> */}
+                            </motion.div>
+                            <FaClock className="duration-icon" />
+                            <span style={{fontWeight:"bold"}}>
+                              {calculateDuration(trip.departure, trip.arrival)}
+                            </span>
+                          </div>
+
+                          <div className="route-point">
+                            <FaMapMarkerAlt className="icon-end" />
+
+                            <div>
+                              <p className="location">
+                                {trip.route.end_location}
+                              </p>
+                              <p className="time">
+                                Arrival: {formattedDateTime(trip.arrival)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <TicketCancellation />
+
+                        {trip.trip_stops && trip.trip_stops.length > 0 && (
+                          <div className="stops-section">
+                            <button
+                              className="view-stops-btn"
+                              onClick={(e) => {
+                                e.currentTarget.parentElement.classList.toggle(
+                                  "expanded"
+                                );
+                              }}
+                            >
+                              View Stops ({trip.trip_stops.length})
+                            </button>
+                            <div className="stops-list">
+                              {trip.trip_stops.map((stop, i) => (
+                                <div key={i} className="stop-item">
+                                  <span className="stop-name">
+                                    {stop.stop_name}
+                                  </span>
+                                  <span className="stop-time">
+                                    {stop.arrival_time}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="bus-card__footer">
+                        <div className="seat-info">
+                          <SeatsAvailability
+                            tripId={trip.id}
+                            date={date}
+                            busType={trip.bus.bus_type}
+                          />
+                        </div>
+                        <button
+                          className="btn-select-seat"
+                          onClick={() => handleSelectSeat(trip)}
+                        >
+                          {trip.bus.bus_type === "Sleeper" ? (
+                            <>
+                              <FaBed /> select Births
+                            </>
+                          ) : (
+                            <>
+                              <MdEventSeat /> Select Seats
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      {/* </div> */}
+                    </motion.div>
+                  ))}
+                </>
+              )}
             </div>
           </>
         )}

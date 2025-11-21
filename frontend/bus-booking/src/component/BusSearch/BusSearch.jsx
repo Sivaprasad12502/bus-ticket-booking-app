@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Context } from "../../context/Context";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import "./BusSearch.scss";
@@ -14,6 +14,15 @@ export const BusSearch = ({
   setShowSearchBar,
 }) => {
   const { apiUrl, navigate } = useContext(Context);
+
+  const location=useLocation();
+  const existingParams=new URLSearchParams(location.search)
+  //preserve onward-trip values if present
+  const onwayTripId=existingParams.get("onwayTripId")
+  const onwaySeats=existingParams.get("onwaySeats")
+  const onwayDate=existingParams.get("onwayDate");
+  const tripPhase=existingParams.get("tripPhase") || "onward"
+  
   const [from, setFrom] = useState(defaultFrom || "");
   const [to, setTo] = useState(defaultTo || "");
   const [date, setDate] = useState(defaultDate || "");
@@ -36,14 +45,27 @@ export const BusSearch = ({
       e.preventDefault();
       alert("Please fill all fields before searching.");
     }
-    const params = new URLSearchParams({
-      from: from.trim(),
-      to: to.trim(),
-      date: date,
-      tripType,
-    });
+    const params = new URLSearchParams();
+    params.set("from", from.trim())
+    params.set("to", to.trim())
+    params.set("tripType",tripType)
+
+    //onward phase stays onward
+    if(tripPhase==="onward"){
+      params.set('date',date)
+    }
+    // return phase must keep onward info
+    if(tripPhase==="return"){
+      params.set("tripPhase", "return");
+      // params.set('date',date)// this should be return date
+      params.set("date",returnDate)// retain onward date as date parm
+      params.set("onwayTripId", onwayTripId)
+      params.set("onwayDate", onwayDate)
+      params.set("onwaySeats", onwaySeats)
+    }
+    // Add return date if roundtrip
     if (tripType === "roundtrip" && returnDate) {
-      params.append("returnDate", returnDate);
+      params.set("returnDate", returnDate);
     }
     if (setShowSearchBar) {
       setShowSearchBar(false);

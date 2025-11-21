@@ -83,7 +83,8 @@ class TripSerializer(serializers.ModelSerializer):
     operator_id = serializers.PrimaryKeyRelatedField(
         queryset=Operator.objects.all(), source="operator", write_only=True
     )
-
+    departure=serializers.DateTimeField(format="%Y-%m-%d %H:%M")
+    arrival=serializers.DateTimeField(format="%Y-%m-%d %H:%M")
     # departure_time = serializers.SerializerMethodField()
     # arrival_time = serializers.SerializerMethodField()
 
@@ -97,26 +98,26 @@ class TripSerializer(serializers.ModelSerializer):
             "route_id",
             "operator_id",
             "operator",
-            "departure_time",
-            "arrival_time",
+            "departure",
+            "arrival",
             "price",
             "trip_stops",
         ]
 
     # Format only for output
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["departure_time"] = (
-            instance.departure_time.strftime("%I:%M %p")
-            if instance.departure_time
-            else None
-        )
-        data["arrival_time"] = (
-            instance.arrival_time.strftime("%I:%M %p")
-            if instance.arrival_time
-            else None
-        )
-        return data
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     data["departure_time"] = (
+    #         instance.departure_time.strftime("%I:%M %p")
+    #         if instance.departure_time
+    #         else None
+    #     )
+    #     data["arrival_time"] = (
+    #         instance.arrival_time.strftime("%I:%M %p")
+    #         if instance.arrival_time
+    #         else None
+    #     )
+    #     return data
 
     # def get_departure_time(self, obj):
     #     return obj.departure_time.strftime("%I:%M %p") if obj.departure_time else None

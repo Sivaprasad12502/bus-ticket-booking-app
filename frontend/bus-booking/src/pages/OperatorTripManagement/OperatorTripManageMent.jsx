@@ -45,8 +45,8 @@ const OperatorTripManageMent = () => {
     bus_id: "",
     route_id: "",
     operator_id: "",
-    departure_time: "",
-    arrival_time: "",
+    departure: "",
+    arrival: "",
     price: "",
   });
   const [editingTrip, setEditingTrip] = useState(null);
@@ -201,10 +201,10 @@ const OperatorTripManageMent = () => {
     setEditingTrip(trip);
     setValues({
       bus_id: trip.bus.id,
-      route_id: trip.route.id,
-      operator_id: trip.operator.id,
-      departure_time: convertTo24Hour(trip.departure_time),
-      arrival_time: convertTo24Hour(trip.arrival_time),
+      route_id:trip.route.id,
+      operator_id:trip.operator.id,
+      departure:trip.departure,
+      arrival: trip.arrival,
       price: trip.price,
     });
   };
@@ -246,7 +246,7 @@ const OperatorTripManageMent = () => {
                 {t.route.end_location}
                 <br /> operator: {t.operator?.username} -{" "}
                 {t.operator?.company_name}
-                <br />⏰ {t.departure_time} → {t.arrival_time} 💰 ₹{t.price}
+                <br />⏰ {t.departure} → {t.arrival} 💰 ₹{t.price}
                 <div className="actions">
                   <button
                     onClick={() => {
@@ -304,21 +304,21 @@ const OperatorTripManageMent = () => {
                       </option>
                     </select>
                     <label htmlFor="">
-                      Enter departure_time
+                      Enter departure time and date
                       <input
-                        type="time"
-                        name="departure_time"
-                        placeholder="departure_time"
-                        value={values.departure_time}
+                        type="datetime-local"
+                        name="departure"
+                        placeholder="departure"
+                        value={values.departure}
                         onChange={handleChange}
                       />
                     </label>
                     <label>
-                      Enter arrival_time
+                      Enter arrival time and date
                       <input
-                        type="time"
-                        name="arrival_time"
-                        value={values.arrival_time}
+                        type="datetime-local"
+                        name="arrival"
+                        value={values.arrival}
                         onChange={handleChange}
                       />
                     </label>

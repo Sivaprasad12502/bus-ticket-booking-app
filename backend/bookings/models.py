@@ -64,12 +64,12 @@ class Trip(models.Model):
     operator=models.ForeignKey("users.Operator",on_delete=models.CASCADE,null=True,blank=True,related_name="trips")
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
-    departure_time = models.TimeField()
-    arrival_time = models.TimeField()
+    departure = models.DateTimeField()
+    arrival = models.DateTimeField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
     
     def __str__(self):
-        return f"{self.bus.bus_name} -> {self.route.start_location} to {self.route.end_location} {self.departure_time} -> {self.arrival_time}"
+        return f"{self.bus.bus_name} -> {self.route.start_location} to {self.route.end_location} {self.departure} -> {self.arrival}"
 
 
 class TripStop(models.Model):
@@ -196,27 +196,27 @@ def create_seats_for_trip(sender, instance, created, **kwargs):
 #         )
 
 #Creates reverse trip if not exists
-@receiver(post_save,sender=Trip)
-def create_trip_stops(sender,instance,created,**kwargs):
-    if created:
-        reverse_exists=Trip.objects.filter(
-            bus=instance.bus,
-            route__start_location=instance.route.end_location,
-            route__end_location=instance.route.start_location,
-            departure_time=instance.arrival_time,
-            arrival_time=instance.departure_time,
-            price=instance.price,
-        ).exists()
-        if not reverse_exists:
-            Trip.objects.create(
-                bus=instance.bus,
-                route=Route.objects.get_or_create(
-                    start_location=instance.route.end_location,
-                    end_location=instance.route.start_location
+# @receiver(post_save,sender=Trip)
+# def create_trip_stops(sender,instance,created,**kwargs):
+#     if created:
+#         reverse_exists=Trip.objects.filter(
+#             bus=instance.bus,
+#             route__start_location=instance.route.end_location,
+#             route__end_location=instance.route.start_location,
+#             departure_time=instance.arrival_time,
+#             arrival_time=instance.departure_time,
+#             price=instance.price,
+#         ).exists()
+#         if not reverse_exists:
+#             Trip.objects.create(
+#                 bus=instance.bus,
+#                 route=Route.objects.get_or_create(
+#                     start_location=instance.route.end_location,
+#                     end_location=instance.route.start_location
 
-                )[0],
-                operator=instance.operator,
-                departure_time=instance.arrival_time,
-                arrival_time=instance.departure_time,
-                price=instance.price,
-            )
+#                 )[0],
+#                 operator=instance.operator,
+#                 departure_time=instance.arrival_time,
+#                 arrival_time=instance.departure_time,
+#                 price=instance.price,
+#             )

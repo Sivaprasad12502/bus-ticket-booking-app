@@ -1,19 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import { useContext } from "react";
 import { Context } from "../../context/Context";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import "./NavBar.scss";
 import { NavLink, useLocation } from "react-router-dom";
-import { FaUser, FaArrowAltCircleLeft ,FaSignInAlt,FaFacebook,FaTwitter,FaInstagram,FaYoutube, FaDiceTwo} from "react-icons/fa";
+import {
+  FaUser,
+  FaArrowAltCircleLeft,
+  FaSignInAlt,
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
+  FaYoutube,
+  FaDiceTwo,
+  FaBars,
+  FaTimes
+} from "react-icons/fa";
 
 const Navbar = () => {
   const { user, setUser, apiUrl, token, setToken, navigate } =
     useContext(Context);
+    const [isOpen,setIsOpen]=useState(false)
   const location = useLocation();
-  console.log(location, "location");
-  console.log("user", user);
-  console.log("token", token);
+  
   const mutate = useMutation({
     mutationFn: async () => {
       const refreshToken = localStorage.getItem("refresh");
@@ -45,13 +55,22 @@ const Navbar = () => {
   };
   return (
     <div className="user-header">
-      <div>
+      <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? <FaTimes /> : <FaBars />}</button>
+      <div className={`toggle ${isOpen ? "open" : ""}`}>
         <ul>
           <li>Follow us:</li>
-          <li><FaFacebook/></li>
-          <li><FaTwitter/></li>
-          <li><FaInstagram/></li>
-          <li><FaYoutube/></li>
+          <li>
+            <FaFacebook />
+          </li>
+          <li>
+            <FaTwitter />
+          </li>
+          <li>
+            <FaInstagram />
+          </li>
+          <li>
+            <FaYoutube />
+          </li>
         </ul>
         {token ? (
           <button>
@@ -72,10 +91,10 @@ const Navbar = () => {
           </button>
         ) : (
           <button>
-            <FaSignInAlt/><NavLink to={"/login"}>Login</NavLink>
+            <FaSignInAlt />
+            <NavLink to={"/login"}>Login</NavLink>
           </button>
         )}
-        
       </div>
       <div>
         <span>

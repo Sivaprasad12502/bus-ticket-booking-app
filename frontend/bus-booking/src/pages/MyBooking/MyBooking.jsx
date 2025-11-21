@@ -190,11 +190,11 @@ const MyBooking = () => {
                         <div className="operator-details">
                           <span>
                             Operator Name{" "}
-                            <strong>{booking.trip.bus.operator_name}</strong>
+                            <strong>{booking.trip.operator.username}</strong>
                           </span>
                           <span>
                             Mobile No:{" "}
-                            <strong>{booking.trip.bus.operator_mobile}</strong>
+                            <strong>{booking.trip.operator.phone}</strong>
                           </span>
                         </div>
                       </div>
@@ -276,7 +276,7 @@ const MyBooking = () => {
                               <div className="passenger-journey">
                                 <div className="journey-stop boarding-stop">
                                   <span className="location">
-                                    📍 {p.boarding_location}
+                                    Boarding: {p.boarding_location}
                                   </span>
                                   {boardingStop?.arrival_time ? (
                                     <span className="time">
@@ -309,7 +309,7 @@ const MyBooking = () => {
                                 <span className="arrow">→</span>
                                 <div className="journey-stop dropping-stop">
                                   <span className="location">
-                                    📍 {p.dropping_location}
+                                    Dropping: {p.dropping_location}
                                   </span>
                                   {droppingStop?.arrival_time ? (
                                     <span className="time">

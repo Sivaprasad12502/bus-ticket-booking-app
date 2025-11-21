@@ -154,19 +154,23 @@ def trip_list(request):
         if travel_date:
             travel_date = datetime.strptime(travel_date, "%Y-%m-%d").date()
             today = timezone.localdate()
+            #filtering by departure date
+            onward_trips=onward_trips.filter(departure__date=travel_date)
             if travel_date == today:
                 # current_dt = timezone.localtime()
                 # time_plus_3hr = current_dt + timedelta(hours=3)
                 # print(current_dt, "currrrent-timeee")
                 # trips = trips.filter(departure_time__gte=time_plus_3hr.time())
-                now = timezone.localtime().time()
+                now = timezone.localtime()
                 # trips = trips.filter(departure_time__gte=now)
-                onward_trips = onward_trips.filter(departure_time__gte=now)
+                onward_trips = onward_trips.filter(departure__gte=now)
         if return_date:
             return_date = datetime.strptime(return_date, "%Y-%m-%d").date()
             today = timezone.localdate()
+            return_trips=return_trips.filter(departure__date=return_date)
             if return_date == today:
-                now = timezone.localtime().time()
+                now = timezone.localtime()
+                return_trips=return_trips.filter(departure__gte=now)
         # serializer = TripSerializer(trips, many=True)
         onward_serializer = TripSerializer(onward_trips, many=True)
         return_serializer = TripSerializer(return_trips, many=True)
@@ -518,7 +522,7 @@ def confirm_payment(request):
 #Applying cancellation policies
 def get_refund_percentage(booking):
     trip_date=booking.booked_date
-    trip_time=booking.trip.departure_time
+    trip_time=booking.trip.departure
 
     #combine into one datetime
     trip_datetime=timezone.make_aware(datetime.combine(trip_date,trip_time))
