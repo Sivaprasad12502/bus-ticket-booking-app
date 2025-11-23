@@ -22,6 +22,8 @@ import AdminOperators from "./pages/AdminOperators/AdminOperators";
 import OperatorLogin from "./pages/OperatorLogin/OperatorLogin";
 import OperatorTripManageMent from "./pages/OperatorTripManagement/OperatorTripManageMent";
 import OperatorProtectedRoute from "./component/OperatorProtectRoute/OperatorProtec";
+import ForgeotPassword from "./pages/ForgotPasswrd/ForgeotPassword";
+import ResetPassword from "./pages/ResetPasswrd/ResetPassword";
 
 function App() {
   return (
@@ -39,9 +41,30 @@ function App() {
       />
       <Routes>
         {/* Protected routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/busDetails" element={<BusCard />} />
-        <Route path="/busDetails/selectSeat" element={<SeatDetail />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/busDetails"
+          element={
+            <ProtectedRoute>
+              <BusCard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/busDetails/selectSeat"
+          element={
+            <ProtectedRoute>
+              <SeatDetail />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/selectSeat/addpassenger"
           element={
@@ -70,6 +93,8 @@ function App() {
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgeotPassword/>}/>
+        <Route path="/reset-password/:uidb64/:token" element={<ResetPassword/>}/>
 
         {/* ========== for admin ========== */}
         <Route path="/admin/login" element={<AdminLogin />} />

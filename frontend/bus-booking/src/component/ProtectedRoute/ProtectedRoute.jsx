@@ -1,5 +1,5 @@
 // ProtectedRoute.jsx
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { Context } from "../../context/Context";
 
@@ -15,19 +15,21 @@ function isTokenExpired(token) {
 }
 
 const ProtectedRoute = ({ children }) => {
-  const { token } = useContext(Context);
-  if (isTokenExpired(token)) {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    return <Navigate to="/login" replace />;
-    // issue fixed
-  }
+  const { token,setToken,setUser } = useContext(Context);
 
-  if (!token || isTokenExpired(token)) {
-    localStorage.removeItem("access");
+
+  useEffect(()=>{
+    if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("token");
     localStorage.removeItem("refresh");
+    localStorage.removeItem("user")
+    setToken(null)
+    setUser({})
+
     // return <Navigate to="/login" replace />;
+    
   }
+  }, [token])
 
   return children;
 };

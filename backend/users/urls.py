@@ -18,4 +18,11 @@ urlpatterns = [
     path("operator/<int:operator_id>/", views.manage_operator, name="manage-operator"),
     path("operator/login/", views.login_operator, name="operator-login"),
     path("operator/logout/", views.logout_operator, name="operator-logout"),
+    # google auth
+    path("google/register/", views.google_register, name="google-register"),
+    path("google/login/", views.google_login, name="google-login"),
+    #password reset
+    path("password-reset/",views.send_password_reset_email),
+    path("password-reset/verify/<uidb64>/<token>/",views.verify_password_reset_token),
+    path("password-reset/confirm/",views.reset_password)
 ]

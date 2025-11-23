@@ -1,16 +1,18 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { data, Link } from "react-router-dom";
 import useForm from "../../hooks/useForm/useForm";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import "./Register.scss";
 import { Context } from "../../context/Context";
 import { toast } from "react-toastify";
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaBus } from "react-icons/fa";
-
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaBus, FaGoogle } from "react-icons/fa";
+//goggle register
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../firebase/Firebase";
 const Register = () => {
-  const params=new URLSearchParams(location.search);
-  const next=params.get("next")||"/"
+  const params = new URLSearchParams(location.search);
+  const next = params.get("next") || "/";
   const { apiUrl, setUser, navigate, setToken } = useContext(Context);
   const { values, handleChange } = useForm({
     username: "",
@@ -44,8 +46,7 @@ const Register = () => {
       setUser(userData);
       toast.success("User registered successfully", {
         onClose: () => {
-          if(next){
-
+          if (next) {
             navigate(next);
           }
         },
@@ -54,15 +55,39 @@ const Register = () => {
     },
     onError: (error) => {
       console.error("Registration failed:", error);
-      if(error.response&&error.response.status===400){
-        const data=error.response.data;
-        const errorMessages=Object.entries(data).flat().join("\n")
-        toast.error(errorMessages)
+      if (error.response && error.response.status === 400) {
+        const data = error.response.data;
+        const errorMessages = Object.entries(data).flat().join("\n");
+        toast.error(errorMessages);
       }
       // toast.error("Registration failed. Please try again");
     },
   });
-
+  //Google registeration mutaion
+  const googleRegisterMuatation = useMutation({
+    mutationFn: async (idToken) => {
+     return await axios.post(`${apiUrl}users/google/register/`, {
+        id_token: idToken,
+      });
+    },
+    onSuccess: ({ data }) => {
+      //Save Token
+      localStorage.setItem("token", data.access);
+      setToken(data.access);
+      localStorage.setItem("refresh", data.refresh);
+      const userData = { username: data.username, email: data.email };
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+      toast.success("Registration Successful!", {
+        onClose: () => navigate(next),
+        autoClose: 1500,
+      });
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error(err.response?.data?.error || "Google register failed");
+    },
+  });
   const handleSubmit = (e) => {
     e.preventDefault();
     const error = validatePassword(values.password, values.password2);
@@ -72,7 +97,18 @@ const Register = () => {
     }
     mutation.mutate(values);
   };
-
+  //Google Register handler function
+  const handleGoogleRegister = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      googleRegisterMuatation.mutate(idToken);
+    } catch (err) {
+      console.log(err);
+      toast.error("Google sign-in failed");
+    }
+  };
   return (
     <div className="register">
       <div className="card">
@@ -81,7 +117,8 @@ const Register = () => {
             <FaBus className="icon-bus" />
             <h2>Already have an account?</h2>
             <p>
-              Welcome back! Login to access exclusive deals, track bookings, and enjoy seamless bus ticket booking.
+              Welcome back! Login to access exclusive deals, track bookings, and
+              enjoy seamless bus ticket booking.
             </p>
             <Link to="/login">
               <button className="btn-login">Login Now</button>
@@ -179,10 +216,26 @@ const Register = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn-register" disabled={mutation.isPending}>
+            <button
+              type="submit"
+              className="btn-register"
+              disabled={mutation.isPending}
+            >
               {mutation.isPending ? "Registering..." : "Register"}
             </button>
           </form>
+          <div className="google-login">
+            <button
+              onClick={handleGoogleRegister}
+              className="btn-google-login"
+              disabled={googleRegisterMuatation.isPending}
+            >
+              <FaGoogle/>
+              {googleRegisterMuatation.isPending
+                ? "Registering with Google..."
+                : "Continue with Google"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

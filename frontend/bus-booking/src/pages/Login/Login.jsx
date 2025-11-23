@@ -6,12 +6,15 @@ import "./Login.scss";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { FaUser, FaLock, FaBus } from "react-icons/fa";
+import { FaUser, FaLock, FaBus,FaGoogle } from "react-icons/fa";
+
+import { auth, googleProvider } from "../../firebase/Firebase";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export const Login = () => {
   const { apiUrl, user, setUser, navigate, setToken } = useContext(Context);
-  const params=new URLSearchParams(location.search)
-  const next=params.get("next")||"/"
+  const params = new URLSearchParams(location.search);
+  const next = params.get("next") || "/";
   const { values, handleChange } = useForm({
     username: "",
     password: "",
@@ -30,8 +33,8 @@ export const Login = () => {
       setUser(userData);
       toast.success("Logged in successfully", {
         onClose: () => {
-          if(next){
-            navigate(next)
+          if (next) {
+            navigate(next);
           }
         },
         autoClose: 2000,
@@ -44,11 +47,48 @@ export const Login = () => {
       );
     },
   });
+  // -----------GOOGLE LOGIN -------------//
+  const loginWithGoogle = useMutation({
+    mutationFn: async (idToken) => {
+      return await axios.post(`${apiUrl}users/google/login/`, {
+        id_token: idToken,
+      });
+    },
+    onSuccess: ({ data }) => {
+      localStorage.setItem("token", data.access);
+      setToken(data.access);
+      localStorage.setItem("refresh", data.refresh);
+      const userData = {
+        username: data.username,
+        email: data.email,
+      };
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      toast.success("login successful!", {
+        onClose: () => navigate(next),
+        autoClose: 1500,
+      });
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error(err.response?.data?.error || "Login failed");
+    },
+  });
   const handleSubmit = (e) => {
     e.preventDefault();
     mutation.mutate(values);
   };
-
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      loginWithGoogle.mutate(idToken);
+    } catch (error) {
+      console.log(error);
+      toast.error("login failed");
+    }
+  };
   return (
     <div className="login">
       <div className="card">
@@ -56,7 +96,10 @@ export const Login = () => {
           <div className="left__content">
             <FaBus className="icon-bus" />
             <h2>First time here?</h2>
-            <p>Register with us to unlock exciting offers and discounts on bus bookings.</p>
+            <p>
+              Register with us to unlock exciting offers and discounts on bus
+              bookings.
+            </p>
             <Link to={`/register?next=${encodeURIComponent(next)}`}>
               <button className="btn-register">Create Account</button>
             </Link>
@@ -102,13 +145,29 @@ export const Login = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn-login" disabled={mutation.isPending}>
+            <button
+              type="submit"
+              className="btn-login"
+              disabled={mutation.isPending}
+            >
               {mutation.isPending ? "Logging in..." : "Login"}
             </button>
           </form>
+          <div className="google-login">
+            
+            <button
+              onClick={handleGoogleLogin}
+              className="btn-google-login"
+              disabled={loginWithGoogle.isPending}
+            >
+              <FaGoogle/>{loginWithGoogle.isPending ? "logging..." : "Continue with Google"}
+            </button>
+          </div>
+          <div className="forgot-password">
+            <Link to={'/forgot-password'}>Forgot password?</Link>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-

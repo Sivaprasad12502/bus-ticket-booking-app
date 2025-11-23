@@ -149,12 +149,26 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,             # blacklist old refresh token
 }
 
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-}
+# SIMPLE_JWT = {
+#     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+#     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+#     "ROTATE_REFRESH_TOKENS": True,
+#     "BLACKLIST_AFTER_ROTATION": True,
+# }
+
+#reset password email settings
+#to console
+# EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend"
+# DEFAULT_FROM_EMAIL="noreply@example.com"
+#using gmail smtp
+EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER="sivaprasadappzia@gmail.com"
+EMAIL_HOST_PASSWORD="rmgi ifjo sgxx zsla"
+
+DEFAULT_FROM_EMAIL=EMAIL_HOST_USER
 
 AUTH_USER_MODEL = 'users.User'
 CORS_ALLOWED_ORIGINS=[

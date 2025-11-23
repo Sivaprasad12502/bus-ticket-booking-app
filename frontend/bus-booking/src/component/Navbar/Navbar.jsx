@@ -17,6 +17,7 @@ import {
   FaBars,
   FaTimes
 } from "react-icons/fa";
+import { getAuth,signOut } from "firebase/auth";
 
 const Navbar = () => {
   const { user, setUser, apiUrl, token, setToken, navigate } =
@@ -50,8 +51,16 @@ const Navbar = () => {
       console.error("logout failed:", error);
     },
   });
-  const handleLogout = () => {
-    mutate.mutate();
+  const handleLogout =async () => {
+    const auth = getAuth();
+    try {
+      //firebase google logout
+      await signOut(auth);
+      //2.Backend lgout(djnago)
+      mutate.mutate();
+    } catch (error) {
+      console.error("sign out failed:", error);
+    }
   };
   return (
     <div className="user-header">
