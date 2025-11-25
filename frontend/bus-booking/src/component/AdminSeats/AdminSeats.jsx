@@ -66,7 +66,7 @@ const AdminSeats = ({ tripId, onBack, bus }) => {
     };
   };
   const renderSeatLayout = () => {
-    if (bus.bus_type === "Sleeper") {
+    if (bus.layout_type === "Sleeper") {
       const layout = generateSleeperLayout(seats);
       return (
         <div className="sleeper-layout">

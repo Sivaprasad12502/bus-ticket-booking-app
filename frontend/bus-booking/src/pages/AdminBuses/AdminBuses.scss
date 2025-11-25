@@ -1,13 +1,21 @@
+@import "../../styles/admin_variables";
+@import "../../styles/admin_mixins";
+
 .admin-buses {
   padding: 1.5rem;
   background: #f8fafc;
   min-height: 100vh;
 
+  /* Title */
   &__title {
     font-size: 1.5rem;
     font-weight: 600;
     color: #1e3a8a;
     margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
 
     span {
       font-size: 1rem;
@@ -15,6 +23,7 @@
     }
   }
 
+  /* FORM */
   &__form {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -24,27 +33,53 @@
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 50, 0.05);
     margin-bottom: 1.5rem;
+    // align-content: end;
 
-    input,
-    select {
-      padding: 0.6rem 0.8rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border 0.2s;
-
-      &:focus {
-        border-color: #3b82f6;
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      label{
+        font-weight: 600;
+        color: #1e3a8a;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        svg {
+          color: #475569;
+          font-size: 1.1rem;
+        }
+      }
+      input,
+      select {
+        padding: 0.875rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+        &:focus{
+          outline: none;
+          background-color: #ffff;
+          box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+        }
+        &::placeholder{
+          color: #aaa;
+        }
+      }
+      select{
+        cursor: pointer;
       }
     }
 
     .btn {
-      grid-column: span 2;
-      justify-self: start;
+      height: 48.8px;
+     align-self: end;
     }
   }
 
+  /* BUS CARDS LIST */
   &__list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -52,7 +87,7 @@
   }
 }
 
-/* Bus Card */
+/* BUS CARD */
 .bus-card {
   background: #ffffff;
   border-radius: 10px;
@@ -76,12 +111,14 @@
 
   &__actions {
     display: flex;
-    justify-content: space-between;
+    gap: 0.5rem;
+    justify-content: center;
     margin-top: 0.8rem;
+    flex-wrap: wrap;
   }
 }
 
-/* Buttons */
+/* BUTTONS */
 .btn {
   padding: 0.5rem 1rem;
   border: none;
@@ -95,13 +132,13 @@
     color: #fff;
 
     &:hover {
-      background: #2563eb;
+      background: #040e22;
       transform: translateY(-1px);
     }
   }
 
   &--edit {
-    background: #0ea5e9;
+    background: #6b7d85;
     color: #fff;
 
     &:hover {
@@ -110,7 +147,7 @@
   }
 
   &--delete {
-    background: #ef4444;
+    background: #b72d2d;
     color: #fff;
 
     &:hover {
@@ -121,5 +158,64 @@
   &:disabled {
     background: #9ca3af;
     cursor: not-allowed;
+  }
+}
+
+/* ------------------------------------------ */
+/* RESPONSIVE BREAKPOINTS */
+/* ------------------------------------------ */
+
+/* 🔹 Phones ( ≤ 480px ) */
+@media (max-width: 480px) {
+  .admin-buses {
+    padding: 1rem;
+
+    &__title {
+      font-size: 1.3rem;
+      text-align: center;
+    }
+
+    &__form {
+      // grid-template-columns: 1fr;
+      // grid-template-columns: repeat(1,1fr) !important;
+      .btn {
+        grid-column: unset !important;
+        width: 100%;
+        justify-self: stretch;
+      }
+    }
+
+    &__list {
+      grid-template-columns: 1fr; /* one card per row */
+    }
+  }
+
+  .bus-card {
+    padding: 0.8rem;
+
+    &__actions {
+      flex-wrap: nowrap !important;
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+/* 🔹 Tablets ( 481px – 768px ) */
+@media (max-width: 768px) {
+  .admin-buses__form {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    // .btn {
+    //   grid-column: span 2;
+
+    // }
+  }
+}
+
+/* 🔹 Large screens */
+@media (min-width: 1200px) {
+  .admin-buses {
+    padding: 2rem 5rem;
   }
 }

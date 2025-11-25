@@ -18,6 +18,7 @@ import "./Buscard.scss";
 import { motion } from "framer-motion";
 import { BusSearch } from "../../component/BusSearch/BusSearch";
 import TicketCancellation from "../../component/TicketCancellation/TicketCancellation";
+import { toast } from "react-toastify";
 
 const SeatsAvailability = ({ tripId, date, busType }) => {
   const { apiUrl } = useContext(Context);
@@ -61,6 +62,7 @@ const BusCard = () => {
   const onwayDate = params.get("onwayDate");
   const onwaySeats = params.get("onwaySeats");
   const [selectedType, setSelectedType] = useState("");
+  const [selectedLayout, setSelectedLayout] = useState("");
   const [selectedTripType, setSelectedTripType] = useState(
     tripPhase == "return" ? "roundtrip" : "oneway"
   );
@@ -112,9 +114,14 @@ const BusCard = () => {
   if (data) {
     console.log(data.onwardTrips, "bus data in buscard");
   }
-  const busType = [
-    ...new Set(data?.onwardTrips.map((trip) => trip.bus.bus_type)),
-  ];
+  const busType =
+    selectedTripType === "oneway"
+      ? [...new Set(data?.onwardTrips.map((trip) => trip.bus.bus_type))]
+      : [...new Set(data?.returnTrips.map((trip) => trip.bus.bus_type))];
+  const busLayout =
+    selectedTripType === "oneway"
+      ? [...new Set(data?.onwardTrips.map((trip) => trip.bus.layout_type))]
+      : [...new Set(data?.returnTrips.map((trip) => trip.bus.layout_type))];
 
   // const filteredData = selectedType
   //   ? data?.filter((trip) => trip.bus.bus_type === selectedType)
@@ -122,17 +129,40 @@ const BusCard = () => {
 
   const bustData =
     selectedTripType === "oneway" ? data?.onwardTrips : data?.returnTrips;
-  const filteredData = (
-    selectedType
-      ? bustData.filter((trip) => trip.bus.bus_type === selectedType)
-      : bustData
-  )?.sort((a, b) => {
-    return (
+  // const filteredData = (
+  //   selectedType
+  //     ? bustData?.filter((trip) => trip.bus.bus_type === selectedType)
+  //     : bustData || selectedLayout
+  //     ? bustData?.filter((trip) => trip.bus.layout_type === selectedLayout)
+  //     : bustData
+  // )?.sort((a, b) => {
+  //   return (
+  //     new Date(`1970/01/01 ${a.arrival_time}`) -
+  //     new Date(`1970/01/01 ${b.arrival_time}`)
+  //   );
+  // });
+  let filteredData = bustData;
+  if (selectedType) {
+    filteredData = filteredData?.filter((t) => t.bus.bus_type === selectedType);
+  }
+  if (selectedLayout) {
+    filteredData = filteredData?.filter(
+      (t) => t.bus.layout_type === selectedLayout
+    );
+  }
+  filteredData = filteredData?.sort(
+    (a, b) =>
       new Date(`1970/01/01 ${a.arrival_time}`) -
       new Date(`1970/01/01 ${b.arrival_time}`)
-    );
-  });
+  );
   const handleSelectSeat = (trip) => {
+    //*Block user when return trip has no buses
+    if(tripType==="roundtrip" && tripPhase==="onward"){
+      if(!data?.returnTrips||data?.returnTrips.length===0){
+        toast.error("No return buses available! Please change return date.")
+        return;
+      }
+    }
     // For one-way trips
     if (tripType === "oneway") {
       navigate(
@@ -223,6 +253,16 @@ const BusCard = () => {
                 </option>
               ))}
             </select>
+            <select
+              name=""
+              id=""
+              onChange={(e) => setSelectedLayout(e.target.value)}
+            >
+              <option value=""> Layout</option>
+              {busLayout?.map((layout) => (
+                <option key={layout}>{layout}</option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -256,7 +296,7 @@ const BusCard = () => {
               )}
             </div>
             <div className="bus-results">
-              {filteredData.length === 0 ? (
+              {filteredData?.length === 0 ? (
                 <div className="no-results">
                   <FaBus className="no-results-icon" />
                   <h3>No buses found</h3>
@@ -299,6 +339,14 @@ const BusCard = () => {
                           >
                             {trip.bus.bus_type}
                           </span>
+                          <span>
+                            {trip.bus.layout_type === "Sleeper" ? (
+                              <FaBed />
+                            ) : (
+                              <MdEventSeat />
+                            )}{" "}
+                            {trip.bus.layout_type}
+                          </span>
                         </div>
                         <div className="price-section">
                           {/* <span className="price-label">Starting from</span> */}
@@ -338,7 +386,7 @@ const BusCard = () => {
                               {/* <div className="line"></div> */}
                             </motion.div>
                             <FaClock className="duration-icon" />
-                            <span style={{fontWeight:"bold"}}>
+                            <span style={{ fontWeight: "bold" }}>
                               {calculateDuration(trip.departure, trip.arrival)}
                             </span>
                           </div>
@@ -398,7 +446,7 @@ const BusCard = () => {
                           className="btn-select-seat"
                           onClick={() => handleSelectSeat(trip)}
                         >
-                          {trip.bus.bus_type === "Sleeper" ? (
+                          {trip.bus.layout_type === "Sleeper" ? (
                             <>
                               <FaBed /> select Births
                             </>

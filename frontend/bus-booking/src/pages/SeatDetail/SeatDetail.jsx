@@ -188,7 +188,7 @@ export const SeatDetail = () => {
   // 2*3
   const layout_type = trip?.bus?.layout_type || "2*2";
   const renderSeats = () => {
-    if (busType === "Sleeper") {
+    if (layout_type === "Sleeper") {
       const layout = generateSlpperLayout(seatNumbers);
       return (
         <div className="sleeper-layout">
@@ -369,18 +369,18 @@ export const SeatDetail = () => {
 
                 {tripPhase === "onward"
                   ? `Select onward trip ${
-                      trip?.bus?.bus_type === "Sleeper" ? "Births" : " seats"
+                      trip?.bus?.layout_type === "Sleeper" ? "Births" : " seats"
                     }`
                   : `Select Return Trip ${
-                      trip?.bus?.bus_type === "Sleeper" ? "Births" : " seats"
+                      trip?.bus?.layout_type === "Sleeper" ? "Births" : " seats"
                     }`}
               </h1>
               <div className="seat-container__header-details">
                 <div className="seat-container__header-details-item">
                   <FaMapMarkerAlt />
                   <span>
-                    <strong>{trip?.source}</strong> →{" "}
-                    <strong>{trip?.destination}</strong>
+                    <strong>{trip?.route?.start_location}</strong> →{" "}
+                    <strong>{trip?.route?.end_location}</strong>
                   </span>
                 </div>
                 <div className="seat-container__header-details-item">
@@ -396,13 +396,14 @@ export const SeatDetail = () => {
                 </div>
                 <div className="seat-container__header-details-item">
                   <FaClock />
-                  <span>{trip?.departure_time}</span>
+                  <span>{trip?.departure}</span>
                 </div>
                 <div className="seat-container__header-details-item">
                   <FaBus />
                   <span>
                     <strong>{trip?.bus?.bus_name}</strong> (
                     {trip?.bus?.bus_type})
+                    ({trip?.bus?.layout_type})
                   </span>
                 </div>
                 <div className="seat-container__header-details-item">

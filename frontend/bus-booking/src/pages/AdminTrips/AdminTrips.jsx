@@ -271,7 +271,7 @@ const AdminTrips = () => {
           <option value="">Select Bus</option>
           {buses?.map((b) => (
             <option key={b.id} value={b.id}>
-              {b.bus_name}
+              {b.bus_name} {b.bus_type} {b.layout_type}
             </option>
           ))}
         </select>

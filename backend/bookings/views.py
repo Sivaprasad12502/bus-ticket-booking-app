@@ -261,6 +261,12 @@ def create_bookings(request):
         Booking.objects.filter(
             status="PENDING_PAYMENT", payment_deadline__lt=timezone.now()
         ).update(status="EXPIRED")
+        #updating expired bookings payment status
+        Payment.objects.filter(
+            # booking__status="PENDING_PAYMENT",
+            booking__payment_deadline__lt=timezone.now(),
+            payment_status="PENDING",
+        ).update(payment_status="EXPIRED")
 
         bookings = Booking.objects.filter(user=request.user)
         serializer = BookingSerializer(bookings, many=True)
@@ -522,7 +528,7 @@ def confirm_payment(request):
 #Applying cancellation policies
 def get_refund_percentage(booking):
     trip_date=booking.booked_date
-    trip_time=booking.trip.departure
+    trip_time=booking.trip.departure.time()
 
     #combine into one datetime
     trip_datetime=timezone.make_aware(datetime.combine(trip_date,trip_time))

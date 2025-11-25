@@ -1,3 +1,5 @@
+@import "../../styles/admin_variables";
+@import "../../styles/admin_mixins";
 .admin-route-page {
   max-width: 1100px;
   margin: 2rem auto;
@@ -12,7 +14,7 @@
     font-size: 1.8rem;
     margin-bottom: 1.2rem;
     text-align: center;
-    color: #222;
+    color: #1e3a8a;
   }
 
   /* ------- ROUTE FORM ------- */
@@ -22,34 +24,96 @@
     flex-wrap: wrap;
     margin-bottom: 2rem;
 
-    input {
-      flex: 1;
-      min-width: 200px;
-      padding: 0.6rem 0.8rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      transition: 0.2s ease;
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      label {
+        font-weight: 600;
+        color: #1e3a8a;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        svg {
+          color: #475569;
+          font-size: 1.1rem;
+        }
+      }
+      input,
+      select {
+        padding: 0.875rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+        &:focus {
+          outline: none;
+          background-color: #ffff;
+          box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+        }
+        &::placeholder {
+          color: #aaa;
+        }
+      }
+      select {
+        cursor: pointer;
+      }
+    }
+    .btn {
+      height: 48.8px;
+      align-self: end;
+    }
+  }
+  /*buttons*/
+  .btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
 
-      &:focus {
-        border-color: #007bff;
-        outline: none;
+    &--primary {
+      background: rgb(43, 55, 96);
+      color: #fff;
+
+      &:hover {
+        background: #040e22;
+        transform: translateY(-1px);
       }
     }
 
-    button {
-      background: rgb(43, 55, 96);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.6rem 1.2rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s ease;
+    &--edit {
+      background: #6b7d85;
+      color: #fff;
 
       &:hover {
-        background: #005fcc;
+        background: #0284c7;
       }
+    }
+
+    &--delete {
+      background: #b72d2d;
+      color: #fff;
+
+      &:hover {
+        background: #dc2626;
+      }
+    }
+    &--managestops {
+      background: #1e3a8a;
+      color: #fff;
+
+      &:hover {
+        background: #163570;
+      }
+    }
+
+    &:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
     }
   }
 
@@ -61,11 +125,14 @@
     gap: 1rem;
 
     li {
+      color: #1e3a8a;
+      font-weight: bold;
       background: white;
       border-radius: 12px;
       padding: 1rem 1.5rem;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 6px rgba(0, 0, 50, 0.05);
       transition: 0.2s ease;
+      border-left: 4px solid #080117;
 
       &:hover {
         transform: translateY(-2px);
@@ -87,6 +154,7 @@
           border-radius: 6px;
           font-size: 0.9rem;
           color: #555;
+          border-left: none;
         }
       }
 
@@ -95,32 +163,6 @@
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
-
-        button {
-          padding: 0.4rem 0.8rem;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          transition: 0.2s ease;
-
-          &:nth-child(1) {
-            background: #f0f8ff;
-            color: #007bff;
-          }
-          &:nth-child(2) {
-            background: #ffecec;
-            color: #d60000;
-          }
-          &:nth-child(3) {
-            background: #e8f5e9;
-            color: #2e7d32;
-          }
-
-          &:hover {
-            opacity: 0.85;
-          }
-        }
       }
     }
   }
@@ -146,35 +188,49 @@
       flex-wrap: wrap;
       gap: 1rem;
       margin-bottom: 1.5rem;
-
-      input {
-        flex: 1;
-        min-width: 180px;
-        padding: 0.6rem 0.8rem;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        transition: 0.2s ease;
-
-        &:focus {
-          border-color: #007bff;
-          outline: none;
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        label {
+          font-weight: 600;
+          color: #1e3a8a;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+          svg {
+            color: #475569;
+            font-size: 1.1rem;
+          }
+        }
+        input,
+        select {
+          padding: 0.875rem 1rem;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          background: #f9fafb;
+          &:focus {
+            outline: none;
+            background-color: #ffff;
+            box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+          }
+          &::placeholder {
+            color: #aaa;
+          }
+        }
+        select {
+          cursor: pointer;
         }
       }
-
-      button {
-        background: #007bff;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-        cursor: pointer;
-        transition: background 0.2s ease;
-
-        &:hover {
-          background: #005fcc;
-        }
+      .btn {
+        height: 48.8px;
+        align-self: end;
       }
+
+      
     }
 
     .stops-list {
@@ -202,27 +258,7 @@
           gap: 0.5rem;
           flex-wrap: wrap;
 
-          button {
-            border: none;
-            border-radius: 6px;
-            padding: 0.4rem 0.8rem;
-            cursor: pointer;
-            transition: 0.2s ease;
-
-            &:first-child {
-              background: #e3f2fd;
-              color: #1976d2;
-            }
-
-            &:last-child {
-              background: #ffebee;
-              color: #c62828;
-            }
-
-            &:hover {
-              opacity: 0.9;
-            }
-          }
+          
         }
       }
     }

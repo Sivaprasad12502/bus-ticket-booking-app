@@ -1,9 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Context } from "../../context/Context";
 import useForm from "../../hooks/useForm/useForm";
 import axios from "axios";
 import "./AdminRoutes.scss";
+import { FaEdit, FaRoute, FaTrash } from "react-icons/fa";
 
 const AdminRoutes = () => {
   const { apiUrl, adminAccessToken } = useContext(Context);
@@ -15,6 +16,8 @@ const AdminRoutes = () => {
   });
   const [editingRoute, setEditingRoute] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const formRef = useRef(null);
+  const inputRef = useRef(null);
   //Fetch Routes
   const {
     data: routes,
@@ -195,40 +198,73 @@ const AdminRoutes = () => {
       distance_from_start: stop.distance_from_start,
     });
   };
+  useEffect(() => {
+    if (editingRoute) {
+      setTimeout(() => {
+        formRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        inputRef.current.focus();
+      }, 100);
+    }
+  }, [editingRoute]);
   // if(routes.length===0){
   //   return <div>No routes available</div>
   // }
   return (
     <div className="admin-route-page">
-      <h2>Manage Routes </h2>
-      <form onSubmit={handleSubmit} className="admin-route-form">
-        <input
-          type="text"
-          placeholder="Start Location"
-          name="start_location"
-          value={values.start_location}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          placeholder="End Location"
-          value={values.end_location}
-          name="end_location"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="number"
-          placeholder="Distance (km)"
-          value={values.distance_km}
-          name="distance_km"
-          onChange={handleChange}
-          required
-        />
-        <button type="submit">
+      <h2><FaRoute /> Manage Routes </h2>
+      <form onSubmit={handleSubmit} className="admin-route-form" ref={formRef}>
+        <div className="form-group">
+          <label htmlFor="start_location">start location</label>
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Start Location"
+            name="start_location"
+            value={values.start_location}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="end_location">End Location</label>
+          <input
+            type="text"
+            placeholder="End Location"
+            value={values.end_location}
+            name="end_location"
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="distance_km">Distance (km)</label>
+          <input
+            type="number"
+            placeholder="Distance (km)"
+            value={values.distance_km}
+            name="distance_km"
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button type="submit" className="btn btn--primary">
           {editingRoute ? "Update Route" : "Add Route"}
         </button>
+        {editingRoute && (
+          <button
+            type="button"
+            className="btn btn--secondary"
+            onClick={() => {
+              setEditingRoute(null);
+              resetForm();
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </form>
       {isLoading ? (
         <p>Loading routes...</p>
@@ -236,8 +272,7 @@ const AdminRoutes = () => {
         <ul className="admin-list">
           {routes?.map((r) => (
             <li key={r.id}>
-              <strong>{r.start_location}</strong> → {r.end_location} (
-              {r.distance_km} km)
+              {r.start_location} → {r.end_location} ({r.distance_km} km)
               <ul>
                 {r?.stops?.map((stop) => (
                   <li key={stop.id}>
@@ -246,43 +281,74 @@ const AdminRoutes = () => {
                 ))}
               </ul>
               <div className="actions">
-                <button onClick={() => handleEdit(r)}>✏️ Edit</button>
-                <button onClick={() => deleteMutation.mutate(r.id)}>
-                  🗑️ Delete
+                <button onClick={() => handleEdit(r)} className="btn btn--edit">
+                  <FaEdit /> Edit
                 </button>
-                <button onClick={() => setSelectedRoute(r)}>
+                <button
+                  onClick={() => deleteMutation.mutate(r.id)}
+                  className="btn btn--delete"
+                >
+                  <FaTrash /> Delete
+                </button>
+                <button
+                  onClick={() => setSelectedRoute(r)}
+                  className="btn btn--managestops"
+                >
                   Manage Stops
                 </button>
               </div>
               {/* {STOPS PANEL} */}
-              {selectedRoute?.id==r.id && (
+              {selectedRoute?.id == r.id && (
                 <div className="stops-panel">
                   <h3>
                     Stops for {selectedRoute.start_location} →{" "}
                     {selectedRoute.end_location}
                   </h3>
                   <form onSubmit={handleStopSubmit} className="stops-form">
-                    <input
-                      name="stop_name"
-                      placeholder="Stop name"
-                      value={stopValues.stop_name}
-                      onChange={stopHandleChange}
-                    />
-                    <input
-                      name="order"
-                      placeholder="Order"
-                      value={stopValues.order}
-                      onChange={stopHandleChange}
-                    />
-                    <input
-                      name="distance_from_start"
-                      placeholder="Distance from start (km)"
-                      value={stopValues.distance_from_start}
-                      onChange={stopHandleChange}
-                    />
-                    <button type="submit">
+                    <div className="form-group">
+                      <label htmlFor="stop_name">Stop Name</label>
+                      <input
+                        name="stop_name"
+                        placeholder="Stop name"
+                        value={stopValues.stop_name}
+                        onChange={stopHandleChange}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="order">Stop Order</label>
+                      <input
+                        name="order"
+                        placeholder="Order"
+                        value={stopValues.order}
+                        onChange={stopHandleChange}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="distance_from_start">
+                        distance from start
+                      </label>
+                      <input
+                        name="distance_from_start"
+                        placeholder="Distance from start (km)"
+                        value={stopValues.distance_from_start}
+                        onChange={stopHandleChange}
+                      />
+                    </div>
+                    <button type="submit" className="btn btn--primary">
                       {editingStop ? "Update Stop" : "Add Stop"}
                     </button>
+                    {editingStop && (
+                      <button
+                        type="button"
+                        className="btn btn--secondary"
+                        onClick={() => {
+                          setEditingStop(null);
+                          stopReset();
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    )}
                   </form>
                   <div className="stops-list">
                     {routeStops?.map((s) => (
@@ -290,13 +356,17 @@ const AdminRoutes = () => {
                         <strong>{s.stop_name}</strong> ({s.distance_from_start}{" "}
                         km)
                         <div>
-                          <button onClick={() => handleEditStop(s)}>
-                            ✏️ Edit
+                          <button
+                            onClick={() => handleEditStop(s)}
+                            className="btn btn--edit"
+                          >
+                            <FaEdit /> Edit
                           </button>
                           <button
                             onClick={() => deleteStopMutation.mutate(s.id)}
+                            className="btn btn--delete"
                           >
-                            🗑 Delete
+                            <FaTrash /> Delete
                           </button>
                         </div>
                       </div>

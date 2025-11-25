@@ -11,10 +11,14 @@ import {
   FaClock,
   FaMapMarkerAlt,
   FaRupeeSign,
+  FaShare,
+  FaDownload
 } from "react-icons/fa";
 import { MdEventSeat } from "react-icons/md";
 import { toast } from "react-toastify";
 import Navbar from "../../component/Navbar/Navbar";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { motion } from "framer-motion";
 const MyBooking = () => {
   const query = useQueryClient();
@@ -61,13 +65,193 @@ const MyBooking = () => {
     },
     onError: (er) => console.log(er),
   });
-  const {data:cancelData}=mutation
-  if(cancelData){
-    console.log("canceledData in booking page", cancelData)
+  const { data: cancelData } = mutation;
+  if (cancelData) {
+    console.log("canceledData in booking page", cancelData);
   }
   const handlePayNow = (bookingId, total_amount) => {
     console.log("handle pay now clicked", bookingId, total_amount);
     navigate(`/payment?onwardId=${bookingId}&totalamount=${total_amount}`);
+  };
+  const formattedDateTime = (datetime) => {
+    if (!datetime) return "";
+    // Format Date
+    const date = new Date(datetime.replace(" ", "T"));
+    const formattedDate = date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    //Format time
+    const time = date.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${formattedDate}, ${time}`;
+  };
+
+  const handleShare = async (booking) => {
+    const generateTicketText = (booking) => {
+      console.log("Formatted:", formattedDateTime(booking.trip.departure));
+
+      let passengerList = booking.passengers
+        .map(
+          (p, index) =>
+            `${index + 1}. ${p.name} (${p.gender}, ${p.age})  
+Seat: ${p.seat_number}  
+Boarding: ${p.boarding_location}  
+Dropping: ${p.dropping_location}
+fare:${p.fare}`
+        )
+        .join("\n\n");
+
+      return `
+🚌 *Bus Ticket*
+
+*Booking ID:* ${booking.id}
+*Status:* ${booking.status}
+
+🔹 *Bus Details*
+${booking.trip.bus.bus_name} (${booking.trip.bus.bus_type})
+Operator: ${booking.trip.operator.username}
+Phone: ${booking.trip.operator.phone}
+
+🔹 *Route*
+From: ${booking.trip.route.start_location}
+To: ${booking.trip.route.end_location}
+
+🔹 *Journey Time*
+
+Departure: ${formattedDateTime(booking.trip.departure)}
+Arrival: ${formattedDateTime(booking.trip.arrival)}
+
+🔹 *Seats*
+${booking.seats.map((s) => s.seat_number).join(", ")}
+
+🔹 *Passengers*
+${passengerList}
+
+💵 *Total Amount:* ₹${booking.total_amount}
+  `;
+    };
+    const message = generateTicketText(booking);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Booking #${booking.id} Confirmation`,
+          text: message,
+        });
+      } catch (error) {
+        console.log("Error sharing booking:", error);
+      }
+    } else {
+      toast.info("Share feature is not supported in this browser.");
+    }
+  };
+  const downloadTicket = async (booking) => {
+    const printArea = document.getElementById("print-area");
+    printArea.style.display = "flex";
+    printArea.style.flexDirection = "column";
+    printArea.innerHTML = `
+  <div style="width:550px;padding:20px;border:2px solid #2b3760;border-radius:10px;font-family:Arial;">
+
+    <h3 style="border-bottom:1px solid #2b3760;padding-bottom:6px;">Booking Information</h3>
+    <p><strong>Booking ID:</strong> ${booking.id}</p>
+    <p><strong>Booked Date:</strong> ${new Date(
+      booking.booked_date
+    ).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })}</p>
+    <p><strong>Status:</strong> ${booking.status.replace("_", " ")}</p>
+    ${
+      booking.payments
+        ? `<p><strong>Payment:</strong> ${booking.payments.payment_status}</p>`
+        : ""
+    }
+
+    <h3 style="border-bottom:1px solid #2b3760;padding-bottom:6px;">Bus Details</h3>
+    <p><strong>Bus Name:</strong> ${booking.trip.bus.bus_name}</p>
+    <p><strong>Type:</strong> ${booking.trip.bus.bus_type}</p>
+    <p><strong>Operator:</strong> ${booking.trip.operator.username}</p>
+    <p><strong>Operator Phone:</strong> ${booking.trip.operator.phone}</p>
+
+    <h3 style="border-bottom:1px solid #2b3760;padding-bottom:6px;">Journey Details</h3>
+    <p><strong>From:</strong> ${booking.trip.route.start_location}</p>
+    <p><strong>To:</strong> ${booking.trip.route.end_location}</p>
+    <p><strong>Departure:</strong> ${formattedDateTime(
+      booking.trip.departure
+    )}</p>
+    <p><strong>Arrival:</strong> ${formattedDateTime(booking.trip.arrival)}</p>
+    <p><strong>Distance:</strong> ${booking.trip.route.distance_km} km</p>
+
+    <h3 style="border-bottom:1px solid #2b3760;padding-bottom:6px;">Selected Seats</h3>
+    <p><strong>Seats:</strong> ${booking.seats
+      .map((s) => s.seat_number)
+      .join(", ")}</p>
+
+    <h3 style="border-bottom:1px solid #2b3760;padding-bottom:6px;">Passenger Details</h3>
+    ${booking.passengers
+      .map((p) => {
+        const boardingStop = booking.trip.trip_stops?.find(
+          (stop) => stop.stop_name === p.boarding_location
+        );
+        const droppingStop = booking.trip.trip_stops?.find(
+          (stop) => stop.stop_name === p.dropping_location
+        );
+
+        return `
+        <div style="border:1px dashed #2b3760;padding:10px;margin-bottom:10px;border-radius:5px;">
+          <p><strong>${p.name}</strong> (${p.gender}, ${p.age} yrs)</p>
+          <p><strong>Seat:</strong> ${p.seat_number}</p>
+
+          <p><strong>Boarding:</strong> ${p.boarding_location}</p>
+          <p><strong>Boarding Time:</strong> ${
+            boardingStop?.arrival_time || "N/A"
+          }</p>
+
+          <p><strong>Dropping:</strong> ${p.dropping_location}</p>
+          <p><strong>Dropping Time:</strong> ${
+            droppingStop?.arrival_time || "N/A"
+          }</p>
+
+          <p><strong>Fare:</strong> ₹${p.fare}</p>
+        </div>
+      `;
+      })
+      .join("")}
+
+    <h3 style="border-top:2px solid #2b3760;padding-top:10px;">Total Amount</h3>
+    <h2 style="color:#2b3760;">₹${booking.total_amount}</h2>
+
+    <p style="text-align:center;font-size:12px;margin-top:10px;border-top:1px dashed #2b3760;padding-top:10px;">
+      * Please carry valid ID proof during the journey.
+    </p>
+  </div>
+`;
+
+    // 3️⃣ Capture with controlled size
+
+    const canvas = await html2canvas(printArea, {
+      scale: 1.5, // ↓ LOW SCALE = SMALL PDF
+
+      backgroundColor: "#ffffff",
+      useCORS: true,
+    });
+
+    // 4️⃣ Restore styles
+
+    // 5️⃣ Generate PDF with correct aspect ratio
+    const img = canvas.toDataURL("image/jpeg", 0.7); // ↓ JPEG + 0.7 = small file
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(img, "JPEG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`ticket-${booking.id}.pdf`);
+    printArea.style.display = "none";
   };
 
   if (isLoading) {
@@ -162,13 +346,13 @@ const MyBooking = () => {
                     <span
                       className={`badge badge--status ${booking.status.toLowerCase()}`}
                     >
-                      {booking.status.replace("_", " ")}
+                     Booking status: {booking.status.replace("_", " ")}
                     </span>
                     {booking.payments && (
                       <span
                         className={`badge badge--payment ${booking.payments.payment_status.toLowerCase()}`}
                       >
-                        {booking.payments.payment_status}
+                        payment status: {booking.payments.payment_status}
                       </span>
                     )}
                   </div>
@@ -185,7 +369,7 @@ const MyBooking = () => {
                             booking.trip.bus.bus_type === "AC" ? "ac" : "non-ac"
                           }`}
                         >
-                          {booking.trip.bus.bus_type}
+                          {booking.trip.bus.bus_type} {booking.trip.bus.layout_type}
                         </span>
                         <div className="operator-details">
                           <span>
@@ -207,7 +391,9 @@ const MyBooking = () => {
                           <p className="location">
                             {booking.trip.route.start_location}
                           </p>
-                          <p className="time">{booking.trip.departure_time}</p>
+                          <p className="time">
+                            {formattedDateTime(booking.trip.departure)}
+                          </p>
                         </div>
                       </div>
                       <div className="route-line">
@@ -222,7 +408,9 @@ const MyBooking = () => {
                           <p className="location">
                             {booking.trip.route.end_location}
                           </p>
-                          <p className="time">{booking.trip.arrival_time}</p>
+                          <p className="time">
+                            {formattedDateTime(booking.trip.arrival)}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -349,6 +537,38 @@ const MyBooking = () => {
                       </div>
                     </div>
                   )}
+                </div>
+                {/* //share and download ticket// */}
+                <div className="ticket-share">
+                  <div
+                    id="print-area"
+                    style={{
+                      width: "fit-content",
+                      padding: "20px",
+                      display: "none",
+                      height: "auto",
+                    }}
+                  ></div>
+
+                  {booking.status == "CONFIRMED" &&
+                    (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleShare(booking)}
+                        >
+                          <FaShare/>
+                         
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => downloadTicket(booking)}
+                        >
+                          {" "}
+                          <FaDownload/> 
+                        </button>
+                      </>
+                    )}
                 </div>
 
                 <div className="ticket-card__footer">

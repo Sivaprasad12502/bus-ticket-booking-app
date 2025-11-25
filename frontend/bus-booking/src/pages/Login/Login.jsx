@@ -6,7 +6,7 @@ import "./Login.scss";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { FaUser, FaLock, FaBus,FaGoogle } from "react-icons/fa";
+import { FaUser, FaLock, FaBus,FaGoogle,FaCheckSquare,FaRegSquare } from "react-icons/fa";
 
 import { auth, googleProvider } from "../../firebase/Firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -19,6 +19,7 @@ export const Login = () => {
     username: "",
     password: "",
   });
+  const [showPassword,setShowPassword]=useState(false)
   const mutation = useMutation({
     mutationFn: async (formData) =>
       await axios.post(`${apiUrl}users/login/`, formData),
@@ -133,7 +134,7 @@ export const Login = () => {
               <div className="input-wrapper">
                 <FaLock className="input-icon" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   placeholder="Enter your password"
                   name="password"
@@ -143,6 +144,9 @@ export const Login = () => {
                   disabled={mutation.isPending}
                 />
               </div>
+              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaCheckSquare /> : <FaRegSquare />} Show Password
+              </button>
             </div>
 
             <button

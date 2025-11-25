@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { data, Link } from "react-router-dom";
 import useForm from "../../hooks/useForm/useForm";
 import { useMutation } from "@tanstack/react-query";
@@ -6,7 +6,7 @@ import axios from "axios";
 import "./Register.scss";
 import { Context } from "../../context/Context";
 import { toast } from "react-toastify";
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaBus, FaGoogle } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaBus, FaGoogle,FaCheckSquare,FaRegSquare} from "react-icons/fa";
 //goggle register
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase/Firebase";
@@ -21,7 +21,7 @@ const Register = () => {
     password2: "",
     phone: "",
   });
-
+  const [showPassword, setShowPassword]=useState(false)
   const validatePassword = (password, password2) => {
     if (password.length < 8) {
       return "Password must be at least 8 characters long";
@@ -170,7 +170,7 @@ const Register = () => {
               <div className="input-wrapper">
                 <FaLock className="input-icon" />
                 <input
-                  type="password"
+                  type={showPassword? "text":"password"}
                   id="password"
                   placeholder="Create a password (min. 8 characters)"
                   name="password"
@@ -187,7 +187,7 @@ const Register = () => {
               <div className="input-wrapper">
                 <FaLock className="input-icon" />
                 <input
-                  type="password"
+                  type={showPassword? "text": "password"}
                   id="password2"
                   placeholder="Confirm your password"
                   name="password2"
@@ -197,6 +197,9 @@ const Register = () => {
                   disabled={mutation.isPending}
                 />
               </div>
+              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaCheckSquare/> : <FaRegSquare/> }show Password
+              </button>
             </div>
 
             <div className="form-group">

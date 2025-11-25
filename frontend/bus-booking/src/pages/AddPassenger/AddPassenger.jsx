@@ -297,7 +297,7 @@ const AddPassenger = () => {
               <FaBus className="icon" />
               <div>
                 <h4>{onwayTrip.bus.bus_name}</h4>
-                <span className="bus-type">{onwayTrip.bus.bus_type}</span>
+                <span className="bus-type">{onwayTrip.bus.bus_type} {onwayTrip.bus.layout_type}</span>
               </div>
             </div>
             <div className="trip-summary__body">
@@ -505,7 +505,7 @@ const AddPassenger = () => {
                 <FaBus className="icon" />
                 <div>
                   <h4>{returnTrip.bus.bus_name}</h4>
-                  <span className="bus-type">{returnTrip.bus.bus_type}</span>
+                  <span className="bus-type">{returnTrip.bus.bus_type}  {returnTrip.bus.layout_type}</span>
                 </div>
               </div>
               <div className="trip-summary__body">

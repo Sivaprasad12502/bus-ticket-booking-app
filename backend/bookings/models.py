@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from datetime import date,time
+from datetime import date, time
 import uuid
 
 
@@ -12,7 +12,7 @@ class Bus(models.Model):
     total_seats = models.IntegerField()
     bus_type = models.CharField(
         max_length=50,
-        choices=[("AC", "AC"), ("Non-AC", "Non-AC"), ("Sleeper", "sleeper")],
+        choices=[("AC", "AC"), ("Non-AC", "Non-AC")],
     )
     # operator_name = models.CharField(max_length=100)
     layout_type = models.CharField(
@@ -61,13 +61,19 @@ class RouteStop(models.Model):
 
 
 class Trip(models.Model):
-    operator=models.ForeignKey("users.Operator",on_delete=models.CASCADE,null=True,blank=True,related_name="trips")
+    operator = models.ForeignKey(
+        "users.Operator",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="trips",
+    )
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     departure = models.DateTimeField()
     arrival = models.DateTimeField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    
+
     def __str__(self):
         return f"{self.bus.bus_name} -> {self.route.start_location} to {self.route.end_location} {self.departure} -> {self.arrival}"
 
@@ -75,8 +81,11 @@ class Trip(models.Model):
 class TripStop(models.Model):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="trip_stops")
     route_stop = models.ForeignKey(RouteStop, on_delete=models.CASCADE)
-    arrival_time = models.TimeField(default=time(0,0))
-    fare_from_start=models.DecimalField(max_digits=8,decimal_places=2,null=True,blank=True)
+    arrival_time = models.TimeField(default=time(0, 0))
+    fare_from_start = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True
+    )
+
     class Meta:
         ordering = ["route_stop__order"]
 
@@ -87,8 +96,10 @@ class TripStop(models.Model):
 class Seat(models.Model):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="seats")
     seat_number = models.CharField(max_length=5)
-    gender_preference=models.CharField(
-        max_length=10,choices=[("ANY","Any"),("WOMEN_ONLY","Women only")],default="ANY"
+    gender_preference = models.CharField(
+        max_length=10,
+        choices=[("ANY", "Any"), ("WOMEN_ONLY", "Women only")],
+        default="ANY",
     )
     # is_booked = models.BooleanField(default=False)
 
@@ -104,7 +115,7 @@ class Booking(models.Model):
     booking_date = models.DateTimeField(auto_now_add=True)
     # Use today's date as default when a booking date is not provided
     booked_date = models.DateField(default=date.today)
-    roundtrip_id=models.UUIDField(null=True,blank=True)
+    roundtrip_id = models.UUIDField(null=True, blank=True)
     payment_deadline = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
@@ -150,7 +161,12 @@ class Payment(models.Model):
     currency = models.CharField(max_length=10, default="inr")
     payment_status = models.CharField(
         max_length=20,
-        choices=[("PENDING", "Pending"), ("SUCCESS", "Success"), ("FAILED", "Failed")],
+        choices=[
+            ("PENDING", "Pending"),
+            ("SUCCESS", "Success"),
+            ("FAILED", "Failed"),
+            ("EXPIRED", "Expired"),
+        ],
         default="PENDING",
     )
     receipt_url = models.URLField(blank=True, null=True)
@@ -166,6 +182,7 @@ def create_seats_for_trip(sender, instance, created, **kwargs):
         total_seats = instance.bus.total_seats
         for i in range(1, total_seats + 1):
             Seat.objects.create(trip=instance, seat_number=str(i))
+
 
 # @receiver(post_save, sender=Trip)
 # def calculate_stop_fares(sender, instance, created, **kwargs):
@@ -195,7 +212,7 @@ def create_seats_for_trip(sender, instance, created, **kwargs):
 #             fare_from_start=fare
 #         )
 
-#Creates reverse trip if not exists
+# Creates reverse trip if not exists
 # @receiver(post_save,sender=Trip)
 # def create_trip_stops(sender,instance,created,**kwargs):
 #     if created:

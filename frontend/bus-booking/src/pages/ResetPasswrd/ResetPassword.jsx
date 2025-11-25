@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "./ResetPassword.scss";
+import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 
 const ResetPassword = () => {
   const { apiUrl, navigate } = useContext(Context);
@@ -15,6 +16,7 @@ const ResetPassword = () => {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Verify reset token
   useEffect(() => {
@@ -60,7 +62,11 @@ const ResetPassword = () => {
   };
 
   if (loading) {
-    return <div className="reset-container"><h3>Verifying link...</h3></div>;
+    return (
+      <div className="reset-container">
+        <h3>Verifying link...</h3>
+      </div>
+    );
   }
 
   if (!valid) {
@@ -80,7 +86,7 @@ const ResetPassword = () => {
         <div className="form-group">
           <label>New Password</label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter new password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -91,12 +97,15 @@ const ResetPassword = () => {
         <div className="form-group">
           <label>Confirm Password</label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Confirm new password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={submitting}
           />
+          <button type="button" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <FaCheckSquare /> : <FaRegSquare />} Show Password
+          </button>
         </div>
 
         <button

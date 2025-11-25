@@ -194,7 +194,8 @@ const Payment = () => {
         }
       } catch (err) {
         console.error(err);
-        toast.error("Failed to initialize payment. Please try again.");
+        //dbbbbbb lockkk
+        // toast.error("Failed to initialize payment. Please try again.");
       }
     };
 
@@ -240,7 +241,7 @@ const Payment = () => {
 
         <div className="payment-content">
           <div className="booking-summary">
-            <h3 className="summary-title">Onward Trip</h3>
+            {/* <h3 className="summary-title">Onward Trip</h3> */}
 
             {onwardBooking && (
               <>
@@ -252,6 +253,7 @@ const Payment = () => {
                 </div>
 
                 <div className="passengers-list">
+                  <h3>Onward Trip</h3>
                   <h4>Passenger Details</h4>
                   {onwardBooking.passengers?.map((item, index) => (
                     <div key={item.id} className="passenger-item">
@@ -276,6 +278,7 @@ const Payment = () => {
                   {isRoundTrip && returnBooking && (
                     <>
                       <h3>Return Trip</h3>
+                      <h4>Passenger Details</h4>
                       {returnBooking.passengers?.map((item, index) => (
                         <div key={item.id} className="passenger-item">
                           <div className="passenger-header">

@@ -6,6 +6,8 @@ import axios from "axios";
 import useForm from "../../hooks/useForm/useForm";
 import "./AdminBuses.scss";
 import { useState } from "react";
+import { FaBus, FaChair, FaEdit, FaSnowflake, FaTrash } from "react-icons/fa";
+import { MdAirlineSeatFlat } from "react-icons/md";
 const AdminBuses = () => {
   const queryClient = useQueryClient();
   const { apiUrl, adminAccessToken } = useContext(Context);
@@ -136,49 +138,65 @@ const AdminBuses = () => {
   return (
     <div className="admin-buses">
       <h2 className="admin-buses__title">
-        🚌 Manage Buses <span>({buses?.length || 0})</span>
+        <FaBus /> Manage Buses <span>({buses?.length || 0})</span>
       </h2>
 
       {/* Add/Edit Form */}
       <form ref={formRef} onSubmit={handleSubmit} className="admin-buses__form">
-        <input
-          ref={inputRef}
-          type="text"
-          name="bus_name"
-          placeholder="Bus Name"
-          value={values.bus_name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="number"
-          name="total_seats"
-          placeholder="Total Seats"
-          value={values.total_seats}
-          onChange={handleChange}
-          required
-        />
-        <select
-          name="bus_type"
-          value={values.bus_type}
-          onChange={handleChange}
-          required
-        >
-          <option value="AC">AC</option>
-          <option value="Non-AC">Non-AC</option>
-          <option value="Sleeper">Sleeper</option>
-        </select>
+        {/* <div> */}
+        <div className="form-group">
+          <label htmlFor="bus_name">
+            <FaBus /> Bus Name
+          </label>
 
-        <select
-          name="layout_type"
-          value={values.layout_type}
-          onChange={handleChange}
-          required
-        >
-          <option value="2*2">2*2</option>
-          <option value="2*3">2*3</option>
-          <option value="Sleeper">Sleeper</option>
-        </select>
+          <input
+            ref={inputRef}
+            type="text"
+            name="bus_name"
+            placeholder="Enter bus Name"
+            value={values.bus_name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="total_seats"> Total Seats</label>
+          <input
+            type="number"
+            name="total_seats"
+            placeholder="Total Seats"
+            value={values.total_seats}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="bus_type">Bus Type</label>
+          <select
+            name="bus_type"
+            value={values.bus_type}
+            onChange={handleChange}
+            required
+          >
+            <option value="AC">AC</option>
+            <option value="Non-AC">Non-AC</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="layout_type"> Layout Type</label>
+          <select
+            name="layout_type"
+            value={values.layout_type}
+            onChange={handleChange}
+            required
+          >
+            <option value="2*2">2*2</option>
+            <option value="2*3">2*3</option>
+            <option value="Sleeper">Sleeper</option>
+          </select>
+        </div>
+        {/* </div> */}
 
         <button
           type="submit"
@@ -193,37 +211,56 @@ const AdminBuses = () => {
             ? "Adding..."
             : "Add Bus"}
         </button>
+        {editingBus && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingBus(null);
+              resetForm();
+            }}
+            className="btn btn--secondary"
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       {/* Bus List */}
       <div className="admin-buses__list">
         {isLoading && <p>Loading buses...</p>}
         {isError && <p className="error">Error: {error?.message}</p>}
-        {buses?.map((bus) => (
-          <div key={bus.id} className="bus-card">
-            <h3>{bus.bus_name}</h3>
-            <p>
-              Type: <strong>{bus.bus_type}</strong>
-            </p>
-            <p>Operator: {bus.operator_name}</p>
-            <p>Mobile: {bus.operator_mobile}</p>
-            <p>Seats: {bus.total_seats}</p>
-            <div className="bus-card__actions">
-              <button
-                onClick={() => handleEditClick(bus)}
-                className="btn btn--edit"
-              >
-                ✏️ Edit
-              </button>
-              <button
-                onClick={() => deleteBusMutation.mutate(bus.id)}
-                className="btn btn--delete"
-              >
-                🗑️ Delete
-              </button>
-            </div>
-          </div>
-        ))}
+
+        {buses?.length === 0 ? (
+          <><p>No buses created yet. Create your first bus!</p></>
+        ) : (
+          <>
+            {" "}
+            {buses?.map((bus) => (
+              <div key={bus.id} className="bus-card">
+                <h3>{bus.bus_name}</h3>
+                <p>
+                  Type: <strong>{bus.bus_type}</strong>
+                </p>
+                <p>Seats: {bus.total_seats}</p>
+                <p>Layout: {bus.layout_type}</p>
+                <div className="bus-card__actions">
+                  <button
+                    onClick={() => handleEditClick(bus)}
+                    className="btn btn--edit"
+                  >
+                    <FaEdit /> Edit
+                  </button>
+                  <button
+                    onClick={() => deleteBusMutation.mutate(bus.id)}
+                    className="btn btn--delete"
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );
