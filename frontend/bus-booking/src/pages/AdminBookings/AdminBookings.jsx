@@ -9,7 +9,9 @@ import {
   FaRupeeSign,
   FaClock,
   FaUser,
+  FaTrash,
 } from "react-icons/fa";
+import { MdBookOnline } from "react-icons/md";
 
 const AdminBookings = () => {
   const queryClient = useQueryClient();
@@ -71,7 +73,7 @@ const AdminBookings = () => {
     <div className="admin-bookings">
       <div className="admin-bookings__header">
         <h1>
-          All Bookings <span>({bookings?.length || 0})</span>
+         <MdBookOnline/> All Bookings <span>({bookings?.length || 0})</span>
         </h1>
       </div>
 
@@ -149,7 +151,7 @@ const AdminBookings = () => {
                             className="delete"
                             onClick={() => deleteMutation.mutate(booking.id)}
                           >
-                            🗑️
+                            <FaTrash/>
                           </button>
                         </div>
                       </td>

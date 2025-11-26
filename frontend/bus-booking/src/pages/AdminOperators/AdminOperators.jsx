@@ -3,7 +3,8 @@ import { Context } from "../../context/Context";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import useForm from "../../hooks/useForm/useForm";
 import axios from "axios";
-import "./AdminOperators.scss"
+import "./AdminOperators.scss";
+import { FaEdit, FaTrash, FaUser } from "react-icons/fa";
 const AdminOperators = () => {
   const { apiUrl, adminAccessToken } = useContext(Context);
   const queryClient = useQueryClient();
@@ -104,7 +105,7 @@ const AdminOperators = () => {
       username: operator.username,
       company_name: operator.company_name,
       phone: operator.phone,
-      password:"",
+      password: "",
     });
   };
 
@@ -114,12 +115,14 @@ const AdminOperators = () => {
 
   return (
     <div className="admin-operator-page">
-      <h2>Manage Operators</h2>
+      <h2>
+        <FaUser /> Manage Operators
+      </h2>
 
       {/* operator form */}
       <form onSubmit={handleOperatorSubmit} className="admin-operator-form">
-        <label htmlFor="">
-          Enter operatorname
+        <div className="form-group">
+          <label htmlFor="username">Enter operatorname</label>
           <input
             type="text"
             name="username"
@@ -127,55 +130,87 @@ const AdminOperators = () => {
             value={values.username}
             onChange={handleChange}
           />
-        </label>
-        <label>
-          Enter company_name
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="company_name">Enter company_name</label>
           <input
             type="text"
             name="company_name"
+            placeholder="enter_company_name"
             value={values.company_name}
             onChange={handleChange}
           />
-        </label>
-        <input
-          type="number"
-          name="phone"
-          value={values.phone}
-          placeholder="Phone"
-          onChange={handleChange}
-        />
-        <input
-          type="password"
-          name="password"
-          value={values.password}
-          placeholder="Password"
-          onChange={handleChange}
-        />
+        </div>
+        <div className="form-group">
+          <label htmlFor="phone">Enter phone</label>
+          <input
+            type="number"
+            name="phone"
+            value={values.phone}
+            placeholder="Phone"
+            onChange={handleChange}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Enter Password</label>
+          <input
+            type="password"
+            name="password"
+            value={values.password}
+            placeholder="Password"
+            onChange={handleChange}
+          />
+        </div>
 
-        <button type="submit">
+        <button type="submit" className="btn btn--primary">
           {editingOperator ? "Update Operator" : "Add Operator"}
         </button>
+        {editingOperator && (
+          <button
+            onClick={() => {
+              seEditingOperator(null), resetForm();
+            }}
+            className="btn btn--secondary"
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       {/* operator List */}
       {isLoading ? (
         <p>Loading operators...</p>
       ) : (
-        <ul className="admin-list">
-          {operators?.map((o) => (
-            <li key={o.id}>
-              <span>{o.username}</span>
-              <span>{o.company_name}</span>
-              <span>{o.phone}</span>
-              <div className="actions">
-                <button onClick={() => handleEditOperator(o)}>✏️ Edit</button>
-                <button onClick={() => deleteOperator.mutate(o.id)}>
-                  🗑️ Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="table-wrapper">
+          <table className="admin-list">
+            <thead>
+              <tr>
+                <th>operatorname</th>
+                <th>company_name</th>
+                <th>phone</th>
+                <th>actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {operators?.map((o) => (
+                <tr key={o.id}>
+                  <td>{o.username}</td>
+                  <td>{o.company_name}</td>
+                  <td>{o.phone}</td>
+                  <td className="actions">
+                    <button onClick={() => handleEditOperator(o)}>
+                      <FaEdit />
+                    </button>
+                    <button onClick={() => deleteOperator.mutate(o.id)}>
+                      <FaTrash className="delete"/>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

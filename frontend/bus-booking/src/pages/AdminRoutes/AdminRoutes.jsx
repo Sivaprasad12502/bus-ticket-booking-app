@@ -214,7 +214,9 @@ const AdminRoutes = () => {
   // }
   return (
     <div className="admin-route-page">
-      <h2><FaRoute /> Manage Routes </h2>
+      <h2>
+        <FaRoute /> Manage Routes{" "}
+      </h2>
       <form onSubmit={handleSubmit} className="admin-route-form" ref={formRef}>
         <div className="form-group">
           <label htmlFor="start_location">start location</label>
@@ -291,10 +293,12 @@ const AdminRoutes = () => {
                   <FaTrash /> Delete
                 </button>
                 <button
-                  onClick={() => setSelectedRoute(r)}
+                  onClick={() =>
+                    setSelectedRoute(selectedRoute?.id === r.id ? null : r)
+                  }
                   className="btn btn--managestops"
                 >
-                  Manage Stops
+                  {selectedRoute?.id===r.id?"Close stops ":"Manage Stops"}
                 </button>
               </div>
               {/* {STOPS PANEL} */}
@@ -351,33 +355,31 @@ const AdminRoutes = () => {
                     )}
                   </form>
                   <div className="stops-list">
-                    {routeStops?.map((s) => (
-                      <div key={s.id} className="stop-card">
-                        <strong>{s.stop_name}</strong> ({s.distance_from_start}{" "}
-                        km)
-                        <div>
-                          <button
-                            onClick={() => handleEditStop(s)}
-                            className="btn btn--edit"
-                          >
-                            <FaEdit /> Edit
-                          </button>
-                          <button
-                            onClick={() => deleteStopMutation.mutate(s.id)}
-                            className="btn btn--delete"
-                          >
-                            <FaTrash /> Delete
-                          </button>
+                    {routeStops?.length === 0 ? (
+                      <p>No Stops </p>
+                    ) : (
+                      routeStops?.map((s) => (
+                        <div key={s.id} className="stop-card">
+                          <strong>{s.stop_name}</strong> (
+                          {s.distance_from_start} km)
+                          <div>
+                            <button
+                              onClick={() => handleEditStop(s)}
+                              className="btn btn--edit"
+                            >
+                              <FaEdit /> Edit
+                            </button>
+                            <button
+                              onClick={() => deleteStopMutation.mutate(s.id)}
+                              className="btn btn--delete"
+                            >
+                              <FaTrash /> Delete
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
-                  <button
-                    className="close-btn"
-                    onClick={() => setSelectedRoute(null)}
-                  >
-                    ❌ Close Stops Panel
-                  </button>
                 </div>
               )}
             </li>

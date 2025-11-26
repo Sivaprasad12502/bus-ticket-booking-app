@@ -143,10 +143,10 @@ const AdminDashboard= () => {
               <div className="dashboard__stat-content">
                 <div className="dashboard__stat-label">{stat.label}</div>
                 <div className="dashboard__stat-value">{stat.value}</div>
-                <div className={`dashboard__stat-change dashboard__stat-change--${stat.trend}`}>
+                {/* <div className={`dashboard__stat-change dashboard__stat-change--${stat.trend}`}>
                   <TrendIcon className="dashboard__stat-trend-icon" />
                   {stat.change}
-                </div>
+                </div> */}
               </div>
             </div>
           );

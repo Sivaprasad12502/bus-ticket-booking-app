@@ -105,7 +105,7 @@ const AdminSidebar = ({ isOpen, onClose, isMobile }) => {
         </ul>
       </nav>
 
-      <div className="sidebar__footer">
+      {/* <div className="sidebar__footer">
         <div className="sidebar__user">
           <div className="sidebar__user-avatar">A</div>
           {!collapsed && (
@@ -115,7 +115,7 @@ const AdminSidebar = ({ isOpen, onClose, isMobile }) => {
             </div>
           )}
         </div>
-      </div>
+      </div> */}
     </aside>
   );
 }

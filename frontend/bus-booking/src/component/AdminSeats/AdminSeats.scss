@@ -16,17 +16,13 @@
     }
 
     button {
-      background: #007bff;
+      background: gray;
       color: white;
       border: none;
       padding: 0.4rem 1rem;
       border-radius: 6px;
       cursor: pointer;
       transition: 0.2s;
-
-      &:hover {
-        background: #0056b3;
-      }
     }
   }
 
@@ -249,8 +245,8 @@
       background: #fff;
       .deck {
         padding: 5px;
-        .berth{
-          height:80px;
+        .berth {
+          height: 80px;
         }
       }
     }

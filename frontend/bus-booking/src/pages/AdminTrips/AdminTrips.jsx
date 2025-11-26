@@ -1,10 +1,21 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Context } from "../../context/Context";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import useForm from "../../hooks/useForm/useForm";
 import axios from "axios";
 import "./AdminTrips.scss";
 import AdminSeats from "../../component/AdminSeats/AdminSeats";
+import {
+  FaBus,
+  FaChair,
+  FaClock,
+  FaEdit,
+  FaRupeeSign,
+  FaTimes,
+  FaTrash,
+} from "react-icons/fa";
+import { MdConfirmationNumber, MdEventSeat } from "react-icons/md";
+import { toast } from "react-toastify";
 const AdminTrips = () => {
   const { apiUrl, adminAccessToken } = useContext(Context);
   const queryClient = useQueryClient();
@@ -18,6 +29,8 @@ const AdminTrips = () => {
   });
   const [editingTrip, setEditingTrip] = useState(null);
   const [selectedTrip, setSelectedTrip] = useState(null);
+  const formRef = useRef(null);
+  const inputRef = useRef(null);
   // Fetch buses and routes for dropdowns
   const {
     data: buses,
@@ -71,7 +84,6 @@ const AdminTrips = () => {
       console.error("Admin Operators error:", error);
     },
   });
- 
 
   // Fetch all trips
   const { data: trips, isLoading: isLoadingTrips } = useQuery({
@@ -205,23 +217,37 @@ const AdminTrips = () => {
     },
   });
   //Time conversion function
-  const convertTo24Hour=(time12)=>{
-    if(!time12) return "";
-    const [time, modifier]=time12.split(" ")
-    let [hours, minutes]=time.split(":")
+
+  //Check if operator already assigned to another trip
+  const isOperatorAsssigned=(operatorId,currentTripId=null)=>{
+    if(!trips) return false;
+    return trips.some((trip)=>{
+      return trip.operator.id===operatorId && trip.id!==currentTripId
+    })
+  }
+  const convertTo24Hour = (time12) => {
+    if (!time12) return "";
+    const [time, modifier] = time12.split(" ");
+    let [hours, minutes] = time.split(":");
     // Convert to number
-    hours=parseInt(hours)
-    if(modifier==="PM"&& hours!==12){
-      hours+=12
+    hours = parseInt(hours);
+    if (modifier === "PM" && hours !== 12) {
+      hours += 12;
     }
-    if(modifier==="AM" && hours===12){
-      hours=0
+    if (modifier === "AM" && hours === 12) {
+      hours = 0;
     }
     return `${hours.toString().padStart(2, "0")}:${minutes}`;
-  }
+  };
   const handleTripSubmit = (e) => {
-   
     e.preventDefault();
+    const operatorId=Number(values.operator_id)
+    // if editing allow same oparator for same trip
+    const currentTripId=editingTrip?editingTrip.id:null;
+    if(isOperatorAsssigned(operatorId,currentTripId)){
+      toast.error("Operator already assigned to another trip")
+      return
+    }
     if (editingTrip) editTrip.mutate({ ...editingTrip, ...values });
     else addTrip.mutate(values);
   };
@@ -250,6 +276,17 @@ const AdminTrips = () => {
       fare_from_start: stop.fare_from_start,
     });
   };
+  useEffect(() => {
+    if (editingTrip) {
+      setTimeout(() => {
+        formRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        inputRef.current.focus();
+      });
+    }
+  }, [editingTrip]);
   if (!buses) {
     return <div>Loading...buses</div>;
   }
@@ -258,52 +295,75 @@ const AdminTrips = () => {
   }
   return (
     <div className="admin-trip-page">
-      <h2>Manage Trips</h2>
+      <h2>
+        <MdConfirmationNumber /> Manage Trips
+      </h2>
 
       {/* Trip form */}
-      <form onSubmit={handleTripSubmit} className="admin-trip-form">
-        <select
-          name="bus_id"
-          value={values.bus_id}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select Bus</option>
-          {buses?.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.bus_name} {b.bus_type} {b.layout_type}
-            </option>
-          ))}
-        </select>
+      <form
+        onSubmit={handleTripSubmit}
+        className="admin-trip-form"
+        ref={formRef}
+      >
+        <div className="form-group">
+          <label htmlFor="bus_id">
+            <FaBus /> Select Bus
+          </label>
+          <select
+            name="bus_id"
+            value={values.bus_id}
+            onChange={handleChange}
+            required
+            ref={inputRef}
+          >
+            <option value="">Select Bus</option>
+            {buses?.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.bus_name} {b.bus_type} {b.layout_type}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select
-          name="route_id"
-          value={values.route_id}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select Route</option>
-          {routes?.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.start_location} → {r.end_location}
-            </option>
-          ))}
-        </select>
-        <select
-          name="operator_id"
-          value={values.operator_id}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select Operator</option>
-          {operators?.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.username} - {o.company_name}
-            </option>
-          ))}
-        </select>
-        <label htmlFor="">
-          Enter departure time and date
+        <div className="form-group">
+          <label htmlFor="route_id">Select Route</label>
+          <select
+            name="route_id"
+            value={values.route_id}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select Route</option>
+            {routes?.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.start_location} → {r.end_location}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="operator_id">Select Operator</label>
+          <select
+            name="operator_id"
+            value={values.operator_id}
+            onChange={(e)=>{
+              const operatorId=Number(e.target.value) 
+              if(isOperatorAsssigned(operatorId,editingTrip?.id)){
+                toast.error("This operator is already assigned to another trip")
+              }
+              handleChange(e)}}
+            required
+          >
+            <option value="">Select Operator</option>
+            {operators?.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.username} - {o.company_name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="departure">Enter departure time and date</label>
           <input
             type="datetime-local"
             name="departure"
@@ -311,27 +371,41 @@ const AdminTrips = () => {
             value={values.departure}
             onChange={handleChange}
           />
-        </label>
-        <label>
-          Enter arrival time and date
+        </div>
+        <div className="form-group">
+          <label htmlFor="arrival">Enter arrival time and date</label>
           <input
             type="datetime-local"
             name="arrival"
             value={values.arrival}
             onChange={handleChange}
           />
-        </label>
-        <input
-          type="number"
-          name="price"
-          value={values.price}
-          placeholder="Price"
-          onChange={handleChange}
-        />
+        </div>
+        <div className="form-group">
+          <label htmlFor="price">Price</label>
+          <input
+            type="number"
+            name="price"
+            value={values.price}
+            placeholder="Price"
+            onChange={handleChange}
+          />
+        </div>
 
-        <button type="submit">
+        <button type="submit" className="btn btn--primary">
           {editingTrip ? "Update Trip" : "Add Trip"}
         </button>
+        {editingTrip && (
+          <button
+            type="button"
+            className="btn btn--secondary"
+            onClick={() => {
+              setEditingTrip(null), resetForm();
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       {/* Trip List */}
@@ -341,28 +415,47 @@ const AdminTrips = () => {
         <ul className="admin-list">
           {trips?.map((t) => (
             <li key={t.id}>
-              🚌 {t.bus.bus_name} — {t.route.start_location} →{" "}
-              {t.route.end_location}
-              <br /> operator: {t.operator?.username} - {t.operator?.company_name}
-              <br />⏰ {t.departure} → {t.arrival} 💰 ₹{t.price}
+              <h2>
+                <FaBus /> {t.bus.bus_name} — {t.route.start_location} →{" "}
+                {t.route.end_location}
+              </h2>
+              <br />
+              <span>
+                operator: {t.operator?.username} - {t.operator?.company_name}
+              </span>
+              <br />
+              <span>
+                <FaClock /> {t.departure} → {t.arrival} <FaRupeeSign /> ₹
+                {t.price}
+              </span>
               <div className="actions">
-                <button onClick={() => handleEditTrip(t)}>✏️ Edit</button>
-                <button onClick={() => deleteTrip.mutate(t.id)}>
-                  🗑️ Delete
+                <button
+                  className="btn btn--edit"
+                  onClick={() => handleEditTrip(t)}
+                >
+                  <FaEdit /> Edit
+                </button>
+                <button
+                  className="btn btn--delete"
+                  onClick={() => deleteTrip.mutate(t.id)}
+                >
+                  <FaTrash /> Delete
                 </button>
                 <button
                   onClick={() =>
                     setSelectedTrip(selectedTrip?.id === t.id ? null : t)
                   }
+                  className="btn btn--managestops"
                 >
                   {selectedTrip?.id === t.id && selectedTrip.view !== "seats"
-                    ? "Hide Stops"
+                    ? "Close Stops"
                     : "Manage Stops"}
                 </button>
                 <button
                   onClick={() => setSelectedTrip({ ...t, view: "seats" })}
+                  className="btn btn--manageseats"
                 >
-                  🪑 Manage Seats
+                  <MdEventSeat /> Manage Seats
                 </button>
               </div>
               {/* Manage Stops */}
@@ -376,59 +469,92 @@ const AdminTrips = () => {
                     />
                   ) : (
                     <div className="stops-panel">
-                      <h3>Trip Stops</h3>
+                      <h3>Trip Stops for </h3>
                       <form onSubmit={handleStopSubmit} className="stops-form">
-                        <select
-                          name="route_stop"
-                          value={stopValues.route_stop}
-                          onChange={handleStopchange}
-                          required
-                        >
-                          <option value="">Select Stop</option>
-                          {t.route.stops?.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.stop_name}
-                            </option>
-                          ))}
-                        </select>
-                        <label>
-                          Arrival Time
+                        <div className="form-group">
+                          <label htmlFor="route_stop">Stop Name</label>
+                          <select
+                            name="route_stop"
+                            value={stopValues.route_stop}
+                            onChange={handleStopchange}
+                            required
+                          >
+                            <option value="">Select Stop</option>
+                            {t.route.stops?.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.stop_name} distance from start:{" "}
+                                {s.distance_from_start} (km)
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="arrival_time">Arrival Time</label>
                           <input
                             type="time"
                             name="arrival_time"
                             value={stopValues.arrival_time}
                             onChange={handleStopchange}
                           />
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          name="fare_from_start"
-                          placeholder="Fare (₹)"
-                          value={stopValues.fare_from_start}
-                          onChange={handleStopchange}
-                        />
-                        <button type="submit">
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="fare_from_start">
+                            Fare from Start
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            name="fare_from_start"
+                            placeholder="Fare (₹)"
+                            value={stopValues.fare_from_start}
+                            onChange={handleStopchange}
+                          />
+                        </div>
+                        <button type="submit" className="btn btn--primary">
                           {editingStop ? "Update Stop" : "Add Stop"}
                         </button>
+                        {editingStop && (
+                          <button
+                            className="btn btn--secondary"
+                            onClick={() => {
+                              seEditingStop(false);
+                              resetStopForm();
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        )}
                       </form>
 
                       <div className="stops-list">
-                        {tripStopes?.map((s) => (
-                          <div key={s.id} className="stop-card">
-                            <strong>{s.stop_name}</strong> — ₹
-                            {s.fare_from_start}
-                            <p>{s.arrival_time}</p>
-                            <div>
-                              <button onClick={() => handleEditStop(s)}>
-                                ✏️
-                              </button>
-                              <button onClick={() => deleteStop.mutate(s.id)}>
-                                🗑️
-                              </button>
+                        {tripStopes?.length == 0 ? (
+                          <p>No stops added</p>
+                        ) : (
+                          tripStopes?.map((s) => (
+                            <div key={s.id} className="stop-card">
+                              <span>
+                                stop name: {s.stop_name} {s.distance_from_start}{" "}
+                                (km)
+                              </span>
+                              <span>fare from start: ₹{s.fare_from_start}</span>
+                              <span>arrival time: {s.arrival_time}</span>
+                              <div>
+                                <button
+                                  onClick={() => handleEditStop(s)}
+                                  className="btn btn--edit"
+                                >
+                                  <FaEdit /> Edit
+                                </button>
+                                <button
+                                  onClick={() => deleteStop.mutate(s.id)}
+                                  className="btn btn--delete"
+                                >
+                                  <FaTrash /> Delete
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))
+                        )}
                       </div>
                     </div>
                   )}

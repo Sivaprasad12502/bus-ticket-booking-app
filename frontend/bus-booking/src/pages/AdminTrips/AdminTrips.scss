@@ -1,41 +1,125 @@
-@import '../../styles/admin_variables';
-@import '../../styles/admin_mixins';
+@import "../../styles/admin_variables";
+@import "../../styles/admin_mixins";
 
 .admin-trip-page {
-  font-family: $admin-font-family;
-  
   h2 {
-    font-size: $admin-font-size-3xl;
-    font-weight: 700;
-    color: $admin-text-primary;
-    margin-bottom: $admin-spacing-xl;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
   }
-  
+
   // Trip Form
   .admin-trip-form {
     @include admin-card;
     margin-bottom: $admin-spacing-2xl;
-    
+
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: $admin-spacing-md;
     align-items: end;
-    
+
     @include responsive(md) {
       grid-template-columns: 1fr;
     }
-    
-    input,
-    select {
-      @include admin-input;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      label {
+        font-weight: 600;
+        color: #1e3a8a;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        svg {
+          color: #475569;
+          font-size: 1.1rem;
+        }
+      }
+      input,
+      select {
+        padding: 0.875rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+        &:focus {
+          outline: none;
+          background-color: #ffff;
+          box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+        }
+        &::placeholder {
+          color: #aaa;
+        }
+      }
+      select {
+        cursor: pointer;
+      }
     }
-    
-    button {
-      @include admin-btn-primary;
-      white-space: nowrap;
+    .btn {
+      height: 48.8px;
+      align-self: end;
     }
   }
-  
+  /* BUTTONS */
+  .btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+
+    &--primary {
+      background: rgb(43, 55, 96);
+      color: #fff;
+
+      &:hover {
+        background: #040e22;
+        transform: translateY(-1px);
+      }
+    }
+
+    &--edit {
+      background: #6b7d85;
+      color: #fff;
+
+      &:hover {
+        background: #0284c7;
+      }
+    }
+
+    &--delete {
+      background: #b72d2d;
+      color: #fff;
+
+      &:hover {
+        background: #dc2626;
+      }
+    }
+    &--managestops{
+      background:#1e3a8a;;
+      color: #fff;
+    }
+    &--manageseats {
+      background: #4a1e1e;
+      color: #fff;
+    }
+
+    &:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+
   // Trips List
   .admin-list {
     list-style: none;
@@ -44,151 +128,163 @@
     display: flex;
     flex-direction: column;
     gap: $admin-spacing-lg;
-    
+
     > li {
-      @include admin-card;
-      border-left: 4px solid $admin-accent;
-      font-size: $admin-font-size-base;
-      line-height: 1.8;
-      
+      display: flex;
+      flex-direction: column;
+      color: #1e3a8a;
+      font-weight: bold;
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 50, 0.05);
+      transition: 0.2s ease;
+      border-left: 4px solid #080117;
+      h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        justify-content: flex-start;
+      }
+      span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: black;
+        font-size: 1.02rem;
+      }
+
       strong {
         color: $admin-text-primary;
       }
-      
+
       br {
         margin: $admin-spacing-xs 0;
       }
     }
   }
-  
+
   // Action Buttons
   .actions {
     display: flex;
     gap: $admin-spacing-sm;
     flex-wrap: wrap;
     margin-top: $admin-spacing-md;
-    
-    button {
-      @include admin-btn-base;
-      font-size: $admin-font-size-sm;
-      padding: $admin-spacing-xs $admin-spacing-md;
-      
-      &:nth-child(1) {
-        // Edit
-        background: $admin-warning;
-        color: white;
-        
-        &:hover {
-          background: darken($admin-warning, 10%);
-        }
-      }
-      
-      &:nth-child(2) {
-        // Delete
-        background: $admin-danger;
-        color: white;
-        
-        &:hover {
-          background: darken($admin-danger, 10%);
-        }
-      }
-      
-      &:nth-child(3) {
-        // Manage Stops
-        background: $admin-info;
-        color: white;
-        
-        &:hover {
-          background: darken($admin-info, 10%);
-        }
-      }
-    }
   }
-  
+
   // Stops Panel
+   /* ------- STOPS PANEL ------- */
   .stops-panel {
-    @include admin-card;
-    margin-top: $admin-spacing-lg;
-    background: $admin-bg-hover;
-    border: 2px solid $admin-accent;
-    
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    animation: slideUp 0.3s ease;
+
     h3 {
-      font-size: $admin-font-size-xl;
-      color: $admin-text-primary;
-      margin-bottom: $admin-spacing-lg;
-      padding-bottom: $admin-spacing-md;
-      border-bottom: 2px solid $admin-border-light;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      text-align: center;
+      color: #111;
     }
-    
+
     .stops-form {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr auto;
-      gap: $admin-spacing-md;
-      margin-bottom: $admin-spacing-xl;
-      
-      @include responsive(md) {
-        grid-template-columns: 1fr;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        label {
+          font-weight: 600;
+          color: #1e3a8a;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+          svg {
+            color: #475569;
+            font-size: 1.1rem;
+          }
+        }
+        input,
+        select {
+          padding: 0.875rem 1rem;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          background: #f9fafb;
+          &:focus {
+            outline: none;
+            background-color: #ffff;
+            box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+          }
+          &::placeholder {
+            color: #aaa;
+          }
+        }
+        select {
+          cursor: pointer;
+        }
       }
-      
-      input,
-      select {
-        @include admin-input;
+      .btn {
+        height: 48.8px;
+        align-self: end;
       }
+
       
-      button {
-        @include admin-btn-success;
-        white-space: nowrap;
-      }
     }
-    
+
     .stops-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: $admin-spacing-md;
-      
-      @include responsive(sm) {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .stop-card {
-      background: white;
-      padding: $admin-spacing-md;
-      border-radius: $admin-radius-md;
-      border-left: 3px solid $admin-success;
-      @include flex-between;
-      gap: $admin-spacing-md;
-      
-      strong {
-        font-size: $admin-font-size-base;
-        color: $admin-text-primary;
-        flex: 1;
-      }
-      
-      div {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+
+      .stop-card {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
         display: flex;
-        gap: $admin-spacing-xs;
-        
-        button {
-          @include admin-btn-base;
-          padding: $admin-spacing-xs $admin-spacing-sm;
-          font-size: $admin-font-size-sm;
-          min-width: 36px;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 0.5rem;
+
+        strong {
+          font-size: 1rem;
+          color: #333;
+        }
+
+        div {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+
           
-          &:nth-child(1) {
-            background: $admin-warning;
-            color: white;
-          }
-          
-          &:nth-child(2) {
-            background: $admin-danger;
-            color: white;
-          }
         }
       }
     }
+
+    .close-btn {
+      margin-top: 1.5rem;
+      display: block;
+      margin-left: auto;
+      background: #eee;
+      color: #333;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s ease;
+
+      &:hover {
+        background: #ddd;
+      }
+    }
   }
-  
+
   // Loading
   p {
     text-align: center;

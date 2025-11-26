@@ -1,191 +1,195 @@
-@import '../../styles/admin_variables';
-@import '../../styles/admin_mixins';
+@import "../../styles/admin_variables";
+@import "../../styles/admin_mixins";
 
 .admin-bookings {
   font-family: $admin-font-family;
-  
+
   &__header {
-    @include flex-between;
-    margin-bottom: $admin-spacing-xl;
-    flex-wrap: wrap;
-    gap: $admin-spacing-md;
+    font-size: 1.03rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
   }
-  
+
   &__title {
     font-size: $admin-font-size-3xl;
     font-weight: 700;
     color: $admin-text-primary;
     margin: 0;
-    
+
     span {
       color: $admin-text-secondary;
       font-size: $admin-font-size-xl;
     }
   }
-  
+
   &__actions {
     display: flex;
     gap: $admin-spacing-md;
     flex-wrap: wrap;
   }
-  
+
   &__btn {
     @include admin-btn-primary;
   }
-  
+
   // Filters
   &__filters {
     @include admin-card;
     margin-bottom: $admin-spacing-xl;
-    
+
     &-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: $admin-spacing-md;
-      
+
       @include responsive(sm) {
         grid-template-columns: 1fr;
       }
     }
-    
+
     &-title {
       font-size: $admin-font-size-lg;
       font-weight: 600;
       margin-bottom: $admin-spacing-md;
       color: $admin-text-primary;
     }
-    
+
     input,
     select {
       @include admin-input;
     }
   }
-  
+
   // Table Container
   &__table-container {
     @include admin-card;
     padding: 0;
     overflow: hidden;
   }
-  
+
   &__table-header {
     padding: $admin-spacing-lg $admin-spacing-xl;
     background: $admin-bg-hover;
     @include flex-between;
     border-bottom: 1px solid $admin-border-light;
-    
+
     h3 {
       margin: 0;
       font-size: $admin-font-size-lg;
       color: $admin-text-primary;
     }
-    
+
     &-actions {
       display: flex;
       gap: $admin-spacing-sm;
-      
+
       button {
         @include admin-btn-secondary;
         padding: $admin-spacing-xs $admin-spacing-md;
       }
     }
   }
-  
+
   &__table-wrapper {
     overflow-x: auto;
     @include admin-scrollbar;
   }
-  
+
   &__table {
     @include admin-table;
     box-shadow: none;
     border-radius: 0;
   }
-  
+
   &__badge {
     @include admin-badge($admin-primary);
-    
+
     &--confirmed {
       @include admin-badge($admin-success);
     }
-    
+
     &--pending {
       @include admin-badge($admin-warning);
     }
-    
+
     &--cancelled {
       @include admin-badge($admin-danger);
     }
   }
-  
+
   &__actions-cell {
     display: flex;
     gap: $admin-spacing-sm;
-    
+
     button {
       @include admin-btn-base;
       padding: $admin-spacing-xs $admin-spacing-sm;
       font-size: $admin-font-size-xs;
-      
+
       &.view {
         background: $admin-info;
         color: white;
-        
+
         &:hover {
           background: darken($admin-info, 10%);
         }
       }
-      
+
       &.edit {
         background: $admin-warning;
         color: white;
-        
+
         &:hover {
           background: darken($admin-warning, 10%);
         }
       }
-      
+
       &.delete {
         background: $admin-danger;
         color: white;
-        
+
         &:hover {
           background: darken($admin-danger, 10%);
         }
       }
     }
   }
-  
+
   // Pagination
   &__pagination {
     padding: $admin-spacing-lg $admin-spacing-xl;
     @include flex-between;
     border-top: 1px solid $admin-border-light;
-    
+
     @include responsive(sm) {
       flex-direction: column;
       gap: $admin-spacing-md;
     }
-    
+
     &-info {
       color: $admin-text-secondary;
       font-size: $admin-font-size-sm;
     }
-    
+
     &-controls {
       display: flex;
       gap: $admin-spacing-sm;
-      
+
       button {
         @include admin-btn-base;
         padding: $admin-spacing-xs $admin-spacing-md;
         background: $admin-bg-hover;
         color: $admin-text-primary;
-        
+
         &:hover:not(:disabled) {
           background: $admin-border-light;
         }
-        
+
         &.active {
           background: $admin-primary;
           color: white;
@@ -193,39 +197,39 @@
       }
     }
   }
-  
+
   // Empty state
   &__empty {
     text-align: center;
     padding: $admin-spacing-2xl;
-    
+
     &-icon {
       font-size: 4rem;
       margin-bottom: $admin-spacing-md;
     }
-    
+
     &-title {
       font-size: $admin-font-size-xl;
       font-weight: 600;
       color: $admin-text-primary;
       margin-bottom: $admin-spacing-sm;
     }
-    
+
     &-message {
       color: $admin-text-secondary;
       margin-bottom: $admin-spacing-lg;
     }
-    
+
     button {
       @include admin-btn-primary;
     }
   }
-  
+
   // Loading
   &__loading {
     @include flex-center;
     padding: $admin-spacing-2xl;
-    
+
     &-spinner {
       @include admin-spinner;
     }

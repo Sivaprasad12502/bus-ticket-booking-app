@@ -505,6 +505,8 @@
         display: flex !important;
         overflow-x: scroll;
         padding: 15px !important;
+        scrollbar-width: thin !important;
+        scrollbar-color:#cbd5e1 transparent !important;
         gap: 12px;
         justify-content: unset !important;
         .search-btn {

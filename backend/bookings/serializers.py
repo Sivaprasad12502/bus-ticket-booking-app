@@ -49,6 +49,7 @@ class RouteSerializer(serializers.ModelSerializer):
 
 class TripStopSerializer(serializers.ModelSerializer):
     stop_name = serializers.CharField(source="route_stop.stop_name", read_only=True)
+    distance_from_start=serializers.CharField(source="route_stop.distance_from_start", read_only=True)
     # arrival_time = serializers.SerializerMethodField()
     arrival_time = serializers.TimeField(
         format="%I:%M %p", input_formats=["%H:%M", "%H:%M:%S"], required=False
@@ -63,6 +64,8 @@ class TripStopSerializer(serializers.ModelSerializer):
             "route_stop",
             "arrival_time",
             "fare_from_start",
+            "distance_from_start",
+            
         ]
 
     def get_arrival_time(self, obj):
