@@ -57,20 +57,20 @@ def admin_dashboard_status(request):
         cancelled_bookings = Booking.objects.filter(status="CANCELLED").count()
         # Revenue statistics
         total_revenue = (
-            Payment.objects.filter(payment_status="COMPLETED").aggregate(
+            Payment.objects.filter(payment_status="SUCCESS").aggregate(
                 total=Sum("amount")
             )["total"]
             or 0
         )
         monthly_revenue = (
             Payment.objects.filter(
-                payment_status="COMPLETED", payment_date__gte=last_30_days
+                payment_status="SUCCESS", payment_date__gte=last_30_days
             ).aggregate(total=Sum("amount"))["total"]
             or 0
         )
         weekly_revenue = (
             Payment.objects.filter(
-                payment_status="COMPLETED", payment_date__gte=last_7_days
+                payment_status="SUCCESS", payment_date__gte=last_7_days
             ).aggregate(total=Sum("amount"))["total"]
             or 0
         )

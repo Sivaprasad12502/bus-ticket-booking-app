@@ -272,118 +272,127 @@ const AdminRoutes = () => {
         <p>Loading routes...</p>
       ) : (
         <ul className="admin-list">
-          {routes?.map((r) => (
-            <li key={r.id}>
-              {r.start_location} → {r.end_location} ({r.distance_km} km)
-              <ul>
-                {r?.stops?.map((stop) => (
-                  <li key={stop.id}>
-                    {stop.stop_name} {stop.distance_from_start} km
-                  </li>
-                ))}
-              </ul>
-              <div className="actions">
-                <button onClick={() => handleEdit(r)} className="btn btn--edit">
-                  <FaEdit /> Edit
-                </button>
-                <button
-                  onClick={() => deleteMutation.mutate(r.id)}
-                  className="btn btn--delete"
-                >
-                  <FaTrash /> Delete
-                </button>
-                <button
-                  onClick={() =>
-                    setSelectedRoute(selectedRoute?.id === r.id ? null : r)
-                  }
-                  className="btn btn--managestops"
-                >
-                  {selectedRoute?.id===r.id?"Close stops ":"Manage Stops"}
-                </button>
-              </div>
-              {/* {STOPS PANEL} */}
-              {selectedRoute?.id == r.id && (
-                <div className="stops-panel">
-                  <h3>
-                    Stops for {selectedRoute.start_location} →{" "}
-                    {selectedRoute.end_location}
-                  </h3>
-                  <form onSubmit={handleStopSubmit} className="stops-form">
-                    <div className="form-group">
-                      <label htmlFor="stop_name">Stop Name</label>
-                      <input
-                        name="stop_name"
-                        placeholder="Stop name"
-                        value={stopValues.stop_name}
-                        onChange={stopHandleChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="order">Stop Order</label>
-                      <input
-                        name="order"
-                        placeholder="Order"
-                        value={stopValues.order}
-                        onChange={stopHandleChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="distance_from_start">
-                        distance from start
-                      </label>
-                      <input
-                        name="distance_from_start"
-                        placeholder="Distance from start (km)"
-                        value={stopValues.distance_from_start}
-                        onChange={stopHandleChange}
-                      />
-                    </div>
-                    <button type="submit" className="btn btn--primary">
-                      {editingStop ? "Update Stop" : "Add Stop"}
-                    </button>
-                    {editingStop && (
-                      <button
-                        type="button"
-                        className="btn btn--secondary"
-                        onClick={() => {
-                          setEditingStop(null);
-                          stopReset();
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </form>
-                  <div className="stops-list">
-                    {routeStops?.length === 0 ? (
-                      <p>No Stops </p>
-                    ) : (
-                      routeStops?.map((s) => (
-                        <div key={s.id} className="stop-card">
-                          <strong>{s.stop_name}</strong> (
-                          {s.distance_from_start} km)
-                          <div>
-                            <button
-                              onClick={() => handleEditStop(s)}
-                              className="btn btn--edit"
-                            >
-                              <FaEdit /> Edit
-                            </button>
-                            <button
-                              onClick={() => deleteStopMutation.mutate(s.id)}
-                              className="btn btn--delete"
-                            >
-                              <FaTrash /> Delete
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+          {routes.length === 0 ? (
+            <p>No routes created</p>
+          ) : (
+            routes?.map((r) => (
+              <li key={r.id}>
+                {r.start_location} → {r.end_location} ({r.distance_km} km)
+                <ul>
+                  {r?.stops?.map((stop) => (
+                    <li key={stop.id}>
+                      {stop.stop_name} {stop.distance_from_start} km
+                    </li>
+                  ))}
+                </ul>
+                <div className="actions">
+                  <button
+                    onClick={() => handleEdit(r)}
+                    className="btn btn--edit"
+                  >
+                    <FaEdit /> Edit
+                  </button>
+                  <button
+                    onClick={() => deleteMutation.mutate(r.id)}
+                    className="btn btn--delete"
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                  <button
+                    onClick={() =>
+                      setSelectedRoute(selectedRoute?.id === r.id ? null : r)
+                    }
+                    className="btn btn--managestops"
+                  >
+                    {selectedRoute?.id === r.id
+                      ? "Close stops "
+                      : "Manage Stops"}
+                  </button>
                 </div>
-              )}
-            </li>
-          ))}
+                {/* {STOPS PANEL} */}
+                {selectedRoute?.id == r.id && (
+                  <div className="stops-panel">
+                    <h3>
+                      Stops for {selectedRoute.start_location} →{" "}
+                      {selectedRoute.end_location}
+                    </h3>
+                    <form onSubmit={handleStopSubmit} className="stops-form">
+                      <div className="form-group">
+                        <label htmlFor="stop_name">Stop Name</label>
+                        <input
+                          name="stop_name"
+                          placeholder="Stop name"
+                          value={stopValues.stop_name}
+                          onChange={stopHandleChange}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="order">Stop Order</label>
+                        <input
+                          name="order"
+                          placeholder="Order"
+                          value={stopValues.order}
+                          onChange={stopHandleChange}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="distance_from_start">
+                          distance from start
+                        </label>
+                        <input
+                          name="distance_from_start"
+                          placeholder="Distance from start (km)"
+                          value={stopValues.distance_from_start}
+                          onChange={stopHandleChange}
+                        />
+                      </div>
+                      <button type="submit" className="btn btn--primary">
+                        {editingStop ? "Update Stop" : "Add Stop"}
+                      </button>
+                      {editingStop && (
+                        <button
+                          type="button"
+                          className="btn btn--secondary"
+                          onClick={() => {
+                            setEditingStop(null);
+                            stopReset();
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </form>
+                    <div className="stops-list">
+                      {routeStops?.length === 0 ? (
+                        <p>No Stops </p>
+                      ) : (
+                        routeStops?.map((s) => (
+                          <div key={s.id} className="stop-card">
+                            <strong>{s.stop_name}</strong> (
+                            {s.distance_from_start} km)
+                            <div>
+                              <button
+                                onClick={() => handleEditStop(s)}
+                                className="btn btn--edit"
+                              >
+                                <FaEdit /> Edit
+                              </button>
+                              <button
+                                onClick={() => deleteStopMutation.mutate(s.id)}
+                                className="btn btn--delete"
+                              >
+                                <FaTrash /> Delete
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </li>
+            ))
+          )}
         </ul>
       )}
     </div>

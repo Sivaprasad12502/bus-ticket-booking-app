@@ -37,7 +37,7 @@ export const BusSearch = ({
     },
   });
 
-  if (isLoading) return <div className="loader">Loading routes...</div>;
+  if (isLoading) return <div className="loaderr">Loading routes...</div>;
   if (isError) return <div className="error">Error: {error.message}</div>;
 
   const handleSearch = (e) => {

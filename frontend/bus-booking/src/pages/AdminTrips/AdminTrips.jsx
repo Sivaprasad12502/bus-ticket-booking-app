@@ -219,12 +219,12 @@ const AdminTrips = () => {
   //Time conversion function
 
   //Check if operator already assigned to another trip
-  const isOperatorAsssigned=(operatorId,currentTripId=null)=>{
-    if(!trips) return false;
-    return trips.some((trip)=>{
-      return trip.operator.id===operatorId && trip.id!==currentTripId
-    })
-  }
+  const isOperatorAsssigned = (operatorId, currentTripId = null) => {
+    if (!trips) return false;
+    return trips.some((trip) => {
+      return trip.operator.id === operatorId && trip.id !== currentTripId;
+    });
+  };
   const convertTo24Hour = (time12) => {
     if (!time12) return "";
     const [time, modifier] = time12.split(" ");
@@ -241,12 +241,12 @@ const AdminTrips = () => {
   };
   const handleTripSubmit = (e) => {
     e.preventDefault();
-    const operatorId=Number(values.operator_id)
+    const operatorId = Number(values.operator_id);
     // if editing allow same oparator for same trip
-    const currentTripId=editingTrip?editingTrip.id:null;
-    if(isOperatorAsssigned(operatorId,currentTripId)){
-      toast.error("Operator already assigned to another trip")
-      return
+    const currentTripId = editingTrip ? editingTrip.id : null;
+    if (isOperatorAsssigned(operatorId, currentTripId)) {
+      toast.error("Operator already assigned to another trip");
+      return;
     }
     if (editingTrip) editTrip.mutate({ ...editingTrip, ...values });
     else addTrip.mutate(values);
@@ -346,12 +346,15 @@ const AdminTrips = () => {
           <select
             name="operator_id"
             value={values.operator_id}
-            onChange={(e)=>{
-              const operatorId=Number(e.target.value) 
-              if(isOperatorAsssigned(operatorId,editingTrip?.id)){
-                toast.error("This operator is already assigned to another trip")
+            onChange={(e) => {
+              const operatorId = Number(e.target.value);
+              if (isOperatorAsssigned(operatorId, editingTrip?.id)) {
+                toast.error(
+                  "This operator is already assigned to another trip"
+                );
               }
-              handleChange(e)}}
+              handleChange(e);
+            }}
             required
           >
             <option value="">Select Operator</option>
@@ -413,6 +416,7 @@ const AdminTrips = () => {
         <p>Loading trips...</p>
       ) : (
         <ul className="admin-list">
+          {trips?.length === 0 && <p>No trips created</p>}
           {trips?.map((t) => (
             <li key={t.id}>
               <h2>

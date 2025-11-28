@@ -8,13 +8,13 @@ from django.contrib.auth import authenticate
 from .models import User, Operator
 from .serializers import UserSerializer, AdminUserSerializer, OperatorSerializer
 
-#password reset imports
+# password reset imports
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.core.mail import send_mail
 
-token_generator=PasswordResetTokenGenerator()
+token_generator = PasswordResetTokenGenerator()
 
 
 # Create your views here.
@@ -360,20 +360,20 @@ def google_login(request):
         )
     except Exception as e:
         return Response({"error": str(e)}, status=400)
-    
 
-#password reset views
+
+# password reset views
 # SEND RESET LINK
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def send_password_reset_email(request):
-    email=request.data.get("email")
+    email = request.data.get("email")
     if not User.objects.filter(email=email).exists():
-        return Response({"error":"Email not found"}, status=400)
-    user =User.objects.get(email=email)
-    uid=urlsafe_base64_encode(smart_bytes(user.id))
-    token=token_generator.make_token(user)
-    reset_link=f"http://localhost:5173/reset-password/{uid}/{token}"
+        return Response({"error": "Email not found"}, status=400)
+    user = User.objects.get(email=email)
+    uid = urlsafe_base64_encode(smart_bytes(user.id))
+    token = token_generator.make_token(user)
+    reset_link = f"http://localhost:5173/reset-password/{uid}/{token}"
 
     send_mail(
         "Reset Your Password",
@@ -384,34 +384,36 @@ def send_password_reset_email(request):
     )
     return Response({"message": "Password reset link  sent to email"}, status=200)
 
+
 # Vrify token
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def verify_password_reset_token(request, uidb64, token):
     try:
-        uid=force_str(urlsafe_base64_decode(uidb64))
-        user=User.objects.get(id=uid)
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(id=uid)
         if token_generator.check_token(user, token):
-            return Response({"Valid":True})
+            return Response({"Valid": True})
         else:
-            return Response({"valid":False}, status=400)
+            return Response({"valid": False}, status=400)
     except Exception:
-        return Response({"valid":False}, status=400)
+        return Response({"valid": False}, status=400)
+
 
 # set new password
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def reset_password(request):
-    uidb64=request.data.get("uidb64")
-    token=request.data.get("token")
-    password=request.data.get("password")
+    uidb64 = request.data.get("uidb64")
+    token = request.data.get("token")
+    password = request.data.get("password")
     try:
-        uid=force_str(urlsafe_base64_decode(uidb64))
-        user=User.objects.get(id=uid)
-        if not token_generator.check_token(user,token):
-           return Response({"error":"Invalid token"}, status=400)
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(id=uid)
+        if not token_generator.check_token(user, token):
+            return Response({"error": "Invalid token"}, status=400)
         user.set_password(password)
         user.save()
-        return Response({"message":"Password reset successful"})
+        return Response({"message": "Password reset successful"})
     except Exception:
-        return Response({"error":"invalid request"}, status=400)
+        return Response({"error": "invalid request"}, status=400)

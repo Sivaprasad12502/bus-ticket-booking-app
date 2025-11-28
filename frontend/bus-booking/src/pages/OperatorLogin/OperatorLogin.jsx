@@ -94,11 +94,11 @@ const OperatorLogin = () => {
             <p>Login to access Trips</p>
           </div>
 
-          {error && (
+          {/* {error && (
             <div className="error-message">
               <span>{error}</span>
             </div>
-          )}
+          )} */}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">

@@ -5,7 +5,8 @@ import { Context } from "../../context/Context";
 import useForm from "../../hooks/useForm/useForm";
 import { MdLogout } from "react-icons/md";
 import axios from "axios";
-import "./OperatorTripManageMent.scss"
+import "./OperatorTripManageMent.scss";
+import { FaBus, FaRupeeSign, FaClock } from "react-icons/fa";
 const OperatorTripManageMent = () => {
   const {
     apiUrl,
@@ -178,20 +179,20 @@ const OperatorTripManageMent = () => {
     },
   });
   //Time conversion function
-  const convertTo24Hour=(time12)=>{
-    if(!time12) return "";
-    const [time, modifier]=time12.split(" ")
-    let [hours, minutes]=time.split(":")
+  const convertTo24Hour = (time12) => {
+    if (!time12) return "";
+    const [time, modifier] = time12.split(" ");
+    let [hours, minutes] = time.split(":");
     // Convert to number
-    hours=parseInt(hours)
-    if(modifier==="PM"&& hours!==12){
-      hours+=12
+    hours = parseInt(hours);
+    if (modifier === "PM" && hours !== 12) {
+      hours += 12;
     }
-    if(modifier==="AM" && hours===12){
-      hours=0
+    if (modifier === "AM" && hours === 12) {
+      hours = 0;
     }
     return `${hours.toString().padStart(2, "0")}:${minutes}`;
-  }
+  };
   const handleTripSubmit = (e) => {
     e.preventDefault();
     if (editingTrip) editTrip.mutate({ ...editingTrip, ...values });
@@ -201,9 +202,9 @@ const OperatorTripManageMent = () => {
     setEditingTrip(trip);
     setValues({
       bus_id: trip.bus.id,
-      route_id:trip.route.id,
-      operator_id:trip.operator.id,
-      departure:trip.departure,
+      route_id: trip.route.id,
+      operator_id: trip.operator.id,
+      departure: trip.departure,
       arrival: trip.arrival,
       price: trip.price,
     });
@@ -218,7 +219,7 @@ const OperatorTripManageMent = () => {
     seEditingStop(stop);
     setStopValues({
       route_stop: stop.route_stop,
-      arrival_time:convertTo24Hour(stop.arrival_time),
+      arrival_time: convertTo24Hour(stop.arrival_time),
       fare_from_start: stop.fare_from_start,
     });
   };
@@ -226,7 +227,9 @@ const OperatorTripManageMent = () => {
   return (
     <div className="operator-trip">
       <nav>
-        <div><span>{operator?.username}</span></div>
+        <div>
+          <span>{operator?.username}</span>
+        </div>
         <button onClick={() => mutation.mutate()}>
           <MdLogout />
           Logout
@@ -238,73 +241,99 @@ const OperatorTripManageMent = () => {
         {/* Trip List */}
         {isLoading ? (
           <p>Loading trips...</p>
+        ) : trips.length === 0 ? (
+          <p>No trips available</p>
         ) : (
           <ul className="trip-list">
             {trips?.map((t) => (
               <li key={t.id}>
-                🚌 {t.bus.bus_name} — {t.route.start_location} →{" "}
-                {t.route.end_location}
-                <br /> operator: {t.operator?.username} -{" "}
-                {t.operator?.company_name}
-                <br />⏰ {t.departure} → {t.arrival} 💰 ₹{t.price}
+                <h2>
+                  <FaBus /> {t.bus.bus_name} — {t.route.start_location} →{" "}
+                  {t.route.end_location}
+                </h2>
+                <br />
+                <span>operator: {t.operator?.username} - </span>
+                <span>company_name: {t.operator?.company_name}</span>
+                <br />
+                <span>
+                  {" "}
+                  <FaClock />
+                  {t.departure} → {t.arrival} <FaRupeeSign /> ₹{t.price}
+                </span>
                 <div className="actions">
                   <button
                     onClick={() => {
                       handleEditTrip(t),
                         setEditingTrip(editingTrip?.id === t.id ? null : t);
                     }}
+                    className="btn btn--edit"
                   >
                     {editingTrip?.id === t.id ? "Cancel Edit" : "Edit"}
                   </button>
-                  <button onClick={() => deleteTrip.mutate(t)}>
+                  {/* <button onClick={() => deleteTrip.mutate(t)}>
                     🗑️ Delete
-                  </button>
+                  </button> */}
                   <button
                     onClick={() =>
                       setSelectedTrip(selectedTrip?.id === t.id ? null : t)
                     }
+                    className="btn btn--managestops"
                   >
                     {selectedTrip?.id === t.id ? "Hide Stops" : "Manage Stops"}
                   </button>
                 </div>
                 {/* Manage trip */}
                 {editingTrip?.id === t.id && (
-                  <form onSubmit={handleTripSubmit} className="admin-trip-form">
-                    <select
-                      name="bus_id"
-                      value={editingTrip.bus_id}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value={editingTrip.bus_id}>
-                        {editingTrip.bus.bus_name}
-                      </option>
-                    </select>
+                  <form
+                    onSubmit={handleTripSubmit}
+                    className="operator-trip-form"
+                  >
+                    <div className="form-group">
+                      <label htmlFor="bus_id"></label>
+                      <select
+                        name="bus_id"
+                        value={editingTrip.bus_id}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value={editingTrip.bus_id}>
+                          {editingTrip.bus.bus_name}
+                        </option>
+                      </select>
+                    </div>
 
-                    <select
-                      name="route_id"
-                      value={values.route_id}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value={editingTrip.route_id}>
-                        {editingTrip.route.start_location} →{" "}
-                        {editingTrip.route.end_location}
-                      </option>
-                    </select>
-                    <select
-                      name="operator_id"
-                      value={values.operator_id}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value={editingTrip.operator_id}>
-                        {editingTrip.operator.username} -{" "}
-                        {editingTrip.operator.company_name}
-                      </option>
-                    </select>
-                    <label htmlFor="">
-                      Enter departure time and date
+                    <div className="form-group">
+                      <label htmlFor="route_id"></label>
+                      <select
+                        name="route_id"
+                        value={values.route_id}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value={editingTrip.route_id}>
+                          {editingTrip.route.start_location} →{" "}
+                          {editingTrip.route.end_location}
+                        </option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="operator_id"></label>
+                      <select
+                        name="operator_id"
+                        value={values.operator_id}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value={editingTrip.operator_id}>
+                          {editingTrip.operator.username} -{" "}
+                          {editingTrip.operator.company_name}
+                        </option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="departure">
+                        Enter departure time and date
+                      </label>
                       <input
                         type="datetime-local"
                         name="departure"
@@ -312,25 +341,32 @@ const OperatorTripManageMent = () => {
                         value={values.departure}
                         onChange={handleChange}
                       />
-                    </label>
-                    <label>
-                      Enter arrival time and date
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="arrival">
+                        Enter arrival time and date
+                      </label>
                       <input
                         type="datetime-local"
                         name="arrival"
                         value={values.arrival}
                         onChange={handleChange}
                       />
-                    </label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={values.price}
-                      placeholder="Price"
-                      onChange={handleChange}
-                    />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="pice"></label>
+                      <input
+                        type="number"
+                        name="price"
+                        value={values.price}
+                        placeholder="Price"
+                        onChange={handleChange}
+                      />
+                    </div>
 
-                    <button type="submit">Update Trip</button>
+                    <button className="btn btn--primary" type="submit">
+                      Update Trip
+                    </button>
                   </form>
                 )}
                 {selectedTrip?.id === t.id && (
@@ -338,37 +374,45 @@ const OperatorTripManageMent = () => {
                     <div className="stops-panel">
                       <h3>Trip Stops</h3>
                       <form onSubmit={handleStopSubmit} className="stops-form">
-                        <select
-                          name="route_stop"
-                          value={stopValues.route_stop}
-                          onChange={handleStopchange}
-                          required
-                        >
-                          <option value="">Select Stop</option>
-                          {t.route.stops?.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.stop_name}
-                            </option>
-                          ))}
-                        </select>
-                        <label>
-                          Arrival Time
+                        <div className="form-group">
+                          <label htmlFor="route_stop">trip_stop</label>
+                          <select
+                            name="route_stop"
+                            value={stopValues.route_stop}
+                            onChange={handleStopchange}
+                            required
+                          >
+                            <option value="">Select Stop</option>
+                            {t.route.stops?.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.stop_name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>Arrival Time</label>
                           <input
                             type="time"
                             name="arrival_time"
                             value={stopValues.arrival_time}
                             onChange={handleStopchange}
                           />
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          name="fare_from_start"
-                          placeholder="Fare (₹)"
-                          value={stopValues.fare_from_start}
-                          onChange={handleStopchange}
-                        />
-                        <button type="submit">
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="fare_from_start">
+                            fare_from_start
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            name="fare_from_start"
+                            placeholder="Fare (₹)"
+                            value={stopValues.fare_from_start}
+                            onChange={handleStopchange}
+                          />
+                        </div>
+                        <button type="submit" className="btn btn--primary">
                           {editingStop ? "Update Stop" : "Add Stop"}
                         </button>
                       </form>
@@ -376,15 +420,15 @@ const OperatorTripManageMent = () => {
                       <div className="stops-list">
                         {tripStopes?.map((s) => (
                           <div key={s.id} className="stop-card">
-                            <strong>{s.stop_name}</strong> — ₹
-                            {s.fare_from_start}
+                            <span>{s.stop_name}</span> 
+                            <span>₹ {s.fare_from_start}</span>
                             <p>{s.arrival_time}</p>
                             <div>
-                              <button onClick={() => handleEditStop(s)}>
-                                ✏️
+                              <button onClick={() => handleEditStop(s)} className="btn btn--edit">
+                                Edit
                               </button>
-                              <button onClick={() => deleteStop.mutate(s.id)}>
-                                🗑️
+                              <button onClick={() => deleteStop.mutate(s.id)} className="btn btn--delete">
+                                Delete
                               </button>
                             </div>
                           </div>

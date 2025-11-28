@@ -1,62 +1,66 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import './AdminSidebar.scss';
-import { 
-  MdDashboard, 
-  MdDirectionsBus, 
-  MdRoute, 
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import "./AdminSidebar.scss";
+import {
+  MdDashboard,
+  MdDirectionsBus,
+  MdRoute,
   MdConfirmationNumber,
   MdBookOnline,
   MdChevronLeft,
   MdChevronRight,
   MdPerson,
-} from 'react-icons/md';
-import { FaBus } from 'react-icons/fa';
+} from "react-icons/md";
+import { FaBus } from "react-icons/fa";
 const AdminSidebar = ({ isOpen, onClose, isMobile }) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  
+
   const menuItems = [
     {
-      path: '/admin/dashboard',
+      path: "/admin/dashboard",
       icon: MdDashboard,
-      label: 'Dashboard',
-      badge: null
+      label: "Dashboard",
+      badge: null,
     },
     {
-      path: '/admin/buses',
+      path: "/admin/buses",
       icon: MdDirectionsBus,
-      label: 'Buses',
-      badge: null
+      label: "Buses",
+      badge: null,
     },
     {
-      path: '/admin/routes',
+      path: "/admin/routes",
       icon: MdRoute,
-      label: 'Routes',
-      badge: null
+      label: "Routes",
+      badge: null,
     },
     {
-      path: '/admin/trips',
-      icon: MdConfirmationNumber,
-      label: 'Trips',
-      badge: null
-    },
-    {
-      path: '/admin/bookings',
-      icon: MdBookOnline,
-      label: 'Bookings',
-      badge: null
-    },
-    {
-      path: '/admin/operators',
+      path: "/admin/operators",
       icon: MdPerson,
-      label: 'Operators',
-      badge: null
-    }
+      label: "Operators",
+      badge: null,
+    },
+    {
+      path: "/admin/trips",
+      icon: MdConfirmationNumber,
+      label: "Trips",
+      badge: null,
+    },
+    {
+      path: "/admin/bookings",
+      icon: MdBookOnline,
+      label: "Bookings",
+      badge: null,
+    },
   ];
 
   return (
-    <aside className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''} ${isOpen ? 'sidebar--open' : ''}`}>
+    <aside
+      className={`sidebar ${collapsed ? "sidebar--collapsed" : ""} ${
+        isOpen ? "sidebar--open" : ""
+      }`}
+    >
       <div className="sidebar__header">
         <div className="sidebar__logo">
           <span className="sidebar__logo-icon">
@@ -64,7 +68,7 @@ const AdminSidebar = ({ isOpen, onClose, isMobile }) => {
           </span>
           {!collapsed && <span className="sidebar__logo-text">BusBooking</span>}
         </div>
-        <button 
+        <button
           className="sidebar__toggle"
           onClick={() => setCollapsed(!collapsed)}
           aria-label="Toggle sidebar"
@@ -82,9 +86,11 @@ const AdminSidebar = ({ isOpen, onClose, isMobile }) => {
                 <Link
                   to={item.path}
                   className={`sidebar__link ${
-                    location.pathname === item.path ? 'sidebar__link--active' : ''
+                    location.pathname === item.path
+                      ? "sidebar__link--active"
+                      : ""
                   }`}
-                  title={collapsed ? item.label : ''}
+                  title={collapsed ? item.label : ""}
                   onClick={() => isMobile && onClose && onClose()}
                 >
                   <span className="sidebar__icon">
@@ -118,6 +124,6 @@ const AdminSidebar = ({ isOpen, onClose, isMobile }) => {
       </div> */}
     </aside>
   );
-}
+};
 
-export default AdminSidebar
+export default AdminSidebar;

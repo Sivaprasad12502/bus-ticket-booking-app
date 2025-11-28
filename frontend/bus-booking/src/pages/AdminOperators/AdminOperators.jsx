@@ -182,6 +182,7 @@ const AdminOperators = () => {
       {isLoading ? (
         <p>Loading operators...</p>
       ) : (
+        
         <div className="table-wrapper">
           <table className="admin-list">
             <thead>
@@ -193,6 +194,7 @@ const AdminOperators = () => {
               </tr>
             </thead>
             <tbody>
+              {operators.length === 0 && (<tr><td colSpan="4">No operators created</td></tr>)}
               {operators?.map((o) => (
                 <tr key={o.id}>
                   <td>{o.username}</td>

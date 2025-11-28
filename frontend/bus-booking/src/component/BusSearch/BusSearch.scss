@@ -4,7 +4,7 @@
 
 // Color Variables
 // $primary-red: #d84e55;
-$primary-red:rgb(43, 55, 96);
+$primary-red: rgb(43, 55, 96);
 // $primary-dark: #c13b42;
 $primary-dark: #040818;
 $white: #ffffff;
@@ -14,6 +14,31 @@ $border-color: #e0e0e0;
 $bg-light: #f9f9f9;
 $shadow-light: rgba(0, 0, 0, 0.08);
 $shadow-medium: rgba(0, 0, 0, 0.12);
+
+.loaderr,
+.error {
+  // position: relative;
+  // z-index: 2;
+  // padding: 24px 32px;
+  // border-radius: 8px;
+  // font-size: 16px;
+  // font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+.loader {
+  background: rgba($white, 0.95);
+  color: $text-color;
+}
+
+.error {
+  background: rgba(255, 255, 255, 0.95);
+  color: $primary-red;
+  border: 2px solid $primary-red;
+}
 
 .bus-search-container {
   display: flex;
@@ -92,24 +117,22 @@ $shadow-medium: rgba(0, 0, 0, 0.12);
       box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
       transform: translateY(-2px);
     }
-    .trip-type-toggle{
+    .trip-type-toggle {
       display: flex;
       gap: 12px;
-      button{
+      button {
         padding: 10px 16px;
-        border:2px solid $border-color;
+        border: 2px solid $border-color;
         border-radius: 8px;
         background-color: $bg-light;
         font-size: 14px;
         font-weight: 600;
-        &.active{
+        &.active {
           border-color: $primary-red;
           background-color: $primary-red;
           color: $white;
-
         }
       }
-
     }
     .form-field {
       display: flex;
@@ -145,7 +168,7 @@ $shadow-medium: rgba(0, 0, 0, 0.12);
         &:hover {
           border-color: lighten($primary-red, 10%);
         }
-        &:disabled{
+        &:disabled {
           background-color: #ccc;
           cursor: not-allowed;
           color: $text-light;
@@ -199,26 +222,6 @@ $shadow-medium: rgba(0, 0, 0, 0.12);
   }
 
   // Loader and Error States
-  .loader,
-  .error {
-    position: relative;
-    z-index: 2;
-    padding: 24px 32px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 500;
-  }
-
-  .loader {
-    background: rgba($white, 0.95);
-    color: $text-color;
-  }
-
-  .error {
-    background: rgba(255, 255, 255, 0.95);
-    color: $primary-red;
-    border: 2px solid $primary-red;
-  }
 
   // Responsive Design
   @media (max-width: 1024px) {

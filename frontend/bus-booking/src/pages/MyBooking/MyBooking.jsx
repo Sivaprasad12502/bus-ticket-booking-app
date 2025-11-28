@@ -126,7 +126,7 @@ To: ${booking.trip.route.end_location}
 Departure: ${formattedDateTime(booking.trip.departure)}
 Arrival: ${formattedDateTime(booking.trip.arrival)}
 
-🔹 *Seats*
+🔹 *Seat number*
 ${booking.seats.map((s) => s.seat_number).join(", ")}
 
 🔹 *Passengers*
@@ -188,7 +188,7 @@ ${passengerList}
     <p><strong>Distance:</strong> ${booking.trip.route.distance_km} km</p>
 
     <h3 style="border-bottom:1px solid #2b3760;padding-bottom:6px;">Selected Seats</h3>
-    <p><strong>Seats:</strong> ${booking.seats
+    <p><strong>Seat number:</strong> ${booking.seats
       .map((s) => s.seat_number)
       .join(", ")}</p>
 
@@ -419,7 +419,7 @@ ${passengerList}
                       <div className="meta-item">
                         <MdEventSeat className="icon" />
                         <span>
-                          Seats:{" "}
+                          Seat number:{" "}
                           {booking.seats.map((s) => s.seat_number).join(", ")}
                         </span>
                       </div>
