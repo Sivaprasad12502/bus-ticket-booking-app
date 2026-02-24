@@ -5,7 +5,7 @@ import { Context } from "../../context/Context";
 import useForm from "../../hooks/useForm/useForm";
 import { MdLogout } from "react-icons/md";
 import axios from "axios";
-import "./OperatorTripManageMent.scss";
+import "./OperatorTripManagement.scss";
 import { FaBus, FaRupeeSign, FaClock } from "react-icons/fa";
 const OperatorTripManageMent = () => {
   const {
